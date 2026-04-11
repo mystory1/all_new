@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Moja appka</title>
+</head>
+<body>
+
+<h1>Posts</h1>
+
+<input id="title" placeholder="Title">
+<input id="content" placeholder="Content">
+<button id="addBtn">Pridať</button>
+
+<ul id="list"></ul>
+
+<!-- správne načítanie supabase -->
+<script type="module">
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+const client = createClient(
+  "https://adpsrpsmfhokyqtvldki.supabase.co",
+  "sb_publishable_jv4V15zIsan0yOuSAUt_Kg_0SDDW0LA"
+);
+
+// načítanie dát
+async function loadPosts() {
+  const { data, error } = await client.from("posts").select("*");
+
+  console.log("LOAD:", data, error);
+
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+
+  if (!data) return;
+
+  data.forEach(post => {
+    const li = document.createElement("li");
+    li.innerText = post.title + " - " + post.content;
+    list.appendChild(li);
+  });
+}
+
+// pridanie dát
+async function addPost() {
+  const title = document.getElementById("title").value;
+  const content = document.getElementById("content").value;
+
+  console.log("ADDING:", title, content);
+
+  const { data, error } = await client
+    .from("posts")
+    .insert([{ title, content }]);
+
+  console.log("RESULT:", data, error);
+
+  loadPosts();
+}
+
+// event listener (spoľahlivejší než onclick)
+document.getElementById("addBtn").addEventListener("click", addPost);
+
+// inicializácia
+loadPosts();
+</script>
+
+</body>
+</html>
