@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prihlásenie</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #f4f4f5;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+
+  .card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 2.5rem 2rem;
+    width: 100%;
+    max-width: 380px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  }
+
+  h1 {
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: #111;
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .field { margin-bottom: 1rem; }
+
+  label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #444;
+    margin-bottom: 0.4rem;
+  }
+
+  input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 0.95rem;
+  }
+
+  input:focus { border-color: #4f6ef7; outline: none; }
+
+  button {
+    width: 100%;
+    margin-top: 1.4rem;
+    padding: 0.8rem;
+    background: #4f6ef7;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  button:hover { background: #3a57e0; }
+
+  .error {
+    margin-top: 1rem;
+    color: red;
+    font-size: 0.9rem;
+    text-align: center;
+  }
+</style>
+</head>
+
+<body>
+  <div class="card">
+    <h1>Prihlásenie</h1>
+
+    <form id="loginForm">
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="email" placeholder="email@domena.com" required>
+      </div>
+
+      <div class="field">
+        <label>Heslo</label>
+        <input type="password" id="password" placeholder="••••••••" required>
+      </div>
+
+      <button type="submit">Prihlásiť sa</button>
+      <div class="error" id="error"></div>
+    </form>
+  </div>
+
+<script>
+  const supabaseUrl = "TVOJ_SUPABASE_URL";
+  const supabaseKey = "TVOJ_SUPABASE_ANON_KEY";
+  const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+  const form = document.getElementById("loginForm");
+  const errorBox = document.getElementById("error");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) {
+      errorBox.textContent = "Zlé prihlasenie";
+      return;
+    }
+
+    window.location.href = "index.html";
+  });
+</script>
+
+</body>
+</html>
