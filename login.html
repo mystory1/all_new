@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #ffffff;
+      color: #111111;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .login-box {
+      width: 100%;
+      max-width: 360px;
+    }
+
+    h1 {
+      font-size: 28px;
+      margin: 0 0 24px;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    input {
+      width: 100%;
+      height: 46px;
+      padding: 0 12px;
+      margin-bottom: 16px;
+      border: 1px solid #cccccc;
+      border-radius: 6px;
+      font-size: 16px;
+      background: #ffffff;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #111111;
+    }
+
+    button {
+      width: 100%;
+      height: 46px;
+      border: none;
+      border-radius: 6px;
+      background: #111111;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #333333;
+    }
+
+    #error {
+      margin-top: 12px;
+      color: red;
+      font-size: 14px;
+      min-height: 20px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-box">
+    <h1>Prihlásenie</h1>
+
+    <form id="loginForm">
+      <label for="email">Meno</label>
+      <input type="email" id="email" placeholder="Zadaj email" required />
+
+      <label for="password">Heslo</label>
+      <input type="password" id="password" placeholder="Zadaj heslo" required />
+
+      <button type="submit">Prihlásiť sa</button>
+    </form>
+
+    <p id="error"></p>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const supabaseClient = window.supabase.createClient(
+        "https://adpsrpsmfhokyqtvldki.supabase.co",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkcHNycHNtZmhva3lxdHZsZGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0MTM1ODYsImV4cCI6MjA5MDk4OTU4Nn0.CVrGlJpjtKTvIUJ2tHuYvDCs-TzNLHcO91R7GQJy6Y0"
+      );
+
+      const form = document.getElementById("loginForm");
+      const errorBox = document.getElementById("error");
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        errorBox.textContent = "";
+
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
+
+        const { error } = await supabaseClient.auth.signInWithPassword({
+          email,
+          password
+        });
+
+        if (error) {
+          errorBox.textContent = error.message;
+          return;
+        }
+
+        window.location.href = "index.html";
+      });
+    });
+  </script>
+</body>
+</html>
