@@ -136,37 +136,7 @@
             return clean.slice(0, 30) + (clean.length > 30 ? '...' : '');
         }
 
-        async function loadNotes() {
-            setStatus('Načítavam poznámky...');
-            const { data: notes, error } = await sb
-                .from('notes')
-                .select('id, title, content, created_at')
-                .order('created_at', { ascending: false });
-
-            if (error) {
-                console.error('Chyba pri načítavaní:', error);
-                setStatus('Chyba pri načítavaní: ' + error.message, true);
-                return;
-            }
-
-            const notesList = document.getElementById('notesList');
-            notesList.innerHTML = (notes || []).map((note, index) => {
-                const shownTitle = generateTitle(note.title, note.content);
-                return `
-                    <div class="note">
-                        <h3>#${index + 1} ${shownTitle}</h3>
-                        <input class="title" id="title-${note.id}" value="${(note.title || '').replaceAll('"', '&quot;')}" placeholder="Názov poznámky">
-                        <textarea class="content" id="content-${note.id}" oninput="updateTitlePreview('${note.id}', this.value)">${note.content || ''}</textarea>
-                        <div class="note-actions">
-                            <button class="save-btn" onclick="updateNote('${note.id}')">Save</button>
-                            <button class="delete-btn" onclick="deleteNote('${note.id}')">Delete</button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-
-            
-        }
+        
 
         function updateTitlePreview(id, content) {
             const card = document.getElementById(`content-${id}`)?.closest('.note');
