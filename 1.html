@@ -77,8 +77,8 @@
         }
         .note-actions { margin-top: 10px; }
         .delete-btn { background: #a00; }
-        .delete-btn:hover { background: #c00; }
-        .save-btn { background: #0a0; }
+        .delete-btn:hover { background: #FF6666; }
+        .save-btn { background: #33CC33; }
         .save-btn:hover { background: #0c0; }
         @media (max-width: 600px) {
             .notes-grid { grid-template-columns: 1fr; }
@@ -88,10 +88,10 @@
 </head>
 <body>
     <div class="container">
-        <h1>Moje poznámky</h1>
+        <h1>Notes</h1>
         <div id="status" class="status">Pripájam sa k databáze...</div>
         <textarea id="noteInput" placeholder="Napíš novú poznámku..."></textarea>
-        <button onclick="addNote()">Pridať poznámku</button>
+        <button onclick="addNote()">Pridať</button>
         <div id="notesList" class="notes-grid"></div>
     </div>
 
