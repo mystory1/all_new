@@ -25,16 +25,24 @@
             color: #bbb;
             min-height: 22px;
         }
-        #noteInput {
+        #noteTitleInput,
+        #noteContentInput {
             width: 100%;
-            height: 120px;
             background: #111;
             color: #fff;
             border: 1px solid #333;
             padding: 15px;
             font-size: 16px;
-            resize: vertical;
             border-radius: 8px;
+            outline: none;
+        }
+        #noteTitleInput {
+            margin-bottom: 10px;
+            height: 50px;
+        }
+        #noteContentInput {
+            height: 120px;
+            resize: vertical;
         }
         button {
             background: #444;
@@ -65,7 +73,7 @@
             border-bottom: 1px solid #333;
             padding-bottom: 5px;
         }
-        .note textarea {
+        .note .content {
             width: 100%;
             background: transparent;
             color: #fff;
@@ -73,6 +81,16 @@
             resize: vertical;
             font-size: 16px;
             min-height: 80px;
+            outline: none;
+        }
+        .note .title {
+            width: 100%;
+            background: transparent;
+            color: #fff;
+            border: none;
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 10px;
             outline: none;
         }
         .note-actions { margin-top: 10px; }
@@ -90,8 +108,11 @@
     <div class="container">
         <h1>Notes</h1>
         <div id="status" class="status">Pripájam sa k databáze...</div>
-        <textarea id="noteInput" placeholder="Napíš novú poznámku..."></textarea>
+
+        <input id="noteTitleInput" type="text" placeholder="Názov poznámky...">
+        <textarea id="noteContentInput" placeholder="Napíš novú poznámku..."></textarea>
         <button onclick="addNote()">Pridať</button>
+
         <div id="notesList" class="notes-grid"></div>
     </div>
 
@@ -107,7 +128,9 @@
             statusEl.style.color = isError ? '#ff7b7b' : '#bbb';
         }
 
-        function generateTitle(content) {
+        function generateTitle(title, content) {
+            const cleanTitle = (title || '').trim();
+            if (cleanTitle) return cleanTitle;
             const clean = (content || '').trim().replace(/\s+/g, ' ');
             if (!clean) return 'Bez názvu';
             return clean.slice(0, 30) + (clean.length > 30 ? '...' : '');
@@ -117,7 +140,7 @@
             setStatus('Načítavam poznámky...');
             const { data: notes, error } = await sb
                 .from('notes')
-                .select('id, content, created_at')
+                .select('id, title, content, created_at')
                 .order('created_at', { ascending: false });
 
             if (error) {
@@ -128,11 +151,12 @@
 
             const notesList = document.getElementById('notesList');
             notesList.innerHTML = (notes || []).map((note, index) => {
-                const title = generateTitle(note.content);
+                const shownTitle = generateTitle(note.title, note.content);
                 return `
                     <div class="note">
-                        <h3>#${index + 1} ${title}</h3>
-                        <textarea id="note-${note.id}" oninput="updateTitlePreview('${note.id}', this.value)">${note.content || ''}</textarea>
+                        <h3>#${index + 1} ${shownTitle}</h3>
+                        <input class="title" id="title-${note.id}" value="${(note.title || '').replaceAll('"', '&quot;')}" placeholder="Názov poznámky">
+                        <textarea class="content" id="content-${note.id}" oninput="updateTitlePreview('${note.id}', this.value)">${note.content || ''}</textarea>
                         <div class="note-actions">
                             <button class="save-btn" onclick="updateNote('${note.id}')">Save</button>
                             <button class="delete-btn" onclick="deleteNote('${note.id}')">Delete</button>
@@ -141,31 +165,36 @@
                 `;
             }).join('');
 
-            setStatus(notes && notes.length ? `Načítané ${notes.length} poznámok.` : 'Zatiaľ tu nie sú žiadne poznámky');
+            setStatus(notes && notes.length ? `Načítané ${notes.length} poznámok.` : 'Zatiaľ tu nie sú žiadne poznámky.');
         }
 
         function updateTitlePreview(id, content) {
-            const card = document.getElementById(`note-${id}`)?.closest('.note');
+            const card = document.getElementById(`content-${id}`)?.closest('.note');
             if (!card) return;
             const h3 = card.querySelector('h3');
             const number = h3.textContent.match(/^#\d+/)?.[0] || '';
-            h3.textContent = `${number} ${generateTitle(content)}`;
+            const titleInput = document.getElementById(`title-${id}`);
+            const title = titleInput?.value.trim();
+            h3.textContent = `${number} ${generateTitle(title, content)}`;
         }
 
         async function addNote() {
-            const input = document.getElementById('noteInput');
-            const content = input.value.trim();
+            const titleInput = document.getElementById('noteTitleInput');
+            const contentInput = document.getElementById('noteContentInput');
 
-            if (!content) {
-                setStatus('Najprv napíš poznámku', true);
+            const title = titleInput.value.trim();
+            const content = contentInput.value.trim();
+
+            if (!title && !content) {
+                setStatus('Najprv vyplň názov alebo poznámku.', true);
                 return;
             }
 
             setStatus('Ukladám poznámku...');
             const { data, error } = await sb
                 .from('notes')
-                .insert([{ content }])
-                .select('id, content, created_at');
+                .insert([{ title, content }])
+                .select('id, title, content, created_at');
 
             if (error) {
                 console.error('Chyba pri pridávaní:', error);
@@ -173,25 +202,26 @@
                 return;
             }
 
-            input.value = '';
+            titleInput.value = '';
+            contentInput.value = '';
             setStatus('Poznámka uložená.');
             await loadNotes();
             console.log('Inserted:', data);
         }
 
         async function updateNote(id) {
-            const textarea = document.getElementById(`note-${id}`);
-            const content = textarea.value.trim();
+            const title = document.getElementById(`title-${id}`).value.trim();
+            const content = document.getElementById(`content-${id}`).value.trim();
 
-            if (!content) {
-                setStatus('Poznámka nemôže byť prázdna', true);
+            if (!title && !content) {
+                setStatus('Poznámka nemôže byť úplne prázdna.', true);
                 return;
             }
 
             setStatus('Ukladám zmeny...');
             const { error } = await sb
                 .from('notes')
-                .update({ content })
+                .update({ title, content })
                 .eq('id', id);
 
             if (error) {
@@ -219,11 +249,11 @@
                 return;
             }
 
-            setStatus('Poznámka zmazaná');
+            setStatus('Poznámka zmazaná.');
             await loadNotes();
         }
 
-        document.getElementById('noteInput').addEventListener('keypress', (e) => {
+        document.getElementById('noteContentInput').addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && e.ctrlKey) addNote();
         });
 
