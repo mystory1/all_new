@@ -138,16 +138,14 @@
   <main class="wrap">
     <section class="card">
       <h1>Login</h1>
-      <p class="subtitle">Prihlás sa menom alebo emailom a heslom.</p>
 
       <form id="loginForm">
         <div class="field">
-          <label for="identifier">Meno alebo email</label>
+          <label for="identifier">Meno</label>
           <input
             id="identifier"
             name="identifier"
             type="text"
-            placeholder="Zadaj meno alebo email"
             autocomplete="username"
             required
           />
@@ -159,7 +157,6 @@
             id="password"
             name="password"
             type="password"
-            placeholder="Zadaj heslo"
             autocomplete="current-password"
             required
           />
@@ -170,10 +167,7 @@
         <p id="successBox" class="message success"></p>
       </form>
 
-      <p class="note">
-        Doplň si <code>SUPABASE_URL</code> a <code>SUPABASE_ANON_KEY</code>.<br>
-        Ak sa prihlasuješ menom, stránka najprv nájde email v tabuľke <code>profiles</code> a potom spraví login.
-      </p>
+
     </section>
   </main>
 
