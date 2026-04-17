@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dummy stránka</title>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --text: #111111;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --button: #111111;
+      --button-text: #ffffff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 24px;
+    }
+    .card {
+      width: 100%;
+      max-width: 640px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 40px 28px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    }
+    h1 {
+      margin: 0 0 12px;
+      font-size: clamp(32px, 6vw, 52px);
+    }
+    p {
+      margin: 0 0 24px;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.6;
+    }
+    .row {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    a, button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: 0 18px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      text-decoration: none;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .primary {
+      background: var(--button);
+      color: var(--button-text);
+      border-color: var(--button);
+    }
+    .secondary {
+      background: #fff;
+      color: var(--text);
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>Si prihlásený</h1>
+    <p>Toto je dočasná dummy stránka po úspešnom prihlásení. Neskôr sem môžeš dať dashboard, administráciu alebo hlavný obsah aplikácie.</p>
+    <div class="row">
+      <a class="secondary" href="./index.html">Späť na login</a>
+      <button class="primary" id="logoutBtn">Odhlásiť sa</button>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = "https://adpsrpsmfhokyqtvldki.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkcHNycHNtZmhva3lxdHZsZGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0MTM1ODYsImV4cCI6MjA5MDk4OTU4Nn0.CVrGlJpjtKTvIUJ2tHuYvDCs-TzNLHcO91R7GQJy6Y0";
+
+    const hasConfig =
+      SUPABASE_URL !== 'https://adpsrpsmfhokyqtvldki.supabase.co' &&
+      SUPABASE_ANON_KEY !== 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkcHNycHNtZmhva3lxdHZsZGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0MTM1ODYsImV4cCI6MjA5MDk4OTU4Nn0.CVrGlJpjtKTvIUJ2tHuYvDCs-TzNLHcO91R7GQJy6Y0';
+
+    if (hasConfig) {
+      const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+      document.getElementById('logoutBtn').addEventListener('click', async () => {
+        await supabaseClient.auth.signOut();
+        window.location.href = './index.html';
+      });
+
+      supabaseClient.auth.getSession().then(({ data }) => {
+        if (!data.session) {
+          window.location.href = './index.html';
+        }
+      });
+    } else {
+      document.getElementById('logoutBtn').addEventListener('click', () => {
+        window.location.href = './index.html';
+      });
+    }
+  </script>
+</body>
+</html>
