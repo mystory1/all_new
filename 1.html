@@ -114,6 +114,8 @@
 <body>
     <div class="container">
         <h1>Notes</h1>
+        <div id="status" class="status">Pripájam sa k databáze...</div>
+
         <input id="noteTitleInput" type="text" placeholder="Notes Title">
         <textarea id="noteContentInput" placeholder="Notes"></textarea>
         <button onclick="addNote()">Add</button>
@@ -142,6 +144,7 @@
         }
 
         async function loadNotes() {
+            setStatus('Načítavam poznámky...');
             const { data: notes, error } = await sb
                 .from('notes')
                 .select('id, title, content, created_at')
@@ -169,6 +172,7 @@
                 `;
             }).join('');
 
+            setStatus(notes && notes.length ? `Načítané ${notes.length} poznámok.` : 'Zatiaľ tu nie sú žiadne poznámky.');
         }
 
         function updateTitlePreview(id, content) {
