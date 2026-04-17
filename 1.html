@@ -134,14 +134,14 @@
                         <h3>#${index + 1} ${title}</h3>
                         <textarea id="note-${note.id}" oninput="updateTitlePreview('${note.id}', this.value)">${note.content || ''}</textarea>
                         <div class="note-actions">
-                            <button class="save-btn" onclick="updateNote('${note.id}')">Uložiť</button>
-                            <button class="delete-btn" onclick="deleteNote('${note.id}')">Vymazať</button>
+                            <button class="save-btn" onclick="updateNote('${note.id}')">Save</button>
+                            <button class="delete-btn" onclick="deleteNote('${note.id}')">Delete</button>
                         </div>
                     </div>
                 `;
             }).join('');
 
-            setStatus(notes && notes.length ? `Načítané ${notes.length} poznámok.` : 'Zatiaľ tu nie sú žiadne poznámky.');
+            setStatus(notes && notes.length ? `Načítané ${notes.length} poznámok.` : 'Zatiaľ tu nie sú žiadne poznámky');
         }
 
         function updateTitlePreview(id, content) {
@@ -184,7 +184,7 @@
             const content = textarea.value.trim();
 
             if (!content) {
-                setStatus('Poznámka nemôže byť prázdna.', true);
+                setStatus('Poznámka nemôže byť prázdna', true);
                 return;
             }
 
@@ -219,7 +219,7 @@
                 return;
             }
 
-            setStatus('Poznámka zmazaná.');
+            setStatus('Poznámka zmazaná');
             await loadNotes();
         }
 
