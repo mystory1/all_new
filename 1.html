@@ -7,151 +7,227 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            background: #000; 
-            color: #fff; 
-            font-family: Arial, sans-serif; 
-            padding: 20px; 
+        body {
+            background: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            padding: 20px;
             min-height: 100vh;
         }
         .container { max-width: 800px; margin: 0 auto; }
-        h1 { text-align: center; margin-bottom: 30px; color: #ccc; }
-        #noteInput { 
-            width: 100%; height: 120px; 
-            background: #111; color: #fff; 
-            border: 1px solid #333; 
-            padding: 15px; font-size: 16px; 
-            resize: vertical; 
+        h1 { text-align: center; margin-bottom: 20px; color: #ccc; }
+        .status {
+            margin: 10px 0 20px;
+            padding: 12px 14px;
+            border: 1px solid #333;
+            border-radius: 8px;
+            background: #111;
+            color: #bbb;
+            min-height: 22px;
         }
-        button { 
-            background: #444; color: #fff; 
-            border: none; padding: 12px 24px; 
-            margin: 10px 5px 0 0; cursor: pointer; 
-            border-radius: 5px; 
+        #noteInput {
+            width: 100%;
+            height: 120px;
+            background: #111;
+            color: #fff;
+            border: 1px solid #333;
+            padding: 15px;
+            font-size: 16px;
+            resize: vertical;
+            border-radius: 8px;
+        }
+        button {
+            background: #444;
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            margin: 10px 5px 0 0;
+            cursor: pointer;
+            border-radius: 5px;
         }
         button:hover { background: #555; }
-        .notes-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
-            gap: 20px; margin-top: 30px; 
+        .notes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
         }
-        .note { 
-            background: #111; border: 1px solid #333; 
-            padding: 20px; border-radius: 8px; 
-            position: relative; 
+        .note {
+            background: #111;
+            border: 1px solid #333;
+            padding: 20px;
+            border-radius: 8px;
         }
-        .note h3 { 
-            margin: 0 0 10px 0; 
-            color: #ccc; 
-            font-size: 18px; 
-            border-bottom: 1px solid #333; 
-            padding-bottom: 5px; 
+        .note h3 {
+            margin: 0 0 10px 0;
+            color: #ccc;
+            font-size: 18px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 5px;
         }
-        .note textarea { 
-            width: 100%; background: transparent; 
-            color: #fff; border: none; 
-            resize: none; font-size: 16px; 
-            min-height: 80px; 
+        .note textarea {
+            width: 100%;
+            background: transparent;
+            color: #fff;
+            border: none;
+            resize: vertical;
+            font-size: 16px;
+            min-height: 80px;
+            outline: none;
         }
-        .note textarea:focus { outline: none; }
         .note-actions { margin-top: 10px; }
         .delete-btn { background: #a00; }
         .delete-btn:hover { background: #c00; }
         .save-btn { background: #0a0; }
         .save-btn:hover { background: #0c0; }
-        @media (max-width: 600px) { 
-            .notes-grid { grid-template-columns: 1fr; } 
-            body { padding: 10px; } 
+        @media (max-width: 600px) {
+            .notes-grid { grid-template-columns: 1fr; }
+            body { padding: 10px; }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Moje poznámky</h1>
+        <div id="status" class="status">Pripájam sa k databáze...</div>
         <textarea id="noteInput" placeholder="Napíš novú poznámku..."></textarea>
         <button onclick="addNote()">Pridať poznámku</button>
         <div id="notesList" class="notes-grid"></div>
     </div>
 
     <script>
-		const SUPABASE_URL = "https://adpsrpsmfhokyqtvldki.supabase.co";
-		const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkcHNycHNtZmhva3lxdHZsZGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0MTM1ODYsImV4cCI6MjA5MDk4OTU4Nn0.CVrGlJpjtKTvIUJ2tHuYvDCs-TzNLHcO91R7GQJy6Y0";
+        const SUPABASE_URL = "https://adpsrpsmfhokyqtvldki.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkcHNycHNtZmhva3lxdHZsZGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0MTM1ODYsImV4cCI6MjA5MDk4OTU4Nn0.CVrGlJpjtKTvIUJ2tHuYvDCs-TzNLHcO91R7GQJy6Y0";
+        const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-		const hasConfig =
-		  SUPABASE_URL !== 'https://adpsrpsmfhokyqtvldki.supabase.co' &&
-		  SUPABASE_ANON_KEY !== 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkcHNycHNtZmhva3lxdHZsZGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0MTM1ODYsImV4cCI6MjA5MDk4OTU4Nn0.CVrGlJpjtKTvIUJ2tHuYvDCs-TzNLHcO91R7GQJy6Y0';
+        const statusEl = document.getElementById('status');
 
+        function setStatus(msg, isError = false) {
+            statusEl.textContent = msg;
+            statusEl.style.color = isError ? '#ff7b7b' : '#bbb';
+        }
 
-
-		if (hasConfig) {
-		  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-		  document.getElementById('logoutBtn').addEventListener('click', async () => {
-			await supabaseClient.auth.signOut();
-			window.location.href = './index.html';
-		  });
-
-		  supabaseClient.auth.getSession().then(({ data }) => {
-			if (!data.session) {
-			  window.location.href = './index.html';
-			}
-		  });
-		} else {
-		  document.getElementById('logoutBtn').addEventListener('click', () => {
-			window.location.href = './index.html';
-		  });
-		}
         function generateTitle(content) {
-            return content.slice(0, 30).trim() + (content.length > 30 ? '...' : '');
+            const clean = (content || '').trim().replace(/\s+/g, ' ');
+            if (!clean) return 'Bez názvu';
+            return clean.slice(0, 30) + (clean.length > 30 ? '...' : '');
         }
 
         async function loadNotes() {
-            const { data: notes, error } = await supabase.from('notes').select('*').order('created_at', { ascending: false });
-            if (error) { console.error('Chyba pri načítavaní:', error); return; }
+            setStatus('Načítavam poznámky...');
+            const { data: notes, error } = await sb
+                .from('notes')
+                .select('id, content, created_at')
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                console.error('Chyba pri načítavaní:', error);
+                setStatus('Chyba pri načítavaní: ' + error.message, true);
+                return;
+            }
+
             const notesList = document.getElementById('notesList');
-            notesList.innerHTML = notes.map((note, index) => {
+            notesList.innerHTML = (notes || []).map((note, index) => {
                 const title = generateTitle(note.content);
                 return `
                     <div class="note">
                         <h3>#${index + 1} ${title}</h3>
-                        <textarea onchange="updateNote('${note.id}', this.value)">${note.content}</textarea>
+                        <textarea id="note-${note.id}" oninput="updateTitlePreview('${note.id}', this.value)">${note.content || ''}</textarea>
                         <div class="note-actions">
-                            <button class="save-btn" onclick="updateNote('${note.id}', this.parentElement.previousElementSibling.value)">Uložiť</button>
+                            <button class="save-btn" onclick="updateNote('${note.id}')">Uložiť</button>
                             <button class="delete-btn" onclick="deleteNote('${note.id}')">Vymazať</button>
                         </div>
                     </div>
                 `;
             }).join('');
+
+            setStatus(notes && notes.length ? `Načítané ${notes.length} poznámok.` : 'Zatiaľ tu nie sú žiadne poznámky.');
+        }
+
+        function updateTitlePreview(id, content) {
+            const card = document.getElementById(`note-${id}`)?.closest('.note');
+            if (!card) return;
+            const h3 = card.querySelector('h3');
+            const number = h3.textContent.match(/^#\d+/)?.[0] || '';
+            h3.textContent = `${number} ${generateTitle(content)}`;
         }
 
         async function addNote() {
             const input = document.getElementById('noteInput');
             const content = input.value.trim();
-            if (!content) return;
-            const { error } = await supabase.from('notes').insert([{ content }]);
-            if (error) { console.error('Chyba pri pridávaní:', error); return; }
+
+            if (!content) {
+                setStatus('Najprv napíš poznámku.', true);
+                return;
+            }
+
+            setStatus('Ukladám poznámku...');
+            const { data, error } = await sb
+                .from('notes')
+                .insert([{ content }])
+                .select('id, content, created_at');
+
+            if (error) {
+                console.error('Chyba pri pridávaní:', error);
+                setStatus('Chyba pri ukladaní: ' + error.message, true);
+                return;
+            }
+
             input.value = '';
-            loadNotes();
+            setStatus('Poznámka uložená.');
+            await loadNotes();
+            console.log('Inserted:', data);
         }
 
-        async function updateNote(id, content) {
-            const { error } = await supabase.from('notes').update({ content }).eq('id', id);
-            if (error) console.error('Chyba pri aktualizácii:', error);
-            else loadNotes();
+        async function updateNote(id) {
+            const textarea = document.getElementById(`note-${id}`);
+            const content = textarea.value.trim();
+
+            if (!content) {
+                setStatus('Poznámka nemôže byť prázdna.', true);
+                return;
+            }
+
+            setStatus('Ukladám zmeny...');
+            const { error } = await sb
+                .from('notes')
+                .update({ content })
+                .eq('id', id);
+
+            if (error) {
+                console.error('Chyba pri aktualizácii:', error);
+                setStatus('Chyba pri ukladaní zmien: ' + error.message, true);
+                return;
+            }
+
+            setStatus('Zmeny uložené.');
+            await loadNotes();
         }
 
         async function deleteNote(id) {
             if (!confirm('Naozaj vymazať?')) return;
-            const { error } = await supabase.from('notes').delete().eq('id', id);
-            if (error) console.error('Chyba pri mazaní:', error);
-            else loadNotes();
+
+            setStatus('Mažem poznámku...');
+            const { error } = await sb
+                .from('notes')
+                .delete()
+                .eq('id', id);
+
+            if (error) {
+                console.error('Chyba pri mazaní:', error);
+                setStatus('Chyba pri mazaní: ' + error.message, true);
+                return;
+            }
+
+            setStatus('Poznámka zmazaná.');
+            await loadNotes();
         }
 
-        // Načítanie pri spustení
-        loadNotes();
         document.getElementById('noteInput').addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && e.ctrlKey) addNote();
         });
+
+        loadNotes();
     </script>
 </body>
 </html>
