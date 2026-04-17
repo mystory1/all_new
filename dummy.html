@@ -99,8 +99,8 @@
         window.location.href = './index.html';
       });
 
-      supabaseClient.auth.getSession().then(({ data }) => {
-        if (!data.session) {
+      supabaseClient.auth.getUser().then(({ data, error }) => {
+        if (error || !data.user) {
           window.location.href = './index.html';
         }
       });
