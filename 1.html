@@ -102,7 +102,7 @@
             .notes-grid { grid-template-columns: 1fr; }
             body { padding: 10px; }
         }
-        .divider {
+		.divider {
 			width: 100%;
 			height: 15px;
 			background: #FFFFFF;
@@ -114,12 +114,10 @@
 <body>
     <div class="container">
         <h1>Notes</h1>
-
-        <input id="noteTitleInput" type="text" placeholder="Názov poznámky">
-        <textarea id="noteContentInput" placeholder="Napíš novú poznámku"></textarea>
+        <input id="noteTitleInput" type="text" placeholder="Notes Title">
+        <textarea id="noteContentInput" placeholder="Notes"></textarea>
         <button onclick="addNote()">Add</button>
-        
-        <div class="divider"></div>
+		<div class="divider"></div>
         <div id="notesList" class="notes-grid"></div>
     </div>
 
@@ -171,7 +169,6 @@
                 `;
             }).join('');
 
-            
         }
 
         function updateTitlePreview(id, content) {
