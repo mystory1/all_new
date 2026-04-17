@@ -109,9 +109,9 @@
         <h1>Notes</h1>
         <div id="status" class="status">Pripájam sa k databáze...</div>
 
-        <input id="noteTitleInput" type="text" placeholder="Názov poznámky...">
-        <textarea id="noteContentInput" placeholder="Napíš novú poznámku..."></textarea>
-        <button onclick="addNote()">Pridať</button>
+        <input id="noteTitleInput" type="text" placeholder="Názov poznámky">
+        <textarea id="noteContentInput" placeholder="Napíš novú poznámku"></textarea>
+        <button onclick="addNote()">Add</button>
 
         <div id="notesList" class="notes-grid"></div>
     </div>
@@ -165,7 +165,7 @@
                 `;
             }).join('');
 
-            setStatus(notes && notes.length ? `Načítané ${notes.length} poznámok.` : 'Zatiaľ tu nie sú žiadne poznámky.');
+            
         }
 
         function updateTitlePreview(id, content) {
