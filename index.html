@@ -5,46 +5,42 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Účet</title>
   <style>
-    *{box-sizing:border-box} body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;font-family:Inter,Arial,sans-serif;background:#0d0d0d;color:#e5e7eb}
-    .wrap{width:100%;max-width:460px}.card{background:#161616;border:1px solid #333;border-radius:18px;box-shadow:0 20px 40px rgba(0,0,0,.45);padding:28px 22px;position:relative;z-index:1}
-    h1{margin:0 0 18px;text-align:center}.tabs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}.tab{all:unset;display:block;text-align:center;border:1px solid #333;background:#222;color:#fff;border-radius:12px;padding:12px;cursor:pointer;font-weight:800;position:relative;z-index:5;pointer-events:auto}.tab.active{background:#2563eb;border-color:#2563eb}
-    form{display:grid;gap:14px}.field{display:grid;gap:6px} label{font-size:14px;color:#cbd5e1} input{width:100%;border:1px solid #444;border-radius:12px;padding:12px;background:#0f0f0f;color:#e5e7eb;font:inherit}
-    button.submit{border:0;border-radius:12px;padding:12px 14px;background:#2563eb;color:#fff;font-weight:800;cursor:pointer}.msg{min-height:20px;font-size:14px}.error{color:#f87171}.success{color:#34d399}
+    *{box-sizing:border-box} body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;font-family:Arial,sans-serif;background:#111;color:#fff}
+    .wrap{width:100%;max-width:460px}.card{background:#1a1a1a;border:1px solid #333;border-radius:16px;padding:20px;position:relative;z-index:1}
+    .tabs{display:flex;gap:10px;margin-bottom:14px;position:relative;z-index:5}.tab{flex:1;position:relative;z-index:6;pointer-events:auto;border:1px solid #444;background:#222;color:#fff;border-radius:10px;padding:12px;cursor:pointer;font-weight:700}.tab.active{background:#2563eb}
+    .panel{display:none}.panel.active{display:block}input{width:100%;padding:12px;border-radius:10px;border:1px solid #444;background:#0f0f0f;color:#fff;margin-bottom:12px}button.submit{width:100%;padding:12px;border:0;border-radius:10px;background:#2563eb;color:#fff;font-weight:700;cursor:pointer}.msg{margin-top:12px;min-height:20px;white-space:pre-wrap;font-size:14px}
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="card">
-      <h1>Účet</h1>
       <div class="tabs">
         <button class="tab active" id="loginTab" type="button">Prihlásenie</button>
         <button class="tab" id="signupTab" type="button">Registrácia</button>
       </div>
-      <form id="authForm">
-        <div class="field"><label for="username">Meno</label><input id="username" type="text" required autocomplete="username" /></div>
-        <div class="field"><label for="password">Heslo</label><input id="password" type="password" required autocomplete="current-password" /></div>
-        <button class="submit" type="submit" id="submitBtn">Prihlásiť sa</button>
-        <div id="msg" class="msg"></div>
-      </form>
+      <div class="panel active" id="loginPanel">
+        <input id="loginUsername" placeholder="Meno">
+        <input id="loginPassword" type="password" placeholder="Heslo">
+        <button class="submit" id="loginBtn" type="button">Prihlásiť sa</button>
+      </div>
+      <div class="panel" id="signupPanel">
+        <input id="signupUsername" placeholder="Meno">
+        <input id="signupPassword" type="password" placeholder="Heslo">
+        <button class="submit" id="signupBtn" type="button">Registrovať</button>
+      </div>
+      <div class="msg" id="msg"></div>
     </div>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/dist/bcrypt.min.js"></script>
   <script>
-    const SUPABASE_URL = 'https://adpsrpsmfhokyqtvldki.supabase.co'
-    const SUPABASE_ANON_KEY = 'TU_DAJ_ANON_KEY'
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-    const loginTab = document.getElementById('loginTab')
-    const signupTab = document.getElementById('signupTab')
-    const submitBtn = document.getElementById('submitBtn')
-    const msg = document.getElementById('msg')
-    const form = document.getElementById('authForm')
-    let mode = 'login'
-    function setMode(next){ mode = next; loginTab.classList.toggle('active', mode==='login'); signupTab.classList.toggle('active', mode==='signup'); submitBtn.textContent = mode==='signup' ? 'Registrovať' : 'Prihlásiť sa'; msg.textContent=''; msg.className='msg' }
-    loginTab.addEventListener('click', e => { e.preventDefault(); setMode('login') })
-    signupTab.addEventListener('click', e => { e.preventDefault(); setMode('signup') })
-    async function loadUser(username){ const { data, error } = await supabase.from('profiles').select('*').eq('username', username).maybeSingle(); if (error) throw error; return data }
-    form.addEventListener('submit', async (e) => { e.preventDefault(); submitBtn.disabled = true; msg.textContent=''; msg.className='msg'; const username=document.getElementById('username').value.trim(); const password=document.getElementById('password').value; try { if(!username||!password) throw new Error('Vyplň meno a heslo.'); if(mode==='signup'){ const existing=await loadUser(username); if(existing) throw new Error('Toto meno už existuje.'); const passwordHash=await bcrypt.hash(password,10); const { error } = await supabase.from('profiles').insert({ username, email:'', password_hash:passwordHash, role:'user', allowed_pages:[] }); if(error) throw error; msg.textContent='Registrácia úspešná.'; msg.classList.add('success'); form.reset(); } else { const user=await loadUser(username); if(!user) throw new Error('Používateľ neexistuje.'); const ok = await bcrypt.compare(password, user.password_hash); if(!ok) throw new Error('Neplatné prihlasovacie údaje.'); localStorage.setItem('session_user', JSON.stringify({ id:user.id, username:user.username, email:user.email, role:user.role||'user', allowed_pages:user.allowed_pages||[] })); msg.textContent='Prihlásenie úspešné.'; msg.classList.add('success'); } } catch(err){ msg.textContent=err.message||'Nastala chyba.'; msg.classList.add('error') } finally { submitBtn.disabled=false } })
+    const msg=document.getElementById('msg')
+    const loginTab=document.getElementById('loginTab'), signupTab=document.getElementById('signupTab')
+    const loginPanel=document.getElementById('loginPanel'), signupPanel=document.getElementById('signupPanel')
+    function setMode(m){ loginTab.classList.toggle('active',m==='login'); signupTab.classList.toggle('active',m==='signup'); loginPanel.classList.toggle('active',m==='login'); signupPanel.classList.toggle('active',m==='signup'); msg.textContent='mode='+m }
+    loginTab.addEventListener('click',()=>setMode('login'))
+    signupTab.addEventListener('click',()=>setMode('signup'))
+    document.getElementById('signupBtn').addEventListener('click',()=>{ msg.textContent='signup click' })
+    document.getElementById('loginBtn').addEventListener('click',()=>{ msg.textContent='login click' })
   </script>
 </body>
 </html>
