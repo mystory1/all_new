@@ -3,111 +3,24 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin - Oprávnenia</title>
+  <title>Admin</title>
   <style>
-    *{box-sizing:border-box} body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:#0d0d0d;color:#e5e7eb}
-    .wrap{min-height:100vh;display:grid;grid-template-columns:280px 1fr}
-    .side{background:#111;border-right:1px solid #2a2a2a;padding:18px;display:flex;flex-direction:column;gap:14px}
-    .brand{font-size:24px;font-weight:900;color:#fff}
-    .badge{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:#1f2937;border:1px solid #374151;font-weight:800;width:max-content}
-    .main{padding:18px;display:flex;flex-direction:column;gap:16px;min-width:0}
-    .top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;border-bottom:1px solid #2a2a2a;padding-bottom:12px}
-    .title{font-size:28px;font-weight:900}
-    .card{background:#161616;border:1px solid #333;border-radius:18px;padding:18px;box-shadow:0 20px 40px rgba(0,0,0,.25)}
-    .grid{display:grid;grid-template-columns:1.2fr .8fr;gap:16px}
-    .field{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}.field label{color:#cbd5e1;font-size:14px}
-    input,select{width:100%;padding:12px;border-radius:12px;border:1px solid #444;background:#0f0f0f;color:#e5e7eb;font:inherit}
-    button{border:0;border-radius:12px;padding:11px 14px;font:inherit;font-weight:800;cursor:pointer}
-    .primary{background:#2563eb;color:#fff}.success{background:#16a34a;color:#fff}.secondary{background:#2b2b2b;color:#e5e7eb}.danger{background:#ef4444;color:#fff}
-    .row{display:flex;gap:10px;flex-wrap:wrap}
-    .list{display:flex;flex-direction:column;gap:8px;max-height:520px;overflow:auto}
-    .user{border:1px solid #333;background:#111;padding:12px;border-radius:14px;display:grid;gap:8px}
-    .user.active{border-color:#2563eb;box-shadow:0 0 0 1px rgba(37,99,235,.35) inset}
-    .muted{color:#9ca3af;font-size:13px}
-    .pagechips{display:flex;gap:8px;flex-wrap:wrap}
-    .chip{padding:8px 10px;border-radius:999px;background:#262626;border:1px solid #444;color:#e5e7eb;font-size:13px;cursor:pointer;user-select:none}
-    .chip.on{background:#2563eb;border-color:#2563eb}
-    @media(max-width:900px){.wrap{grid-template-columns:1fr}.side{border-right:0;border-bottom:1px solid #2a2a2a}.grid{grid-template-columns:1fr}}
+    *{box-sizing:border-box} body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:#0d0d0d;color:#e5e7eb}.wrap{min-height:100vh;display:grid;grid-template-columns:260px 1fr}.side{background:#111;border-right:1px solid #2a2a2a;padding:18px;display:flex;flex-direction:column;gap:12px}.brand{font-size:24px;font-weight:900;color:#fff}.badge{padding:8px 12px;border-radius:999px;background:#1f2937;border:1px solid #374151;width:max-content;font-weight:800}.main{padding:18px;display:flex;flex-direction:column;gap:16px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;border-bottom:1px solid #2a2a2a;padding-bottom:12px}.title{font-size:28px;font-weight:900}.card{background:#161616;border:1px solid #333;border-radius:18px;padding:18px;box-shadow:0 20px 40px rgba(0,0,0,.25)}.grid{display:grid;grid-template-columns:1.2fr .8fr;gap:16px}.field{display:flex;flex-direction:column;gap:6px;margin-bottom:12px} label{color:#cbd5e1;font-size:14px} input,select{width:100%;padding:12px;border-radius:12px;border:1px solid #444;background:#0f0f0f;color:#e5e7eb;font:inherit} button{border:0;border-radius:12px;padding:11px 14px;font:inherit;font-weight:800;cursor:pointer}.primary{background:#2563eb;color:#fff}.secondary{background:#2b2b2b;color:#e5e7eb}.danger{background:#ef4444;color:#fff}.list{display:flex;flex-direction:column;gap:8px;max-height:540px;overflow:auto}.user{border:1px solid #333;background:#111;padding:12px;border-radius:14px;display:grid;gap:8px;cursor:pointer}.user.active{border-color:#2563eb}.muted{color:#9ca3af;font-size:13px}.pagechips{display:flex;gap:8px;flex-wrap:wrap}.chip{padding:8px 10px;border-radius:999px;background:#262626;border:1px solid #444;color:#e5e7eb;font-size:13px;cursor:pointer;user-select:none}.chip.on{background:#2563eb;border-color:#2563eb}@media(max-width:900px){.wrap{grid-template-columns:1fr}.side{border-right:0;border-bottom:1px solid #2a2a2a}.grid{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
 <div class="wrap">
-  <aside class="side">
-    <div class="brand">Admin panel</div>
-    <div class="badge" id="meBadge">Načítavam...</div>
-    <button class="secondary" id="backBtn">Späť do menu</button>
-    <button class="secondary" id="refreshBtn">Obnoviť</button>
-    <button class="danger" id="logoutBtn">Odhlásiť sa</button>
-  </aside>
-  <main class="main">
-    <div class="top">
-      <div>
-        <div class="title">Správa oprávnení</div>
-        <div class="muted">Admin môže meniť roly aj prístup k stránkam</div>
-      </div>
-    </div>
-
-    <div class="grid">
-      <section class="card">
-        <h3 style="margin:0 0 14px;color:#fff">Používatelia</h3>
-        <div class="field"><label>Vyhľadať</label><input id="searchInput" placeholder="username alebo email" /></div>
-        <div id="usersList" class="list"></div>
-      </section>
-
-      <section class="card">
-        <h3 style="margin:0 0 14px;color:#fff">Vybraný používateľ</h3>
-        <div id="detailsEmpty" class="muted">Vyber používateľa zo zoznamu.</div>
-        <div id="detailsWrap" style="display:none">
-          <div class="field"><label>Username</label><input id="detailUsername" disabled /></div>
-          <div class="field"><label>Email</label><input id="detailEmail" disabled /></div>
-          <div class="field"><label>Rola</label>
-            <select id="detailRole">
-              <option value="user">user</option>
-              <option value="admin">admin</option>
-            </select>
-          </div>
-          <div class="field"><label>Prístup k stránkam</label>
-            <div class="pagechips" id="pageChips"></div>
-          </div>
-          <div class="row">
-            <button class="primary" id="saveBtn">Uložiť</button>
-            <button class="secondary" id="resetBtn">Zrušiť zmeny</button>
-          </div>
-        </div>
-      </section>
-    </div>
-  </main>
+  <aside class="side"><div class="brand">Admin panel</div><div class="badge" id="meBadge">Načítavam...</div><button class="secondary" id="backBtn">Späť do menu</button><button class="secondary" id="refreshBtn">Obnoviť</button><button class="danger" id="logoutBtn">Odhlásiť sa</button></aside>
+  <main class="main"><div class="top"><div><div class="title">Správa oprávnení</div><div class="muted">Admin môže meniť roly aj prístup k stránkam</div></div></div><div class="grid"><section class="card"><h3 style="margin:0 0 14px;color:#fff">Používatelia</h3><div class="field"><label>Vyhľadať</label><input id="searchInput" placeholder="username alebo email" /></div><div id="usersList" class="list"></div></section><section class="card"><h3 style="margin:0 0 14px;color:#fff">Vybraný používateľ</h3><div id="detailsEmpty" class="muted">Vyber používateľa zo zoznamu.</div><div id="detailsWrap" style="display:none"><div class="field"><label>Username</label><input id="detailUsername" disabled /></div><div class="field"><label>Email</label><input id="detailEmail" disabled /></div><div class="field"><label>Rola</label><select id="detailRole"><option value="user">user</option><option value="admin">admin</option></select></div><div class="field"><label>Prístup k stránkam</label><div class="pagechips" id="pageChips"></div></div><div style="display:flex;gap:10px;flex-wrap:wrap"><button class="primary" id="saveBtn">Uložiť</button><button class="secondary" id="resetBtn">Zrušiť zmeny</button></div></div></section></div></main>
 </div>
-<script type="module">
-  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
-  const SUPABASE_URL = 'https://adpsrpsmfhokyqtvldki.supabase.co'
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkcHNycHNtZmhva3lxdHZsZGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0MTM1ODYsImV4cCI6MjA5MDk4OTU4Nn0.CVrGlJpjtKTvIUJ2tHuYvDCs-TzNLHcO91R7GQJy6Y0'
-  const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-  const ADMIN_USERNAME = 'Patrik'
-  const PAGES = ['0.html','1.html','2.html','3.html','4.html','5.html']
-  let me=null, users=[], selected=null, original=null
-
-  function getSessionUser(){ const raw = localStorage.getItem('session_user'); return raw ? JSON.parse(raw) : null }
-  function isAdmin(user){ return user && user.username === ADMIN_USERNAME }
-  function requireAdmin(){ const u=getSessionUser(); if(!u){ location.replace('login.html'); return false } if(!isAdmin(u)){ location.replace('0.html'); return false } return true }
-  function esc(s=''){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML }
-  function userRole(u){ return u.role || 'user' }
-  function userPages(u){ return Array.isArray(u.allowed_pages) ? u.allowed_pages : [] }
-  function normalizeRow(u){ return { ...u, role: u.role || 'user', allowed_pages: Array.isArray(u.allowed_pages) ? u.allowed_pages : [] } }
-  function renderMe(){ meBadge.textContent = `${me.username} • admin` }
-  function renderUsers(){ const q = document.getElementById('searchInput').value.trim().toLowerCase(); const list = document.getElementById('usersList'); list.innerHTML=''; users.filter(u => [u.username,u.email].filter(Boolean).join(' ').toLowerCase().includes(q)).forEach(u=>{ const el=document.createElement('div'); el.className='user'+(selected?.id===u.id?' active':''); el.innerHTML=`<strong>${esc(u.username)}</strong><div class='muted'>${esc(u.email||'')}</div><div class='muted'>rola: ${esc(userRole(u))} • stránky: ${esc(userPages(u).join(', ')||'žiadne')}</div>`; el.onclick=()=>selectUser(u.id); list.appendChild(el) }) }
-  function renderChips(){ const wrap=document.getElementById('pageChips'); wrap.innerHTML=''; PAGES.forEach(p=>{ const b=document.createElement('button'); b.type='button'; b.className='chip'+(original?.allowed_pages?.includes(p)?' on':''); b.textContent=p; b.onclick=()=>{ const arr = new Set(original.allowed_pages||[]); arr.has(p)?arr.delete(p):arr.add(p); original.allowed_pages=[...arr]; renderChips(); b.classList.toggle('on') }; wrap.appendChild(b) }) }
-  function selectUser(id){ selected = users.find(u=>u.id===id); original = JSON.parse(JSON.stringify(selected)); document.getElementById('detailsEmpty').style.display='none'; document.getElementById('detailsWrap').style.display='block'; document.getElementById('detailUsername').value=selected.username||''; document.getElementById('detailEmail').value=selected.email||''; document.getElementById('detailRole').value=selected.role||'user'; renderChips(); renderUsers() }
-  async function load(){ const u = getSessionUser(); if(!u || !isAdmin(u)){ location.replace('login.html'); return } me=u; renderMe(); const { data, error } = await sb.from('profiles').select('*').order('created_at',{ascending:true}); if(error){ alert(error.message); return } users=(data||[]).map(normalizeRow); if(!users.some(x=>x.username===ADMIN_USERNAME)){ const current = users.find(x=>x.username===u.username); if(current){ current.role='admin'; await sb.from('profiles').update({ role:'admin' }).eq('id', current.id) } } renderUsers() }
-  async function save(){ if(!selected) return; const nextRole = document.getElementById('detailRole').value; const nextPages = original.allowed_pages || []; const payload = { role: nextRole, allowed_pages: nextPages }; const { error } = await sb.from('profiles').update(payload).eq('id', selected.id); if(error){ alert(error.message); return } selected.role = nextRole; selected.allowed_pages = nextPages; original = JSON.parse(JSON.stringify(selected)); users = users.map(u=>u.id===selected.id ? JSON.parse(JSON.stringify(selected)) : u); renderUsers(); alert('Uložené') }
-  document.getElementById('searchInput').addEventListener('input', renderUsers)
-  document.getElementById('saveBtn').onclick = save
-  document.getElementById('resetBtn').onclick = ()=>{ if(selected) selectUser(selected.id) }
-  document.getElementById('refreshBtn').onclick = load
-  document.getElementById('backBtn').onclick = ()=>location.href='0.html'
-  document.getElementById('logoutBtn').onclick = async ()=>{ try{ localStorage.removeItem('session_user'); await sb.auth.signOut() } finally { location.replace('login.html') } }
-  document.getElementById('detailRole').addEventListener('change', ()=>{ if(original) original.role = document.getElementById('detailRole').value })
-  if(requireAdmin()) load()
+<script>
+  const PAGES=['0.html','1.html','2.html','3.html','4.html','5.html','admin.html']; const ADMIN_USERNAME='Patrik'; const me=JSON.parse(localStorage.getItem('session_user')||'null'); if(!me) location.replace('index.html'); if((me.username||'')!==ADMIN_USERNAME && me.role!=='admin') location.replace('0.html'); document.getElementById('meBadge').textContent=`${me.username} • ${me.role||'user'}`;
+  function getProfiles(){ try{return JSON.parse(localStorage.getItem('profiles_cache')||'[]')}catch(e){return[]} } function saveProfiles(arr){ localStorage.setItem('profiles_cache', JSON.stringify(arr)) }
+  let users=getProfiles(), selected=null, original=null; function renderUsers(){ const q=(document.getElementById('searchInput').value||'').toLowerCase(); const list=document.getElementById('usersList'); list.innerHTML=''; users.filter(u=>`${u.username||''} ${u.email||''}`.toLowerCase().includes(q)).forEach(u=>{ const el=document.createElement('div'); el.className='user'+(selected?.id===u.id?' active':''); el.innerHTML=`<strong>${u.username||''}</strong><div class='muted'>${u.email||''}</div><div class='muted'>rola: ${u.role||'user'} • stránky: ${(u.allowed_pages||[]).join(', ')||'žiadne'}</div>`; el.onclick=()=>selectUser(u.id); list.appendChild(el) }) }
+  function renderChips(){ const wrap=document.getElementById('pageChips'); wrap.innerHTML=''; PAGES.forEach(p=>{ const b=document.createElement('button'); b.type='button'; b.className='chip'+((original?.allowed_pages||[]).includes(p)?' on':''); b.textContent=p; b.onclick=()=>{ const set=new Set(original.allowed_pages||[]); set.has(p)?set.delete(p):set.add(p); original.allowed_pages=[...set]; b.classList.toggle('on') }; wrap.appendChild(b) }) }
+  function selectUser(id){ selected=users.find(u=>u.id===id); original=JSON.parse(JSON.stringify(selected)); document.getElementById('detailsEmpty').style.display='none'; document.getElementById('detailsWrap').style.display='block'; document.getElementById('detailUsername').value=selected.username||''; document.getElementById('detailEmail').value=selected.email||''; document.getElementById('detailRole').value=selected.role||'user'; renderChips(); renderUsers() }
+  if(!users.length && me){ users=[{id:me.id,username:me.username,email:me.email||'',role:me.role||'admin',allowed_pages:me.allowed_pages||PAGES.slice()}]; saveProfiles(users) }
+  renderUsers(); document.getElementById('searchInput').addEventListener('input', renderUsers); document.getElementById('saveBtn').onclick=e=>{ e.preventDefault(); if(!selected) return; selected.role=document.getElementById('detailRole').value; users=users.map(u=>u.id===selected.id?{...selected}:u); saveProfiles(users); alert('Uložené') }; document.getElementById('resetBtn').onclick=e=>{ e.preventDefault(); if(selected) selectUser(selected.id) }; document.getElementById('refreshBtn').onclick=()=>{ users=getProfiles(); renderUsers() }; document.getElementById('backBtn').onclick=()=>location.href='0.html'; document.getElementById('logoutBtn').onclick=()=>{ localStorage.removeItem('session_user'); location.replace('index.html') };
 </script>
 </body>
 </html>
