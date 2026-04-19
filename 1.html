@@ -7,155 +7,66 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            background: #000;
-            color: #fff;
-            font-family: Arial, sans-serif;
-            padding: 20px;
-            min-height: 100vh;
-        }
+        body { background: #000; color: #fff; font-family: Arial, sans-serif; padding: 20px; min-height: 100vh; }
         .container { max-width: 800px; margin: 0 auto; }
-        h1 { text-align: center; margin-bottom: 20px; color: #ccc; }
-        .status {
-            margin: 10px 0 20px;
-            padding: 12px 14px;
-            border: 1px solid #333;
-            border-radius: 8px;
-            background: #111;
-            color: #bbb;
-            min-height: 22px;
-        }
-        #noteTitleInput,
-        #noteContentInput {
-            width: 100%;
-            background: #111;
-            color: #fff;
-            border: 1px solid #333;
-            padding: 15px;
-            font-size: 16px;
-            border-radius: 8px;
-            outline: none;
-        }
-        #noteTitleInput {
-            margin-bottom: 10px;
-            height: 50px;
-        }
-        #noteContentInput {
-            height: 120px;
-            resize: vertical;
-        }
-        button {
-            background: #444;
-            color: #fff;
-            border: none;
-            padding: 12px 24px;
-            margin: 10px 5px 0 0;
-            cursor: pointer;
-            border-radius: 5px;
-        }
+        .topbar { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom: 20px; }
+        h1 { color: #ccc; }
+        .nav-btn { display:inline-flex; align-items:center; justify-content:center; min-height:42px; padding: 0 16px; text-decoration:none; background:#222; color:#fff; border:1px solid #333; border-radius:8px; }
+        .logout-btn { background:#ef4444; border:1px solid #b91c1c; color:#fff; cursor:pointer; }
+        .status { margin: 10px 0 20px; padding: 12px 14px; border: 1px solid #333; border-radius: 8px; background: #111; color: #bbb; min-height: 22px; }
+        #noteTitleInput, #noteContentInput { width: 100%; background: #111; color: #fff; border: 1px solid #333; padding: 15px; font-size: 16px; border-radius: 8px; outline: none; }
+        #noteTitleInput { margin-bottom: 10px; height: 50px; }
+        #noteContentInput { height: 120px; resize: vertical; }
+        button { background: #444; color: #fff; border: none; padding: 12px 24px; margin: 10px 5px 0 0; cursor: pointer; border-radius: 5px; }
         button:hover { background: #555; }
-        .notes-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 30px;
-        }
-        .note {
-            background: #111;
-            border: 1px solid #333;
-            padding: 20px;
-            border-radius: 8px;
-        }
-        .note h3 {
-            margin: 0 0 10px 0;
-            color: #ccc;
-            font-size: 18px;
-            border-bottom: 1px solid #333;
-            padding-bottom: 5px;
-        }
-        .note .content {
-            width: 100%;
-            background: transparent;
-            color: #fff;
-            border: none;
-            resize: vertical;
-            font-size: 16px;
-            min-height: 80px;
-            outline: none;
-        }
-        .note .title {
-            width: 100%;
-            background: transparent;
-            color: #fff;
-            border: none;
-            font-size: 15px;
-            font-weight: 700;
-            margin-bottom: 10px;
-            outline: none;
-        }
+        .notes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-top: 30px; }
+        .note { background: #111; border: 1px solid #333; padding: 20px; border-radius: 8px; }
+        .note h3 { margin: 0 0 10px 0; color: #ccc; font-size: 18px; border-bottom: 1px solid #333; padding-bottom: 5px; }
+        .note .content { width: 100%; background: transparent; color: #fff; border: none; resize: vertical; font-size: 16px; min-height: 80px; outline: none; }
+        .note .title { width: 100%; background: transparent; color: #fff; border: none; font-size: 15px; font-weight: 700; margin-bottom: 10px; outline: none; }
         .note-actions { margin-top: 10px; }
         .delete-btn { background: #a00; }
         .delete-btn:hover { background: #FF6666; }
         .save-btn { background: #009933; }
         .save-btn:hover { background: #0c0; }
-        @media (max-width: 600px) {
-            .notes-grid { grid-template-columns: 1fr; }
-            body { padding: 10px; }
-        }
-		.divider {
-			width: 100%;
-			height: 15px;
-			background: #FFFFFF;
-			opacity: 0.25;
-			margin: 25px 0 10px;
-		}
+        .divider { width: 100%; height: 15px; background: #FFFFFF; opacity: 0.25; margin: 25px 0 10px; }
+        .empty { margin-top: 24px; padding: 16px; border: 1px solid #333; border-radius: 8px; background: #111; color: #bbb; }
+        @media (max-width: 600px) { .notes-grid { grid-template-columns: 1fr; } body { padding: 10px; } }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Notes</h1>
+        <div class="topbar">
+            <h1>Notes</h1>
+            <a id="backToMenuBtn" class="nav-btn" href="0.html">Späť do menu</a>
+            <button id="logoutBtn" class="nav-btn logout-btn" type="button">Odhlásiť sa</button>
+        </div>
         <div id="status" class="status">Pripájam sa k databáze.</div>
 
         <input id="noteTitleInput" type="text" placeholder="Notes Title">
         <textarea id="noteContentInput" placeholder="Notes"></textarea>
         <button onclick="addNote()">Add</button>
-		<div class="divider"></div>
+        <div class="divider"></div>
         <div id="notesList" class="notes-grid"></div>
     </div>
 
     <script>
         const SUPABASE_URL = "https://adpsrpsmfhokyqtvldki.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkcHNycHNtZmhva3lxdHZsZGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0MTM1ODYsImV4cCI6MjA5MDk4OTU4Nn0.CVrGlJpjtKTvIUJ2tHuYvDCs-TzNLHcO91R7GQJy6Y0";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkcHNycHNtZmhva3lxdHZsZGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0MTM1ODYsImV4cCI6MjA5MDk4OTU4Nn0.CVrGlJpjtKTvIUJ2tHuYvDCs-TzNLHcO91R7GQJy6Y0";
         const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
         const statusEl = document.getElementById('status');
+        const me = JSON.parse(localStorage.getItem('session_user') || 'null');
+        if (!me) location.replace('index.html');
+        const allowed = me.role === 'admin' ? ['0.html','1.html','2.html','3.html','4.html','5.html','admin.html','notes.html'] : (me.allowed_pages || []);
+        if (!allowed.includes('notes.html')) location.replace('0.html');
 
-        function setStatus(msg, isError = false) {
-            statusEl.textContent = msg;
-            statusEl.style.color = isError ? '#ff7b7b' : '#bbb';
-        }
-
-        function generateTitle(title, content) {
-            const cleanTitle = (title || '').trim();
-            if (cleanTitle) return cleanTitle;
-            const clean = (content || '').trim().replace(/\s+/g, ' ');
-            if (!clean) return 'Bez názvu';
-            return clean.slice(0, 30) + (clean.length > 30 ? '...' : '');
-        }
+        function setStatus(msg, isError = false) { statusEl.textContent = msg; statusEl.style.color = isError ? '#ff7b7b' : '#bbb'; }
+        function generateTitle(title, content) { const cleanTitle = (title || '').trim(); if (cleanTitle) return cleanTitle; const clean = (content || '').trim().replace(/\s+/g, ' '); if (!clean) return 'Bez názvu'; return clean.slice(0, 30) + (clean.length > 30 ? '...' : ''); }
 
         async function loadNotes() {
             setStatus('Načítavam poznámky...');
-            const { data: notes, error } = await sb
-                .from('notes')
-                .select('id, title, content, created_at')
-                .order('created_at', { ascending: false });
-
-            if (error) {
-                console.error('Chyba pri načítavaní:', error);
-                setStatus('Chyba pri načítavaní: ' + error.message, true);
-                return;
-            }
-
+            const { data: notes, error } = await sb.from('notes').select('id, title, content, created_at, user_id').eq('user_id', me.id).order('created_at', { ascending: false });
+            if (error) { console.error('Chyba pri načítavaní:', error); setStatus('Chyba pri načítavaní: ' + error.message, true); return; }
             const notesList = document.getElementById('notesList');
             notesList.innerHTML = (notes || []).map((note, index) => {
                 const shownTitle = generateTitle(note.title, note.content);
@@ -171,7 +82,7 @@
                     </div>
                 `;
             }).join('');
-
+            if (!notes || !notes.length) notesList.innerHTML = '<div class="empty">Zatiaľ tu nemáš žiadne poznámky.</div>';
             setStatus(notes && notes.length ? `Načítané ${notes.length} poznámok.` : 'Zatiaľ tu nie sú žiadne poznámky.');
         }
 
@@ -188,82 +99,35 @@
         async function addNote() {
             const titleInput = document.getElementById('noteTitleInput');
             const contentInput = document.getElementById('noteContentInput');
-
             const title = titleInput.value.trim();
             const content = contentInput.value.trim();
-
-            if (!title && !content) {
-                setStatus('Najprv vyplň názov alebo poznámku.', true);
-                return;
-            }
-
+            if (!title && !content) { setStatus('Najprv vyplň názov alebo poznámku.', true); return; }
             setStatus('Ukladám poznámku...');
-            const { data, error } = await sb
-                .from('notes')
-                .insert([{ title, content }])
-                .select('id, title, content, created_at');
-
-            if (error) {
-                console.error('Chyba pri pridávaní:', error);
-                setStatus('Chyba pri ukladaní: ' + error.message, true);
-                return;
-            }
-
-            titleInput.value = '';
-            contentInput.value = '';
-            setStatus('Poznámka uložená.');
-            await loadNotes();
-            console.log('Inserted:', data);
+            const { data, error } = await sb.from('notes').insert([{ user_id: me.id, title, content }]).select('id, title, content, created_at, user_id');
+            if (error) { console.error('Chyba pri pridávaní:', error); setStatus('Chyba pri ukladaní: ' + error.message, true); return; }
+            titleInput.value = ''; contentInput.value = ''; setStatus('Poznámka uložená.'); await loadNotes(); console.log('Inserted:', data);
         }
 
         async function updateNote(id) {
             const title = document.getElementById(`title-${id}`).value.trim();
             const content = document.getElementById(`content-${id}`).value.trim();
-
-            if (!title && !content) {
-                setStatus('Poznámka nemôže byť úplne prázdna.', true);
-                return;
-            }
-
+            if (!title && !content) { setStatus('Poznámka nemôže byť úplne prázdna.', true); return; }
             setStatus('Ukladám zmeny...');
-            const { error } = await sb
-                .from('notes')
-                .update({ title, content })
-                .eq('id', id);
-
-            if (error) {
-                console.error('Chyba pri aktualizácii:', error);
-                setStatus('Chyba pri ukladaní zmien: ' + error.message, true);
-                return;
-            }
-
-            setStatus('Zmeny uložené.');
-            await loadNotes();
+            const { error } = await sb.from('notes').update({ title, content }).eq('id', id).eq('user_id', me.id);
+            if (error) { console.error('Chyba pri aktualizácii:', error); setStatus('Chyba pri ukladaní zmien: ' + error.message, true); return; }
+            setStatus('Zmeny uložené.'); await loadNotes();
         }
 
         async function deleteNote(id) {
             if (!confirm('Naozaj vymazať?')) return;
-
             setStatus('Mažem poznámku...');
-            const { error } = await sb
-                .from('notes')
-                .delete()
-                .eq('id', id);
-
-            if (error) {
-                console.error('Chyba pri mazaní:', error);
-                setStatus('Chyba pri mazaní: ' + error.message, true);
-                return;
-            }
-
-            setStatus('Poznámka zmazaná.');
-            await loadNotes();
+            const { error } = await sb.from('notes').delete().eq('id', id).eq('user_id', me.id);
+            if (error) { console.error('Chyba pri mazaní:', error); setStatus('Chyba pri mazaní: ' + error.message, true); return; }
+            setStatus('Poznámka zmazaná.'); await loadNotes();
         }
 
-        document.getElementById('noteContentInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && e.ctrlKey) addNote();
-        });
-
+        document.getElementById('noteContentInput').addEventListener('keypress', (e) => { if (e.key === 'Enter' && e.ctrlKey) addNote(); });
+        document.getElementById('logoutBtn').addEventListener('click', () => { localStorage.removeItem('session_user'); location.replace('index.html'); });
         loadNotes();
     </script>
 </body>
