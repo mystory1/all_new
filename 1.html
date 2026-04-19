@@ -52,13 +52,16 @@
 
     <script>
         const SUPABASE_URL = "https://adpsrpsmfhokyqtvldki.supabase.co";
-        const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkcHNycHNtZmhva3lxdHZsZGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0MTM1ODYsImV4cCI6MjA5MDk4OTU4Nn0.CVrGlJpjtKTvIUJ2tHuYvDCs-TzNLHcO91R7GQJy6Y0'
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkcHNycHNtZmhva3lxdHZsZGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0MTM1ODYsImV4cCI6MjA5MDk4OTU4Nn0.CVrGlJpjtKTvIUJ2tHuYvDCs-TzNLHcO91R7GQJy6Y0";
+        const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         const statusEl = document.getElementById('status');
         const me = JSON.parse(localStorage.getItem('session_user') || 'null');
         if (!me) location.replace('index.html');
-        const allowed = me.role === 'admin' ? ['0.html','1.html','2.html','3.html','4.html','5.html','admin.html','notes.html'] : (me.allowed_pages || []);
-        if (!allowed.includes('notes.html')) location.replace('0.html');
-        const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const allPages = ['1.html','2.html','3.html','4.html','5.html','admin.html','notes.html'];
+        const allowed = me.role === 'admin' ? allPages : (me.allowed_pages || []);
+        const currentPage = (location.pathname.split('/').pop() || '1.html').replace(/^\//,'');
+        const pageMap = currentPage === '1.html' ? ['1.html','notes.html'] : [currentPage, 'notes.html'];
+        if (!pageMap.some(p => allowed.includes(p))) location.replace('0.html');
 
         function setStatus(msg, isError = false) { statusEl.textContent = msg; statusEl.style.color = isError ? '#ff7b7b' : '#bbb'; }
         function generateTitle(title, content) { const cleanTitle = (title || '').trim(); if (cleanTitle) return cleanTitle; const clean = (content || '').trim().replace(/\s+/g, ' '); if (!clean) return 'Bez názvu'; return clean.slice(0, 30) + (clean.length > 30 ? '...' : ''); }
