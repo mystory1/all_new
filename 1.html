@@ -62,28 +62,37 @@
 
         function setStatus(msg, isError = false) { statusEl.textContent = msg; statusEl.style.color = isError ? '#ff7b7b' : '#bbb'; }
         function generateTitle(title, content) { const cleanTitle = (title || '').trim(); if (cleanTitle) return cleanTitle; const clean = (content || '').trim().replace(/\s+/g, ' '); if (!clean) return 'Bez názvu'; return clean.slice(0, 30) + (clean.length > 30 ? '...' : ''); }
+        function fetchKey() { return localStorage.getItem('supabase_anon_key') || SUPABASE_ANON_KEY; }
+
+        async function reloadClient() { return window.supabase.createClient(SUPABASE_URL, fetchKey()); }
 
         async function loadNotes() {
-            setStatus('Načítavam poznámky...');
-            const { data: notes, error } = await sb.from('notes').select('id, title, content, created_at, user_id').eq('user_id', me.id).order('created_at', { ascending: false });
-            if (error) { console.error('Chyba pri načítavaní:', error); setStatus('Chyba pri načítavaní: ' + error.message, true); return; }
-            const notesList = document.getElementById('notesList');
-            notesList.innerHTML = (notes || []).map((note, index) => {
-                const shownTitle = generateTitle(note.title, note.content);
-                return `
-                    <div class="note">
-                        <h3>#${index + 1} ${shownTitle}</h3>
-                        <input class="title" id="title-${note.id}" value="${(note.title || '').replaceAll('"', '&quot;')}" placeholder="Názov poznámky">
-                        <textarea class="content" id="content-${note.id}" oninput="updateTitlePreview('${note.id}', this.value)">${note.content || ''}</textarea>
-                        <div class="note-actions">
-                            <button class="save-btn" onclick="updateNote('${note.id}')">Save</button>
-                            <button class="delete-btn" onclick="deleteNote('${note.id}')">Delete</button>
+            try {
+                setStatus('Načítavam poznámky...');
+                const client = await reloadClient();
+                const { data: notes, error } = await client.from('notes').select('id, title, content, created_at, user_id').eq('user_id', me.id).order('created_at', { ascending: false });
+                if (error) throw error;
+                const notesList = document.getElementById('notesList');
+                notesList.innerHTML = (notes || []).map((note, index) => {
+                    const shownTitle = generateTitle(note.title, note.content);
+                    return `
+                        <div class="note">
+                            <h3>#${index + 1} ${shownTitle}</h3>
+                            <input class="title" id="title-${note.id}" value="${(note.title || '').replaceAll('"', '&quot;')}" placeholder="Názov poznámky">
+                            <textarea class="content" id="content-${note.id}" oninput="updateTitlePreview('${note.id}', this.value)">${note.content || ''}</textarea>
+                            <div class="note-actions">
+                                <button class="save-btn" onclick="updateNote('${note.id}')">Save</button>
+                                <button class="delete-btn" onclick="deleteNote('${note.id}')">Delete</button>
+                            </div>
                         </div>
-                    </div>
-                `;
-            }).join('');
-            if (!notes || !notes.length) notesList.innerHTML = '<div class="empty">Zatiaľ tu nemáš žiadne poznámky.</div>';
-            setStatus(notes && notes.length ? `Načítané ${notes.length} poznámok.` : 'Zatiaľ tu nie sú žiadne poznámky.');
+                    `;
+                }).join('');
+                if (!notes || !notes.length) notesList.innerHTML = '<div class="empty">Zatiaľ tu nemáš žiadne poznámky.</div>';
+                setStatus(notes && notes.length ? `Načítané ${notes.length} poznámok.` : 'Zatiaľ tu nie sú žiadne poznámky.');
+            } catch (error) {
+                console.error('Chyba pri načítavaní:', error);
+                setStatus('Chyba pri načítavaní: ' + (error?.message || error), true);
+            }
         }
 
         function updateTitlePreview(id, content) {
@@ -97,33 +106,53 @@
         }
 
         async function addNote() {
-            const titleInput = document.getElementById('noteTitleInput');
-            const contentInput = document.getElementById('noteContentInput');
-            const title = titleInput.value.trim();
-            const content = contentInput.value.trim();
-            if (!title && !content) { setStatus('Najprv vyplň názov alebo poznámku.', true); return; }
-            setStatus('Ukladám poznámku...');
-            const { data, error } = await sb.from('notes').insert([{ user_id: me.id, title, content }]).select('id, title, content, created_at, user_id');
-            if (error) { console.error('Chyba pri pridávaní:', error); setStatus('Chyba pri ukladaní: ' + error.message, true); return; }
-            titleInput.value = ''; contentInput.value = ''; setStatus('Poznámka uložená.'); await loadNotes(); console.log('Inserted:', data);
+            try {
+                const titleInput = document.getElementById('noteTitleInput');
+                const contentInput = document.getElementById('noteContentInput');
+                const title = titleInput.value.trim();
+                const content = contentInput.value.trim();
+                if (!title && !content) { setStatus('Najprv vyplň názov alebo poznámku.', true); return; }
+                setStatus('Ukladám poznámku...');
+                const client = await reloadClient();
+                const { data, error } = await client.from('notes').insert([{ user_id: me.id, title, content }]).select('id, title, content, created_at, user_id');
+                if (error) throw error;
+                titleInput.value = ''; contentInput.value = ''; setStatus('Poznámka uložená.'); await loadNotes(); console.log('Inserted:', data);
+            } catch (error) {
+                console.error('Chyba pri pridávaní:', error);
+                setStatus('Chyba pri ukladaní: ' + (error?.message || error), true);
+            }
         }
 
         async function updateNote(id) {
-            const title = document.getElementById(`title-${id}`).value.trim();
-            const content = document.getElementById(`content-${id}`).value.trim();
-            if (!title && !content) { setStatus('Poznámka nemôže byť úplne prázdna.', true); return; }
-            setStatus('Ukladám zmeny...');
-            const { error } = await sb.from('notes').update({ title, content }).eq('id', id).eq('user_id', me.id);
-            if (error) { console.error('Chyba pri aktualizácii:', error); setStatus('Chyba pri ukladaní zmien: ' + error.message, true); return; }
-            setStatus('Zmeny uložené.'); await loadNotes();
+            try {
+                const title = document.getElementById(`title-${id}`).value.trim();
+                const content = document.getElementById(`content-${id}`).value.trim();
+                if (!title && !content) { setStatus('Poznámka nemôže byť úplne prázdna.', true); return; }
+                setStatus('Ukladám zmeny...');
+                const client = await reloadClient();
+                const { error } = await client.from('notes').update({ title, content }).eq('id', id).eq('user_id', me.id);
+                if (error) throw error;
+                setStatus('Zmeny uložené.');
+                await loadNotes();
+            } catch (error) {
+                console.error('Chyba pri aktualizácii:', error);
+                setStatus('Chyba pri ukladaní zmien: ' + (error?.message || error), true);
+            }
         }
 
         async function deleteNote(id) {
             if (!confirm('Naozaj vymazať?')) return;
-            setStatus('Mažem poznámku...');
-            const { error } = await sb.from('notes').delete().eq('id', id).eq('user_id', me.id);
-            if (error) { console.error('Chyba pri mazaní:', error); setStatus('Chyba pri mazaní: ' + error.message, true); return; }
-            setStatus('Poznámka zmazaná.'); await loadNotes();
+            try {
+                setStatus('Mažem poznámku...');
+                const client = await reloadClient();
+                const { error } = await client.from('notes').delete().eq('id', id).eq('user_id', me.id);
+                if (error) throw error;
+                setStatus('Poznámka zmazaná.');
+                await loadNotes();
+            } catch (error) {
+                console.error('Chyba pri mazaní:', error);
+                setStatus('Chyba pri mazaní: ' + (error?.message || error), true);
+            }
         }
 
         document.getElementById('noteContentInput').addEventListener('keypress', (e) => { if (e.key === 'Enter' && e.ctrlKey) addNote(); });
