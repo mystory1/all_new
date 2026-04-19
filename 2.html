@@ -78,12 +78,14 @@
   function selectColor(i){selectedColor=i; document.querySelectorAll('.swatch').forEach((b,idx)=>b.classList.toggle('selected', idx===i))}
   function project(){return state.projects.find(p=>p.id===state.activeProjectId)}
   function saveLocal(){localStorage.setItem('kanban_projects_v1', JSON.stringify(state))}
+  function getSessionUser(){ const raw = localStorage.getItem('session_user'); return raw ? JSON.parse(raw) : null }
   async function loadAll(){
-    const {data: projects, error: pe} = await db.from('projects').select('*').order('created_at',{ascending:true})
+    const user = getSessionUser(); if(!user){ window.location.href='login.html'; return }
+    const {data: projects, error: pe} = await db.from('projects').select('*').eq('owner_id', user.id).order('created_at',{ascending:true})
     if(pe) return alert(pe.message)
-    const {data: columns, error: ce} = await db.from('columns').select('*').order('position',{ascending:true})
+    const {data: columns, error: ce} = await db.from('columns').select('*').eq('owner_id', user.id).order('position',{ascending:true})
     if(ce) return alert(ce.message)
-    const {data: tasks, error: te} = await db.from('tasks').select('*').order('position',{ascending:true})
+    const {data: tasks, error: te} = await db.from('tasks').select('*').eq('owner_id', user.id).order('position',{ascending:true})
     if(te) return alert(te.message)
     state.projects = (projects||[]).map(p=>({
       ...p,
@@ -93,25 +95,26 @@
       }))
     }))
     if(!state.projects.length){
-      const p = await createDefaultProject()
+      const p = await createDefaultProject(user)
       state.projects=[p]
     }
     state.activeProjectId = state.activeProjectId && state.projects.some(p=>p.id===state.activeProjectId) ? state.activeProjectId : state.projects[0].id
     saveLocal(); render()
   }
-  async function createDefaultProject(){
-    const {data:p, error} = await db.from('projects').insert({name:'Projekt 1'}).select().single()
+  async function createDefaultProject(user){
+    const {data:p, error} = await db.from('projects').insert({name:'Projekt 1', owner_id:user.id}).select().single()
     if(error) throw error
     const cols = [
-      {title:'Todo', color:0, position:0, project_id:p.id},
-      {title:'In Progress', color:1, position:1, project_id:p.id},
-      {title:'Done', color:2, position:2, project_id:p.id}
+      {title:'Todo', color:0, position:0, project_id:p.id, owner_id:user.id},
+      {title:'In Progress', color:1, position:1, project_id:p.id, owner_id:user.id},
+      {title:'Done', color:2, position:2, project_id:p.id, owner_id:user.id}
     ]
     const {data: insertedCols, error: ce} = await db.from('columns').insert(cols).select('*')
     if(ce) throw ce
     return {...p, columns: insertedCols.map(c=>({...c, tasks:[]}))}
   }
   async function createProject(){
+    const user = getSessionUser(); if(!user) return alert('Nie si prihlásený.')
     const name = document.getElementById('projectName').value.trim() || 'Nový projekt'
     const {data, error} = await db.from('projects').insert({
       name,
@@ -119,9 +122,9 @@
     }).select().single()
     if(error) return alert(error.message)
     const cols = [
-      {title:'Todo', color:0, position:0, project_id:data.id},
-      {title:'In Progress', color:1, position:1, project_id:data.id},
-      {title:'Done', color:2, position:2, project_id:data.id}
+      {title:'Todo', color:0, position:0, project_id:data.id, owner_id: user.id},
+      {title:'In Progress', color:1, position:1, project_id:data.id, owner_id: user.id},
+      {title:'Done', color:2, position:2, project_id:data.id, owner_id: user.id}
     ]
     const {data: insertedCols, error: ce} = await db.from('columns').insert(cols).select('*')
     if(ce) return alert(ce.message)
@@ -175,7 +178,7 @@
       }
     } else {
       const target = p.columns.find(c=>c.id===colId)
-      const payload = {name,note,column_id:colId,position:target.tasks.length}
+      const payload = {name,note,column_id:colId,position:target.tasks.length, owner_id: getSessionUser().id}
       const {data,error} = await db.from('tasks').insert(payload).select().single()
       if(error) return alert(error.message)
       target.tasks.push(data)
@@ -184,7 +187,7 @@
   }
   async function addColumn(){
     const p=project(); const name=document.getElementById('columnName').value.trim()||'Nový stav'; if(p.columns.length>=8) return alert('Maximálne 8 stavov.')
-    const payload = {title:name,color:selectedColor,project_id:p.id,position:p.columns.length}
+    const payload = {title:name,color:selectedColor,project_id:p.id,position:p.columns.length, owner_id:getSessionUser().id}
     const {data,error} = await db.from('columns').insert(payload).select().single()
     if(error) return alert(error.message)
     p.columns.push({...data, tasks:[]})
@@ -195,7 +198,7 @@
     if(!confirm('Naozaj zmazať stav a všetky úlohy?')) return
     const {error} = await db.from('columns').delete().eq('id', colId)
     if(error) return alert(error.message)
-    p.columns = p.columns.filter(x=>x.id!==colId); if(p.columns.length===0){ const nc={id:uid('c'),title:'Todo',color:0,tasks:[],project_id:p.id,position:0}; await db.from('columns').insert({id:nc.id,title:nc.title,color:nc.color,project_id:p.id,position:0}); p.columns=[nc] }
+    p.columns = p.columns.filter(x=>x.id!==colId); if(p.columns.length===0){ const nc={id:uid('c'),title:'Todo',color:0,tasks:[],project_id:p.id,position:0}; await db.from('columns').insert({id:nc.id,title:nc.title,color:nc.color,project_id:p.id,position:0, owner_id:getSessionUser().id}); p.columns=[nc] }
     saveLocal(); render()
   }
   async function deleteTask(taskId,colId){
@@ -226,7 +229,7 @@
         localStorage.removeItem('kanban_projects_v1')
         await db.auth.signOut()
       } finally {
-        window.location.href = 'index.html'
+        window.location.href = 'login.html'
       }
     }
     document.getElementById('openTaskBtn').onclick=()=>openTaskModal()
