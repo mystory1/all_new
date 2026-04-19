@@ -52,7 +52,11 @@
         <div class="title" id="currentProjectTitle">Projekt</div>
         <div class="project-label" id="currentProjectLabel">Stavy a úlohy</div>
       </div>
-      <div class="actions"><button class="primary" id="openTaskBtn">Pridať úlohu</button><button class="success" id="openColumnBtn">Pridať stav</button></div>
+      <div class="actions">
+        <button class="secondary" id="logoutBtn">Odhlásiť sa</button>
+        <button class="primary" id="openTaskBtn">Pridať úlohu</button>
+        <button class="success" id="openColumnBtn">Pridať stav</button>
+      </div>
     </div>
     <div id="board" class="board"></div>
   </main>
@@ -74,13 +78,6 @@
   function selectColor(i){selectedColor=i; document.querySelectorAll('.swatch').forEach((b,idx)=>b.classList.toggle('selected', idx===i))}
   function project(){return state.projects.find(p=>p.id===state.activeProjectId)}
   function saveLocal(){localStorage.setItem('kanban_projects_v1', JSON.stringify(state))}
-  async function api(action, table, payload={}, filterKey=null, filterVal=null){
-    let q = db.from(table)
-    if(action==='insert') return await q.insert(payload).select()
-    if(action==='update') return await q.update(payload).eq(filterKey, filterVal).select()
-    if(action==='delete') return await q.delete().eq(filterKey, filterVal)
-    if(action==='select') return await q.select('*').order('created_at',{ascending:true})
-  }
   async function loadAll(){
     const {data: projects, error: pe} = await db.from('projects').select('*').order('created_at',{ascending:true})
     if(pe) return alert(pe.message)
@@ -214,7 +211,33 @@
     const p=project(); if(!p){ document.getElementById('currentProjectTitle').textContent='Žiadny projekt'; document.getElementById('board').innerHTML=''; return }
     document.getElementById('currentProjectTitle').textContent=p.name; document.getElementById('currentProjectLabel').textContent=`Projekt ID: ${shortId(p.id)} • ${p.columns.length} stavov`; renderProjectList(); const board=document.getElementById('board'); board.className='board cols-'+Math.min(p.columns.length,6); board.innerHTML=''; const status=document.getElementById('taskStatus'); status.innerHTML='<option value="">Vyber stav</option>';
     p.columns.forEach(col=>{const opt=document.createElement('option'); opt.value=col.id; opt.textContent=col.title; status.appendChild(opt); const column=document.createElement('div'); column.className='column'; column.innerHTML=`<div class="column-header"><div class="column-title" contenteditable="true" style="background:${COLORS[col.color]}">${esc(col.title)}</div><button class="icon-btn edit-column-btn" title="Upraviť stav">✎</button><button class="icon-btn delete-column-btn" title="Zmazať stav">✕</button></div><div class="tasks"></div>`; column.querySelector('.column-title').onblur=async e=>{col.title=e.target.textContent.trim()||'Bez názvu'; await db.from('columns').update({title:col.title}).eq('id', col.id); saveLocal(); render()}; column.querySelector('.edit-column-btn').onclick=()=>editColumn(col.id); column.querySelector('.delete-column-btn').onclick=()=>deleteColumn(col.id); column.ondragover=e=>{e.preventDefault(); e.dataTransfer.dropEffect='move'}; column.ondrop=e=>{e.preventDefault(); const data=JSON.parse(e.dataTransfer.getData('text/plain')); if(data) dropTaskToColumn(data,col.id)}; const tasksWrap=column.querySelector('.tasks'); col.tasks.forEach((task,index)=>{const taskEl=document.createElement('div'); taskEl.className='task'; taskEl.draggable=true; taskEl.innerHTML=`<div class="task-top"><div class="task-id">#${shortId(task.id)}</div><div class="task-actions"><button class="icon-btn edit-task-btn" title="Upraviť">✎</button><button class="icon-btn delete-task-btn" title="Zmazať">✕</button></div></div><div class="task-name">${index+1}. ${esc(task.name)}</div><div class="task-details">Vytvorené: ${fmt(task.created_at||task.createdAt||Date.now())}<br><br>Poznámka: ${task.note?esc(task.note):'—'}</div>`; taskEl.onclick=e=>{if(!e.target.closest('.icon-btn')) taskEl.classList.toggle('open')}; taskEl.ondragstart=e=>{taskEl.classList.add('dragging'); e.dataTransfer.setData('text/plain',JSON.stringify({taskId:task.id,fromCol:col.id}))}; taskEl.ondragend=()=>taskEl.classList.remove('dragging'); taskEl.querySelector('.edit-task-btn').onclick=()=>openTaskModal(col.id,task); taskEl.querySelector('.delete-task-btn').onclick=()=>deleteTask(task.id,col.id); tasksWrap.appendChild(taskEl)}); board.appendChild(column)})}
-  async function init(){selectColor(0); await loadAll(); document.getElementById('newProjectBtn').onclick=()=>openProjectModal(); document.getElementById('renameProjectBtn').onclick=()=>{editingProjectId=state.activeProjectId; openProjectModal(project()?.name||'')}; document.getElementById('deleteProjectBtn').onclick=deleteProject; document.getElementById('openTaskBtn').onclick=()=>openTaskModal(); document.getElementById('openColumnBtn').onclick=openColumnModal; document.getElementById('closeTaskBtn').onclick=closeTaskModal; document.getElementById('closeColumnBtn').onclick=closeColumnModal; document.getElementById('closeProjectBtn').onclick=closeProjectModal; document.getElementById('saveTaskBtn').onclick=addOrUpdateTask; document.getElementById('saveColumnBtn').onclick=addColumn; document.getElementById('saveProjectBtn').onclick=()=>editingProjectId?updateProjectName():createProject(); document.getElementById('taskModal').onclick=e=>{if(e.target.id==='taskModal') closeTaskModal()}; document.getElementById('columnModal').onclick=e=>{if(e.target.id==='columnModal') closeColumnModal()}; document.getElementById('projectModal').onclick=e=>{if(e.target.id==='projectModal') closeProjectModal()}}
+  async function init(){
+    selectColor(0)
+    await loadAll()
+    document.getElementById('newProjectBtn').onclick=()=>openProjectModal()
+    document.getElementById('renameProjectBtn').onclick=()=>{editingProjectId=state.activeProjectId; openProjectModal(project()?.name||'')}
+    document.getElementById('deleteProjectBtn').onclick=deleteProject
+    document.getElementById('logoutBtn').onclick=async ()=>{
+      try{
+        localStorage.removeItem('session_user')
+        localStorage.removeItem('kanban_projects_v1')
+        await db.auth.signOut()
+      } finally {
+        window.location.href = 'login.html'
+      }
+    }
+    document.getElementById('openTaskBtn').onclick=()=>openTaskModal()
+    document.getElementById('openColumnBtn').onclick=openColumnModal
+    document.getElementById('closeTaskBtn').onclick=closeTaskModal
+    document.getElementById('closeColumnBtn').onclick=closeColumnModal
+    document.getElementById('closeProjectBtn').onclick=closeProjectModal
+    document.getElementById('saveTaskBtn').onclick=addOrUpdateTask
+    document.getElementById('saveColumnBtn').onclick=addColumn
+    document.getElementById('saveProjectBtn').onclick=()=>editingProjectId?updateProjectName():createProject()
+    document.getElementById('taskModal').onclick=e=>{if(e.target.id==='taskModal') closeTaskModal()}
+    document.getElementById('columnModal').onclick=e=>{if(e.target.id==='columnModal') closeColumnModal()}
+    document.getElementById('projectModal').onclick=e=>{if(e.target.id==='projectModal') closeProjectModal()}
+  }
   init()
 </script>
 </body>
