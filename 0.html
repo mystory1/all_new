@@ -5,93 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Menu</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            min-height: 100vh;
-            background: #000;
-            color: #fff;
-            font-family: Arial, sans-serif;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 600px;
-			
-            text-align: center;
-        }
-
-        h1 {
-            margin-bottom: 24px;
-            font-size: 2rem;
-            color: #f0f0f0;
-        }
-
-        .buttons {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 14px;
-        }
-
-        .nav-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 64px;
-            text-decoration: none;
-            color: #fff;
-            background: #1a1a1a;
-            border: 1px solid #333;
-            border-radius: 12px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
-            user-select: none;
-        }
-
-        .nav-btn:hover {
-            background: #2a2a2a;
-            border-color: #555;
-            transform: translateY(-2px);
-        }
-
-        .nav-btn:active {
-            transform: translateY(0);
-        }
-
-        @media (max-width: 800px) {
-            .buttons {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 480px) {
-            .buttons {
-                grid-template-columns: 1fr;
-            }
-
-            h1 {
-                font-size: 1.6rem;
-            }
-
-            .nav-btn {
-                min-height: 58px;
-            }
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { min-height: 100vh; background: #000; color: #fff; font-family: Arial, sans-serif; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .container { width: 100%; max-width: 600px; text-align: center; }
+        h1 { margin-bottom: 24px; font-size: 2rem; color: #f0f0f0; }
+        .buttons { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; }
+        .nav-btn { display: flex; align-items: center; justify-content: center; min-height: 64px; text-decoration: none; color: #fff; background: #1a1a1a; border: 1px solid #333; border-radius: 12px; font-size: 1.1rem; font-weight: 600; transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease; user-select: none; }
+        .nav-btn:hover { background: #2a2a2a; border-color: #555; transform: translateY(-2px); }
+        .nav-btn:active { transform: translateY(0); }
+        @media (max-width: 800px) { .buttons { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 480px) { .buttons { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } .nav-btn { min-height: 58px; } }
     </style>
 </head>
 <body>
     <main class="container">
-
-
         <div class="buttons">
             <a class="nav-btn" href="1.html">1</a>
             <a class="nav-btn" href="2.html">2</a>
@@ -100,23 +27,13 @@
             <a class="nav-btn" href="5.html">5</a>
         </div>
     </main>
-
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-    const SUPABASE_URL = "https://adpsrpsmfhokyqtvldki.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkcHNycHNtZmhva3lxdHZsZGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0MTM1ODYsImV4cCI6MjA5MDk4OTU4Nn0.CVrGlJpjtKTvIUJ2tHuYvDCs-TzNLHcO91R7GQJy6Y0";
-    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    async function checkAuth() {
-        const { data: { session } } = await sb.auth.getSession();
-        if (!session) {
-            window.location.href = "login.html";
-        }
-    }
-
-    checkAuth();
-
-	</script>
+    <script>
+      function checkAuth(){
+        const raw = localStorage.getItem('session_user')
+        if(!raw){ window.location.replace('login.html'); return }
+        try { const user = JSON.parse(raw); if(!user || !user.id) throw new Error('bad'); } catch(e) { localStorage.removeItem('session_user'); window.location.replace('login.html'); }
+      }
+      checkAuth()
+    </script>
 </body>
 </html>
