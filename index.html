@@ -10,7 +10,6 @@
     h1{margin:0 0 18px;text-align:center}.tabs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}.tab{border:1px solid #333;background:#222;color:#fff;border-radius:12px;padding:12px;cursor:pointer;font-weight:800}.tab.active{background:#2563eb;border-color:#2563eb}
     form{display:grid;gap:14px}.field{display:grid;gap:6px} label{font-size:14px;color:#cbd5e1} input{width:100%;border:1px solid #444;border-radius:12px;padding:12px;background:#0f0f0f;color:#e5e7eb;font:inherit}
     button.submit{border:0;border-radius:12px;padding:12px 14px;background:#2563eb;color:#fff;font-weight:800;cursor:pointer}.msg{min-height:20px;font-size:14px}.error{color:#f87171}.success{color:#34d399}
-    .debug{margin-top:12px;padding:10px;border:1px dashed #444;border-radius:12px;background:#101010;color:#9ca3af;font-size:12px;white-space:pre-wrap;display:none}
   </style>
 </head>
 <body>
@@ -26,29 +25,15 @@
         <div class="field"><label for="password">Heslo</label><input id="password" type="password" required autocomplete="current-password" /></div>
         <button class="submit" type="submit" id="submitBtn">Prihlásiť sa</button>
         <div id="msg" class="msg"></div>
-        <div id="debug" class="debug"></div>
       </form>
     </div>
   </div>
-  <script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
-    import bcrypt from 'https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/+esm'
-
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/dist/bcrypt.min.js"></script>
+  <script>
     const SUPABASE_URL = 'https://adpsrpsmfhokyqtvldki.supabase.co'
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkcHNycHNtZmhva3lxdHZsZGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0MTM1ODYsImV4cCI6MjA5MDk4OTU4Nn0.CVrGlpJjtKTvIUJ2tHuYvDCs-TzNLHcO91R7GQJy6Y0'
-    const debug = (t) => { const el=document.getElementById('debug'); el.style.display='block'; el.textContent += t + '
-' }
-    debug('init')
-    debug('url=' + SUPABASE_URL)
-    debug('key_len=' + SUPABASE_ANON_KEY.length)
-
-    let supabase
-    try {
-      supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-      debug('client=ok')
-    } catch (e) {
-      debug('client_error=' + e.message)
-    }
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
     const loginTab = document.getElementById('loginTab')
     const signupTab = document.getElementById('signupTab')
@@ -70,10 +55,8 @@
     signupTab.onclick = () => setMode('signup')
 
     async function loadUser(username){
-      debug('loadUser=' + username)
       const { data, error } = await supabase.from('profiles').select('*').eq('username', username).maybeSingle()
-      if (error) { debug('loadUser_error=' + error.message); throw error }
-      debug('loadUser_found=' + (data ? 'yes' : 'no'))
+      if (error) throw error
       return data
     }
 
@@ -82,7 +65,6 @@
       submitBtn.disabled = true
       msg.textContent = ''
       msg.className = 'msg'
-      debug('submit mode=' + mode)
 
       const username = document.getElementById('username').value.trim()
       const password = document.getElementById('password').value
@@ -95,10 +77,8 @@
           if (existing) throw new Error('Toto meno už existuje.')
 
           const passwordHash = await bcrypt.hash(password, 10)
-          const payload = { username, email: '', password_hash: passwordHash, role: 'user', allowed_pages: [] }
-          debug('insert_profile')
-          const { error } = await supabase.from('profiles').insert(payload)
-          if (error) { debug('insert_error=' + error.message); throw error }
+          const { error } = await supabase.from('profiles').insert({ username, email: '', password_hash: passwordHash, role: 'user', allowed_pages: [] })
+          if (error) throw error
 
           msg.textContent = 'Registrácia úspešná.'
           msg.classList.add('success')
@@ -116,7 +96,6 @@
           setTimeout(() => window.location.replace('./0.html'), 500)
         }
       } catch (err) {
-        debug('err=' + (err.message || 'unknown'))
         msg.textContent = err.message || 'Nastala chyba.'
         msg.classList.add('error')
       } finally {
