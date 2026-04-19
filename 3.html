@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cinema City 1+1</title>
+  <style>
+    *{box-sizing:border-box} body{margin:0;font-family:Arial,sans-serif;background:#0b0b0b;color:#fff;min-height:100vh;padding:20px}.wrap{max-width:900px;margin:0 auto}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px}.card{background:#111;border:1px solid #2a2a2a;border-radius:18px;padding:18px;box-shadow:0 16px 40px rgba(0,0,0,.25)}h1{margin:0;font-size:clamp(28px,4vw,42px)}.muted{color:#9ca3af}.offer{background:#151515;border:1px solid #333;border-radius:16px;padding:18px;margin-top:16px}.offer h2{margin:0 0 10px;font-size:20px}.badge{display:inline-block;margin-top:10px;padding:6px 10px;border-radius:999px;background:#2563eb;color:#fff;font-size:12px;font-weight:700}.label{color:#93c5fd;font-size:13px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}.range{font-size:18px;font-weight:700}.refresh{border:0;background:#2563eb;color:#fff;padding:12px 16px;border-radius:12px;font-weight:700;cursor:pointer}.error{background:#3b0f14;border:1px solid #7f1d1d;color:#fecaca;padding:12px 14px;border-radius:12px;white-space:pre-wrap}.loading{padding:18px;color:#cbd5e1}.source{margin-top:18px;font-size:13px;color:#9ca3af} .stack{display:flex;flex-direction:column;gap:16px}@media(max-width:700px){body{padding:12px}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <h1>1+1 ponuky Cinema City</h1>
+        <div class="muted">Automaticky sa načíta pri otvorení stránky.</div>
+      </div>
+      <button class="refresh" id="refreshBtn" type="button">Obnoviť</button>
+    </div>
+    <div class="card" id="statusBox"><div class="loading">Načítavam údaje...</div></div>
+    <div id="offersBox" class="stack"></div>
+    <div class="source" id="sourceInfo"></div>
+  </div>
+
+  <script>
+    const URL = 'https://www.cinemacity.sk/static/sk/sk/offers';
+    const box = document.getElementById('statusBox');
+    const offersBox = document.getElementById('offersBox');
+    const sourceInfo = document.getElementById('sourceInfo');
+    const esc = s => String(s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+
+    function renderStatus(title, detail=''){
+      box.innerHTML = '<div class="range">' + esc(title) + '</div>' + (detail ? '<div class="muted" style="margin-top:6px">' + esc(detail) + '</div>' : '');
+    }
+
+    function parse(text){
+      const items = [];
+      const re1 = /Od\s*(\d{1,2}\.\d{1,2}\.?)\s*-\s*(\d{1,2}\.\d{1,2}\.?)\s*platí\s*Filmánia\s*na\s*film:\s*([^
+\.]+)/gi;
+      const re2 = /Túto sobotu\s*(\d{1,2}\.\d{1,2}\.?)\s*je to film:\s*([^
+]+)/gi;
+      let m;
+      while ((m = re1.exec(text)) !== null) items.push({kind:'FILMÁNIA', title:m[3].trim(), from:m[1], to:m[2]});
+      while ((m = re2.exec(text)) !== null) items.push({kind:'CINEMAKIDS', title:m[2].trim(), from:m[1], to:'sobota'});
+      return items;
+    }
+
+    async function load(){
+      try{
+        renderStatus('Načítavam údaje...');
+        offersBox.innerHTML = '';
+        sourceInfo.textContent = '';
+        const res = await fetch(URL, { cache:'no-store', mode:'cors' });
+        const text = await res.text();
+        const items = parse(text);
+        if (!items.length){
+          const excerpt = text.slice(0, 1200);
+          box.innerHTML = '<div class="error">Našiel som stránku, ale nenašiel som 1+1 dáta v očakávanom tvare.
+
+Prvých 1200 znakov z odpovede:
+
+' + esc(excerpt) + '</div>';
+        } else {
+          renderStatus('Našiel som ' + items.length + ' ponúk.', 'Zobrazené sú len akcie 1+1 / Filmánia / CinemaKids.');
+          offersBox.innerHTML = items.map(i => `
+            <div class="offer">
+              <div class="label">${esc(i.kind)}</div>
+              <h2>${esc(i.title)}</h2>
+              <div class="muted">Platí od</div>
+              <div class="range">${esc(i.from)}</div>
+              <div class="muted" style="margin-top:10px">Platí do</div>
+              <div class="range">${esc(i.to)}</div>
+              <div class="badge">1+1</div>
+            </div>
+          `).join('');
+        }
+        sourceInfo.textContent = 'Zdroj: ' + URL;
+      }catch(err){
+        box.innerHTML = '<div class="error">Chyba pri načítaní: ' + esc(err && (err.message || err.toString()) || 'neznáma chyba') + '
+
+Ak sa stránka otvára ako file://, niektoré prehliadače blokujú CORS/fetch. Skús ju otvoriť cez lokálny server.</div>';
+      }
+    }
+
+    document.getElementById('refreshBtn').addEventListener('click', load);
+    window.addEventListener('DOMContentLoaded', load);
+  </script>
+</body>
+</html>
