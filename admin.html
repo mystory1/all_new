@@ -19,7 +19,7 @@
   const PAGES=['1.html','2.html','3.html','4.html','5.html','admin.html'];
   const ADMIN_USERNAME='Patrik';
   const SUPABASE_URL='https://adpsrpsmfhokyqtvldki.supabase.co';
-  const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkcHNycHNtZmhva3lxdHZsZGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0MTAwMDAsImV4cCI6MjA5MDk4OTU4Nn0.CVrGlJpjtKTvIUJ2tHuYvDCs-TzNLHcO91R7GQJy6Y0';
+  const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkcHNycHNtZmhva3lxdHZsZGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0MTM1ODYsImV4cCI6MjA5MDk4OTU4Nn0.CVrGlJpjtKTvIUJ2tHuYvDCs-TzNLHcO91R7GQJy6Y0';
   const supabase=window.supabase?.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
   const $=id=>document.getElementById(id);
   const state={users:[],selected:null,original:null,view:'all'};
@@ -32,7 +32,7 @@
   const selectUser=id=>{ state.selected=state.users.find(u=>String(u.id)===String(id)); if(!state.selected) return; state.original=JSON.parse(JSON.stringify(state.selected)); $('detailsEmpty').style.display='none'; $('detailsWrap').style.display='block'; $('detailUsername').value=state.selected.username||''; $('detailEmail').value=state.selected.email||''; $('detailRole').value=state.selected.role||'user'; $('detailStatus').textContent=state.selected.approved ? 'approved' : 'pending'; $('detailStatus').className='status '+(state.selected.approved ? 'approved' : 'pending'); renderChips(); render(); };
   const persistLocal=()=>{ saveCache(state.users); notice('Uložené lokálne do profiles_cache'); };
   const saveToDb=async u=>{ if(!supabase) throw new Error('Supabase client sa nespustil'); const payload={role:u.role||'user', approved:!!u.approved, allowed_pages:u.allowed_pages||[]}; const {error}=await supabase.from('profiles').update(payload).eq('id',u.id); if(error) throw error; notice('Uložené do DB pre '+(u.username||u.id)); };
-  const loadDb=async()=>{ try{ notice('Načítavam z DB...'); if(!supabase) throw new Error('Supabase client sa nespustil'); const {data,error}=await supabase.from('profiles').select('*').order('created_at',{ascending:false}); if(error) throw error; state.users=mergeById(data||[]); saveCache(state.users); notice('Načítané z DB: '+state.users.length); render(); }catch(err){ console.error(err); notice('DB error: '+(err?.message||err)); } };
+  const loadDb=async()=>{ try{ notice('Načítavam z DB...'); if(!supabase) throw new Error('Supabase client sa nespustil'); const {data,error}=await supabase.from('profiles').select('*').order('created_at',{ascending:false}); if(error) throw error; state.users=mergeById(data||[]); saveCache(state.users); notice('Načítané z DB: '+state.users.length); render(); }catch(err){ console.error(err); notice('DB error: '+(err?.message||err)); } }
   const init=async()=>{
     try{
       const me=JSON.parse(localStorage.getItem('session_user')||'null');
