@@ -28,23 +28,80 @@
       </form>
     </div>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/dist/bcrypt.min.js"></script>
   <script>
     const SUPABASE_URL = 'https://adpsrpsmfhokyqtvldki.supabase.co'
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkcHNycHNtZmhva3lxdHZsZGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0MTM1ODYsImV4cCI6MjA5MDk4OTU4Nn0.CVrGlpJjtKTvIUJ2tHuYvDCs-TzNLHcO91R7GQJy6Y0'
+    const SUPABASE_ANON_KEY = 'TU_DAJ_ANON_KEY'
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
     const loginTab = document.getElementById('loginTab')
     const signupTab = document.getElementById('signupTab')
     const submitBtn = document.getElementById('submitBtn')
     const msg = document.getElementById('msg')
     const form = document.getElementById('authForm')
     let mode = 'login'
-    function setMode(next){ mode = next; loginTab.classList.toggle('active', mode==='login'); signupTab.classList.toggle('active', mode==='signup'); submitBtn.textContent = mode==='signup' ? 'Registrovať' : 'Prihlásiť sa'; msg.textContent=''; msg.className='msg' }
-    loginTab.onclick = () => setMode('login')
-    signupTab.onclick = () => setMode('signup')
-    async function loadUser(username){ const { data, error } = await supabase.from('profiles').select('*').eq('username', username).maybeSingle(); if(error) throw error; return data }
-    form.addEventListener('submit', async (e) => { e.preventDefault(); submitBtn.disabled = true; msg.textContent = ''; msg.className = 'msg'; const username = document.getElementById('username').value.trim(); const password = document.getElementById('password').value; try { if (!username || !password) throw new Error('Vyplň meno a heslo.'); if (mode === 'signup') { const existing = await loadUser(username); if (existing) throw new Error('Toto meno už existuje.'); const passwordHash = await bcrypt.hash(password, 10); const { error } = await supabase.from('profiles').insert({ username, email: '', password_hash: passwordHash, role: 'user', allowed_pages: [] }); if (error) throw error; msg.textContent = 'Registrácia úspešná.'; msg.classList.add('success'); form.reset(); } else { const user = await loadUser(username); if (!user) throw new Error('Používateľ neexistuje.'); const ok = await bcrypt.compare(password, user.password_hash); if (!ok) throw new Error('Neplatné prihlasovacie údaje.'); localStorage.setItem('session_user', JSON.stringify({ id: user.id, username: user.username, email:user.email, role:user.role||'user', allowed_pages:user.allowed_pages||[] })); localStorage.setItem('profiles_cache', JSON.stringify([ { id:user.id, username:user.username, email:user.email, role:user.role||'user', allowed_pages:user.allowed_pages||[] } ])); msg.textContent = 'Prihlásenie úspešné.'; msg.classList.add('success'); setTimeout(() => window.location.replace('./0.html'), 500); } } catch (err) { msg.textContent = err.message || 'Nastala chyba.'; msg.classList.add('error') } finally { submitBtn.disabled = false } })
+
+    function setMode(next){
+      mode = next
+      loginTab.classList.toggle('active', mode==='login')
+      signupTab.classList.toggle('active', mode==='signup')
+      submitBtn.textContent = mode==='signup' ? 'Registrovať' : 'Prihlásiť sa'
+      msg.textContent = ''
+      msg.className = 'msg'
+    }
+
+    loginTab.addEventListener('click', (e) => { e.preventDefault(); setMode('login') })
+    signupTab.addEventListener('click', (e) => { e.preventDefault(); setMode('signup') })
+
+    async function loadUser(username){
+      const { data, error } = await supabase.from('profiles').select('*').eq('username', username).maybeSingle()
+      if (error) throw error
+      return data
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault()
+      submitBtn.disabled = true
+      msg.textContent = ''
+      msg.className = 'msg'
+
+      const username = document.getElementById('username').value.trim()
+      const password = document.getElementById('password').value
+
+      try {
+        if (!username || !password) throw new Error('Vyplň meno a heslo.')
+
+        if (mode === 'signup') {
+          const existing = await loadUser(username)
+          if (existing) throw new Error('Toto meno už existuje.')
+
+          const passwordHash = await bcrypt.hash(password, 10)
+          const { error } = await supabase.from('profiles').insert({ username, email: '', password_hash: passwordHash, role: 'user', allowed_pages: [] })
+          if (error) throw error
+
+          msg.textContent = 'Registrácia úspešná.'
+          msg.classList.add('success')
+          form.reset()
+        } else {
+          const user = await loadUser(username)
+          if (!user) throw new Error('Používateľ neexistuje.')
+
+          const ok = await bcrypt.compare(password, user.password_hash)
+          if (!ok) throw new Error('Neplatné prihlasovacie údaje.')
+
+          localStorage.setItem('session_user', JSON.stringify({ id: user.id, username: user.username, email:user.email, role:user.role||'user', allowed_pages:user.allowed_pages||[] }))
+          localStorage.setItem('profiles_cache', JSON.stringify([{ id:user.id, username:user.username, email:user.email, role:user.role||'user', allowed_pages:user.allowed_pages||[] }]))
+          msg.textContent = 'Prihlásenie úspešné.'
+          msg.classList.add('success')
+        }
+      } catch (err) {
+        msg.textContent = err.message || 'Nastala chyba.'
+        msg.classList.add('error')
+      } finally {
+        submitBtn.disabled = false
+      }
+    })
   </script>
 </body>
 </html>
