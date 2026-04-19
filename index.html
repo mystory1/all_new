@@ -33,7 +33,7 @@
   <script>
     window.addEventListener('load',()=>{
       const SUPABASE_URL='https://adpsrpsmfhokyqtvldki.supabase.co'
-      const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkcHNycHNtZmhva3lxdHZsZGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0MTM1ODYsImV4cCI6MjA5MDk4OTU4Nn0.CVrGlJpjtKTvIUJ2tHuYvDCs-TzNLHcO91R7GQJy6Y0'
+      const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkcHNycHNtZmhva3lxdHZsZGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0MTM1ODYsImV4cCI6MjA5MDk4OTU4Nn0.CVrGlJpjtKTvIUJ2tHuYvDCs-TzNLHcO91R7GQJy6Y0'
       const supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY)
       const msg=document.getElementById('msg')
       const loginTab=document.getElementById('loginTab'), signupTab=document.getElementById('signupTab')
@@ -75,8 +75,8 @@
       }
       loginBtn.addEventListener('click', doLogin)
       signupBtn.addEventListener('click', doSignup)
-      ;[loginUsername, loginPassword].forEach(el => el.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin() }))
-      ;[signupUsername, signupPassword].forEach(el => el.addEventListener('keydown', e => { if (e.key === 'Enter') doSignup() }))
+      loginPassword.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin() })
+      signupPassword.addEventListener('keydown', e => { if (e.key === 'Enter') doSignup() })
     })
   </script>
 </body>
