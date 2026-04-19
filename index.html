@@ -95,6 +95,9 @@
           localStorage.setItem('session_user', JSON.stringify({ id: user.id, username: user.username }))
           msg.textContent = 'Prihlásenie úspešné.'
           msg.classList.add('success')
+          setTimeout(() => {
+          window.location.href = '0.html';
+        }, 700);
         }
       } catch (err) {
         msg.textContent = err.message || 'Nastala chyba.'
