@@ -3,243 +3,106 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <title>Účet</title>
   <style>
-    :root {
-      --bg: #ffffff;
-      --surface: #ffffff;
-      --text: #111111;
-      --muted: #6b7280;
-      --border: #e5e7eb;
-      --primary: #111111;
-      --primary-hover: #222222;
-      --danger: #b42318;
-      --success: #027a48;
-      --shadow: 0 12px 40px rgba(0, 0, 0, 0.07);
-      --radius: 18px;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      min-height: 100vh;
-      display: grid;
-      place-items: center;
-      padding: 24px;
-      font-family: Inter, Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-    }
-
-    .wrap {
-      width: 100%;
-      max-width: 440px;
-    }
-
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 32px 24px;
-    }
-
-    h1 {
-      font-size: clamp(2rem, 1.4rem + 2vw, 2.5rem);
-      line-height: 1.1;
-      text-align: center;
-      margin-bottom: 10px;
-    }
-
-    .subtitle {
-      text-align: center;
-      color: var(--muted);
-      margin-bottom: 28px;
-      font-size: 0.98rem;
-      line-height: 1.5;
-    }
-
-    form {
-      display: grid;
-      gap: 16px;
-    }
-
-    .field label {
-      display: block;
-      font-size: 0.95rem;
-      font-weight: 600;
-      margin-bottom: 8px;
-    }
-
-    .field input {
-      width: 100%;
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 14px 16px;
-      font-size: 16px;
-      background: #fff;
-      color: var(--text);
-      outline: none;
-      transition: border-color .18s ease, box-shadow .18s ease;
-    }
-
-    .field input:focus {
-      border-color: #111;
-      box-shadow: 0 0 0 4px rgba(17, 17, 17, 0.08);
-    }
-
-    button {
-      margin-top: 6px;
-      border: 0;
-      border-radius: 14px;
-      background: var(--primary);
-      color: #fff;
-      padding: 14px 16px;
-      font-size: 16px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background .18s ease, transform .18s ease;
-    }
-
-    button:hover { background: var(--primary-hover); }
-    button:active { transform: translateY(1px); }
-    button:disabled { opacity: .7; cursor: wait; }
-
-    .message {
-      min-height: 20px;
-      text-align: center;
-      font-size: 0.95rem;
-    }
-
-    .message.error { color: var(--danger); }
-    .message.success { color: var(--success); }
-
-    .note {
-      margin-top: 18px;
-      text-align: center;
-      font-size: 0.9rem;
-      color: var(--muted);
-      line-height: 1.6;
-    }
-
-    code {
-      background: #f3f4f6;
-      padding: 2px 6px;
-      border-radius: 8px;
-    }
-
-    @media (max-width: 480px) {
-      .card { padding: 24px 18px; }
-    }
+    *{box-sizing:border-box} body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;font-family:Inter,Arial,sans-serif;background:#0d0d0d;color:#e5e7eb}
+    .wrap{width:100%;max-width:460px}.card{background:#161616;border:1px solid #333;border-radius:18px;box-shadow:0 20px 40px rgba(0,0,0,.45);padding:28px 22px}
+    h1{margin:0 0 18px;text-align:center}.tabs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}.tab{border:1px solid #333;background:#222;color:#fff;border-radius:12px;padding:12px;cursor:pointer;font-weight:800}.tab.active{background:#2563eb;border-color:#2563eb}
+    form{display:grid;gap:14px}.field{display:grid;gap:6px} label{font-size:14px;color:#cbd5e1} input{width:100%;border:1px solid #444;border-radius:12px;padding:12px;background:#0f0f0f;color:#e5e7eb;font:inherit}
+    button.submit{border:0;border-radius:12px;padding:12px 14px;background:#2563eb;color:#fff;font-weight:800;cursor:pointer}.msg{min-height:20px;font-size:14px}.error{color:#f87171}.success{color:#34d399}
   </style>
 </head>
 <body>
-  <main class="wrap">
-    <section class="card">
-      <h1>Login</h1>
-
-      <form id="loginForm">
-        <div class="field">
-          <label for="identifier">Meno</label>
-          <input
-            id="identifier"
-            name="identifier"
-            type="text"
-            autocomplete="username"
-            required
-          />
-        </div>
-
-        <div class="field">
-          <label for="password">Heslo</label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            autocomplete="current-password"
-            required
-          />
-        </div>
-
-        <button type="submit" id="submitBtn">Prihlásiť sa</button>
-        <p id="errorBox" class="message error"></p>
-        <p id="successBox" class="message success"></p>
+  <div class="wrap">
+    <div class="card">
+      <h1>Účet</h1>
+      <div class="tabs">
+        <button class="tab active" id="loginTab">Prihlásenie</button>
+        <button class="tab" id="signupTab">Registrácia</button>
+      </div>
+      <form id="authForm">
+        <div class="field"><label for="username">Meno</label><input id="username" type="text" required autocomplete="username" /></div>
+        <div class="field"><label for="password">Heslo</label><input id="password" type="password" required autocomplete="current-password" /></div>
+        <button class="submit" type="submit" id="submitBtn">Prihlásiť sa</button>
+        <div id="msg" class="msg"></div>
       </form>
+    </div>
+  </div>
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+    import bcrypt from 'https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/+esm'
 
+    const SUPABASE_URL = 'https://adpsrpsmfhokyqtvldki.supabase.co'
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkcHNycHNtZmhva3lxdHZsZGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0MTM1ODYsImV4cCI6MjA5MDk4OTU4Nn0.CVrGlJpjtKTvIUJ2tHuYvDCs-TzNLHcO91R7GQJy6Y0'
+  
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
-    </section>
-  </main>
+    const loginTab = document.getElementById('loginTab')
+    const signupTab = document.getElementById('signupTab')
+    const submitBtn = document.getElementById('submitBtn')
+    const msg = document.getElementById('msg')
+    const form = document.getElementById('authForm')
+    let mode = 'login'
 
-  <script>
-    const SUPABASE_URL = "https://adpsrpsmfhokyqtvldki.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkcHNycHNtZmhva3lxdHZsZGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0MTM1ODYsImV4cCI6MjA5MDk4OTU4Nn0.CVrGlJpjtKTvIUJ2tHuYvDCs-TzNLHcO91R7GQJy6Y0";
-
-    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    const form = document.getElementById('loginForm');
-    const submitBtn = document.getElementById('submitBtn');
-    const errorBox = document.getElementById('errorBox');
-    const successBox = document.getElementById('successBox');
-
-    function looksLikeEmail(value) {
-      return value.includes('@');
+    function setMode(next){
+      mode = next
+      loginTab.classList.toggle('active', mode==='login')
+      signupTab.classList.toggle('active', mode==='signup')
+      submitBtn.textContent = mode==='signup' ? 'Registrovať' : 'Prihlásiť sa'
+      msg.textContent = ''
+      msg.className = 'msg'
     }
 
-    async function resolveEmail(identifier) {
-      if (looksLikeEmail(identifier)) {
-        return identifier;
-      }
+    loginTab.onclick = () => setMode('login')
+    signupTab.onclick = () => setMode('signup')
 
-      const { data, error } = await supabaseClient
-        .from('profiles')
-        .select('email')
-        .eq('username', identifier)
-        .maybeSingle();
-
-      if (error) {
-        throw new Error('Nepodarilo sa nájsť používateľa podľa mena. Skontroluj RLS policy pre profiles.');
-      }
-
-      if (!data?.email) {
-        throw new Error('Používateľ s týmto menom neexistuje.');
-      }
-
-      return data.email;
+    async function loadUser(username){
+      const { data, error } = await supabase.from('users').select('*').eq('username', username).maybeSingle()
+      if (error) throw error
+      return data
     }
 
-    form.addEventListener('submit', async (event) => {
-      event.preventDefault();
-      errorBox.textContent = '';
-      successBox.textContent = '';
-      submitBtn.disabled = true;
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault()
+      submitBtn.disabled = true
+      msg.textContent = ''
+      msg.className = 'msg'
 
-      const identifier = document.getElementById('identifier').value.trim();
-      const password = document.getElementById('password').value;
+      const username = document.getElementById('username').value.trim()
+      const password = document.getElementById('password').value
 
       try {
-        const email = await resolveEmail(identifier);
+        if (!username || !password) throw new Error('Vyplň meno a heslo.')
 
-        const { error } = await supabaseClient.auth.signInWithPassword({
-          email,
-          password,
-        });
+        if (mode === 'signup') {
+          const existing = await loadUser(username)
+          if (existing) throw new Error('Toto meno už existuje.')
 
-        if (error) {
-          throw new Error('Neplatné prihlasovacie údaje.');
+          const passwordHash = await bcrypt.hash(password, 10)
+          const { error } = await supabase.from('users').insert({ username, password_hash: passwordHash })
+          if (error) throw error
+
+          msg.textContent = 'Registrácia úspešná.'
+          msg.classList.add('success')
+          form.reset()
+        } else {
+          const user = await loadUser(username)
+          if (!user) throw new Error('Používateľ neexistuje.')
+
+          const ok = await bcrypt.compare(password, user.password_hash)
+          if (!ok) throw new Error('Neplatné prihlasovacie údaje.')
+
+          localStorage.setItem('session_user', JSON.stringify({ id: user.id, username: user.username }))
+          msg.textContent = 'Prihlásenie úspešné.'
+          msg.classList.add('success')
         }
-
-        successBox.textContent = 'Prihlásenie úspešné, presmerovávam...';
-
-        setTimeout(() => {
-          window.location.href = '0.html';
-        }, 700);
       } catch (err) {
-        errorBox.textContent = err.message || 'Nastala chyba pri prihlásení.';
+        msg.textContent = err.message || 'Nastala chyba.'
+        msg.classList.add('error')
       } finally {
-        submitBtn.disabled = false;
+        submitBtn.disabled = false
       }
-    });
+    })
   </script>
 </body>
 </html>
