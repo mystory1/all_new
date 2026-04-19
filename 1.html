@@ -26,23 +26,33 @@
 
   <script>
     const SUPABASE_URL = 'https://adpsrpsmfhokyqtvldki.supabase.co';
-    const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkcHNycHNtZmhva3lxdHZsZGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0MTM1ODYsImV4cCI6MjA5MDk4OTU4Nn0.CVrGlJpjtKTvIUJ2tHuYvDCs-TzNLHcO91R7GQJy6Y0'
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkcHNycHNtZmhva3lxdHZsZGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0MTM1ODYsImV4cCI6MjA5MDk4OTU4Nn0.CVrGlJpjtKTvIUJ2tHuYvDCs-TzNLHcO91R7GQJy6Y0';
     const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     const statusEl = document.getElementById('status');
     const me = JSON.parse(localStorage.getItem('session_user') || 'null');
     if (!me) location.replace('index.html');
 
-    const currentPage = 'notes.html';
     const allowed = me.role === 'admin' ? ['0.html','1.html','2.html','3.html','4.html','5.html','admin.html','notes.html'] : (me.allowed_pages || []);
-    if (!(allowed.includes(currentPage) || allowed.includes('1.html'))) location.replace('0.html');
+    if (!(allowed.includes('notes.html') || allowed.includes('1.html'))) location.replace('0.html');
+
+    let authUser = null;
 
     function setStatus(msg, isError = false) { statusEl.textContent = msg; statusEl.style.color = isError ? '#ff7b7b' : '#bbb'; }
     function generateTitle(title, content) { const cleanTitle = (title || '').trim(); if (cleanTitle) return cleanTitle; const clean = (content || '').trim().replace(/\s+/g, ' '); if (!clean) return 'Bez názvu'; return clean.slice(0, 30) + (clean.length > 30 ? '...' : ''); }
 
+    async function getAuthUser() {
+      const { data, error } = await sb.auth.getUser();
+      if (error) throw error;
+      authUser = data?.user || null;
+      if (!authUser) throw new Error('Chýba Supabase auth session. Prihlás sa cez Supabase Auth.');
+      return authUser;
+    }
+
     async function loadNotes() {
       try {
+        const user = authUser || await getAuthUser();
         setStatus('Načítavam poznámky...');
-        const { data: notes, error } = await sb.from('notes').select('id, title, content, created_at, user_id').eq('user_id', me.id).order('created_at', { ascending: false });
+        const { data: notes, error } = await sb.from('notes').select('id, title, content, created_at, user_id').eq('user_id', user.id).order('created_at', { ascending: false });
         if (error) throw error;
         const notesList = document.getElementById('notesList');
         notesList.innerHTML = (notes || []).map((note, index) => {
@@ -79,13 +89,14 @@
 
     async function addNote() {
       try {
+        const user = authUser || await getAuthUser();
         const titleInput = document.getElementById('noteTitleInput');
         const contentInput = document.getElementById('noteContentInput');
         const title = titleInput.value.trim();
         const content = contentInput.value.trim();
         if (!title && !content) { setStatus('Najprv vyplň názov alebo poznámku.', true); return; }
         setStatus('Ukladám poznámku...');
-        const { data, error } = await sb.from('notes').insert([{ user_id: me.id, title, content }]).select('id, title, content, created_at, user_id');
+        const { data, error } = await sb.from('notes').insert([{ user_id: user.id, title, content }]).select('id, title, content, created_at, user_id');
         if (error) throw error;
         titleInput.value = ''; contentInput.value = ''; setStatus('Poznámka uložená.'); await loadNotes(); console.log('Inserted:', data);
       } catch (error) {
@@ -96,11 +107,12 @@
 
     async function updateNote(id) {
       try {
+        const user = authUser || await getAuthUser();
         const title = document.getElementById(`title-${id}`).value.trim();
         const content = document.getElementById(`content-${id}`).value.trim();
         if (!title && !content) { setStatus('Poznámka nemôže byť úplne prázdna.', true); return; }
         setStatus('Ukladám zmeny...');
-        const { error } = await sb.from('notes').update({ title, content }).eq('id', id).eq('user_id', me.id);
+        const { error } = await sb.from('notes').update({ title, content }).eq('id', id).eq('user_id', user.id);
         if (error) throw error;
         setStatus('Zmeny uložené.');
         await loadNotes();
@@ -113,8 +125,9 @@
     async function deleteNote(id) {
       if (!confirm('Naozaj vymazať?')) return;
       try {
+        const user = authUser || await getAuthUser();
         setStatus('Mažem poznámku...');
-        const { error } = await sb.from('notes').delete().eq('id', id).eq('user_id', me.id);
+        const { error } = await sb.from('notes').delete().eq('id', id).eq('user_id', user.id);
         if (error) throw error;
         setStatus('Poznámka zmazaná.');
         await loadNotes();
@@ -125,7 +138,7 @@
     }
 
     document.getElementById('noteContentInput').addEventListener('keypress', (e) => { if (e.key === 'Enter' && e.ctrlKey) addNote(); });
-    document.getElementById('logoutBtn').addEventListener('click', () => { localStorage.removeItem('session_user'); location.replace('index.html'); });
+    document.getElementById('logoutBtn').addEventListener('click', async () => { await sb.auth.signOut(); localStorage.removeItem('session_user'); location.replace('index.html'); });
     loadNotes();
   </script>
 </body>
