@@ -223,7 +223,7 @@
         localStorage.removeItem('kanban_projects_v1')
         await db.auth.signOut()
       } finally {
-        window.location.href = 'login.html'
+        window.location.href = 'index.html'
       }
     }
     document.getElementById('openTaskBtn').onclick=()=>openTaskModal()
