@@ -33,19 +33,22 @@
   <script>
     window.addEventListener('load',()=>{
       const SUPABASE_URL='https://adpsrpsmfhokyqtvldki.supabase.co'
-      const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkcHNycHNtZmhva3lxdHZsZGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0MTM1ODYsImV4cCI6MjA5MDk4OTU4Nn0.CVrGlJpjtKTvIUJ2tHuYvDCs-TzNLHcO91R7GQJy6Y0'
+      const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkcHNycHNtZmhva3lxdHZsZGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0MTM1ODYsImV4cCI6MjA5MDk4OTU4Nn0.CVrGlJpjtKTvIUJ2tHuYvDCs-TzNLHcO91R7GQJy6Y0'
       const supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY)
       const msg=document.getElementById('msg')
       const loginTab=document.getElementById('loginTab'), signupTab=document.getElementById('signupTab')
       const loginPanel=document.getElementById('loginPanel'), signupPanel=document.getElementById('signupPanel')
+      const loginUsername=document.getElementById('loginUsername'), loginPassword=document.getElementById('loginPassword')
+      const signupUsername=document.getElementById('signupUsername'), signupPassword=document.getElementById('signupPassword')
+      const loginBtn=document.getElementById('loginBtn'), signupBtn=document.getElementById('signupBtn')
       function setMode(m){ loginTab.classList.toggle('active',m==='login'); signupTab.classList.toggle('active',m==='signup'); loginPanel.classList.toggle('active',m==='login'); signupPanel.classList.toggle('active',m==='signup'); msg.textContent='' }
       loginTab.addEventListener('click',()=>setMode('login'))
       signupTab.addEventListener('click',()=>setMode('signup'))
       async function loadUser(u){ const {data,error}=await supabase.from('profiles').select('*').eq('username',u).maybeSingle(); if(error) throw error; return data }
-      document.getElementById('signupBtn').addEventListener('click', async ()=>{
+      async function doSignup(){
         try{
-          const u=document.getElementById('signupUsername').value.trim()
-          const p=document.getElementById('signupPassword').value
+          const u=signupUsername.value.trim()
+          const p=signupPassword.value
           if(!u||!p){ msg.textContent='Vyplň meno a heslo.'; return }
           const existing=await loadUser(u)
           if(existing){ msg.textContent='Toto meno už existuje.'; return }
@@ -53,11 +56,11 @@
           if(error) throw error
           msg.textContent='Registrácia úspešná. Počkaj na schválenie adminom.'
         }catch(e){ msg.textContent='ERR '+(e.message||e) }
-      })
-      document.getElementById('loginBtn').addEventListener('click', async ()=>{
+      }
+      async function doLogin(){
         try{
-          const u=document.getElementById('loginUsername').value.trim()
-          const p=document.getElementById('loginPassword').value
+          const u=loginUsername.value.trim()
+          const p=loginPassword.value
           if(!u||!p){ msg.textContent='Vyplň meno a heslo.'; return }
           const user=await loadUser(u)
           if(!user){ msg.textContent='Používateľ neexistuje.'; return }
@@ -69,7 +72,11 @@
           if(session.role==='admin' || session.username==='Patrik') location.assign('./admin.html')
           else location.assign('./0.html')
         }catch(e){ msg.textContent='ERR '+(e.message||e) }
-      })
+      }
+      loginBtn.addEventListener('click', doLogin)
+      signupBtn.addEventListener('click', doSignup)
+      ;[loginUsername, loginPassword].forEach(el => el.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin() }))
+      ;[signupUsername, signupPassword].forEach(el => el.addEventListener('keydown', e => { if (e.key === 'Enter') doSignup() }))
     })
   </script>
 </body>
