@@ -6,7 +6,7 @@
   <title>Účet</title>
   <style>
     *{box-sizing:border-box} body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;font-family:Arial,sans-serif;background:#111;color:#fff}
-    .wrap{width:100%;max-width:460px}.card{background:#1a1a1a;border:1px solid #333;border-radius:16px;padding:20px;position:relative;z-index:1}.tabs{display:flex;gap:10px;margin-bottom:14px;position:relative;z-index:100}.tab{flex:1;position:relative;z-index:101;pointer-events:auto;border:1px solid #444;background:#222;color:#fff;border-radius:10px;padding:12px;cursor:pointer;font-weight:700}.tab.active{background:#2563eb}.panel{display:none}.panel.active{display:block}input{width:100%;padding:12px;border-radius:10px;border:1px solid #444;background:#0f0f0f;color:#fff;margin-bottom:12px}button.submit{width:100%;padding:12px;border:0;border-radius:10px;background:#2563eb;color:#fff;font-weight:700;cursor:pointer}.msg{margin-top:12px;min-height:20px;white-space:pre-wrap;font-size:14px}
+    .wrap{width:100%;max-width:460px}.card{background:#1a1a1a;border:1px solid #333;border-radius:16px;padding:20px}.tabs{display:flex;gap:10px;margin-bottom:14px}.tab{flex:1;border:1px solid #444;background:#222;color:#fff;border-radius:10px;padding:12px;cursor:pointer;font-weight:700}.tab.active{background:#2563eb}.panel{display:none}.panel.active{display:block}input{width:100%;padding:12px;border-radius:10px;border:1px solid #444;background:#0f0f0f;color:#fff;margin-bottom:12px}button.submit{width:100%;padding:12px;border:0;border-radius:10px;background:#2563eb;color:#fff;font-weight:700;cursor:pointer}.msg{margin-top:12px;min-height:20px;white-space:pre-wrap;font-size:14px}
   </style>
 </head>
 <body>
@@ -38,7 +38,7 @@
       const msg=document.getElementById('msg')
       const loginTab=document.getElementById('loginTab'), signupTab=document.getElementById('signupTab')
       const loginPanel=document.getElementById('loginPanel'), signupPanel=document.getElementById('signupPanel')
-      function setMode(m){ loginTab.classList.toggle('active',m==='login'); signupTab.classList.toggle('active',m==='signup'); loginPanel.classList.toggle('active',m==='login'); signupPanel.classList.toggle('active',m==='signup'); msg.textContent='mode='+m }
+      function setMode(m){ loginTab.classList.toggle('active',m==='login'); signupTab.classList.toggle('active',m==='signup'); loginPanel.classList.toggle('active',m==='login'); signupPanel.classList.toggle('active',m==='signup'); msg.textContent='' }
       loginTab.addEventListener('click',()=>setMode('login'))
       signupTab.addEventListener('click',()=>setMode('signup'))
       async function loadUser(u){ const {data,error}=await supabase.from('profiles').select('*').eq('username',u).maybeSingle(); if(error) throw error; return data }
@@ -51,7 +51,7 @@
           if(existing){ msg.textContent='Toto meno už existuje.'; return }
           const { data, error } = await supabase.from('profiles').insert({ username:u, email:'', password_hash:p, role:'user', allowed_pages:[] }).select()
           if(error) throw error
-          msg.textContent='Registrácia úspešná. ' + JSON.stringify(data)
+          msg.textContent='Registrácia úspešná.'
         }catch(e){ msg.textContent='ERR '+(e.message||e) }
       })
       document.getElementById('loginBtn').addEventListener('click', async ()=>{
@@ -61,10 +61,10 @@
           if(!u||!p){ msg.textContent='Vyplň meno a heslo.'; return }
           const user=await loadUser(u)
           if(!user){ msg.textContent='Používateľ neexistuje.'; return }
-          const ok = user.password_hash === p
-          if(!ok){ msg.textContent='Neplatné prihlasovacie údaje.'; return }
+          if(user.password_hash !== p){ msg.textContent='Neplatné prihlasovacie údaje.'; return }
           localStorage.setItem('session_user', JSON.stringify({ id:user.id, username:user.username, email:user.email, role:user.role||'user', allowed_pages:user.allowed_pages||[] }))
           msg.textContent='Prihlásenie úspešné.'
+          window.location.assign('./0.html')
         }catch(e){ msg.textContent='ERR '+(e.message||e) }
       })
     })
