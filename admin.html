@@ -15,28 +15,47 @@
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
-  window.addEventListener('load',()=>{
-    const PAGES=['1.html','2.html','3.html','4.html','5.html','admin.html']; const ADMIN_USERNAME='Patrik'; const me=JSON.parse(localStorage.getItem('session_user')||'null'); if(!me) location.replace('index.html'); if((me.username||'')!==ADMIN_USERNAME && me.role!=='admin') location.replace('0.html'); document.getElementById('meBadge').textContent=`${me.username} • ${me.role||'user'}`;
-    const SUPABASE_URL='https://adpsrpsmfhokyqtvldki.supabase.co'; const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkcHNycHNtZmhva3lxdHZsZGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0MTM1ODYsImV4cCI6MjA5MDk4OTU4Nn0.CVrGlJpjtKTvIUJ2tHuYvDCs-TzNLHcO91R7GQJy6Y0'; const supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY)
-    function getProfiles(){ try{return JSON.parse(localStorage.getItem('profiles_cache')||'[]')}catch(e){return[]} } function saveProfiles(arr){ localStorage.setItem('profiles_cache', JSON.stringify(arr)); localStorage.setItem('profiles_cache_updated_at', String(Date.now())) }
-    function mergeById(arr){ const m=new Map(arr.map(u=>[u.id,u])); const current=JSON.parse(localStorage.getItem('profiles_cache')||'[]'); current.forEach(u=>{ if(!m.has(u.id)) m.set(u.id,u) }); return [...m.values()] }
-    let users=mergeById(getProfiles()), selected=null, original=null, view='all';
-    function setNotice(t){ document.getElementById('cacheNotice').textContent=t }
-    async function loadDb(){ const {data,error}=await supabase.from('profiles').select('*'); if(error){ document.getElementById('cacheNotice').textContent='DB error: '+error.message; return } users=mergeById(data||[]); saveProfiles(users); document.getElementById('cacheNotice').textContent='Načítané z DB: '+users.length; renderUsers() }
-    function renderUsers(){ const q=(document.getElementById('searchInput').value||'').toLowerCase(); const list=document.getElementById('usersList'); list.innerHTML=''; let arr=users.filter(u=>`${u.username||''} ${u.email||''}`.toLowerCase().includes(q)); if(view==='pending') arr=arr.filter(u=>!u.approved); if(!arr.length){ list.innerHTML='<div class="muted">Žiadni používatelia v tomto zozname.</div>'; return } arr.forEach(u=>{ const el=document.createElement('div'); el.className='user'+(selected?.id===u.id?' active':''); el.innerHTML=`<strong>${u.username||''}</strong><div class='muted'>${u.email||''}</div><div class='muted'>rola: ${u.role||'user'} • stránky: ${(u.allowed_pages||[]).join(', ')||'žiadne'}</div><div class='status ${u.approved ? 'approved' : 'pending'}'>${u.approved ? 'approved' : 'pending'}</div>`; el.onclick=()=>selectUser(u.id); list.appendChild(el) }) }
-    function renderChips(){ const wrap=document.getElementById('pageChips'); wrap.innerHTML=''; PAGES.forEach(p=>{ const b=document.createElement('button'); b.type='button'; b.className='chip'+((original?.allowed_pages||[]).includes(p)?' on':''); b.textContent=p; b.onclick=()=>{ const set=new Set(original.allowed_pages||[]); set.has(p)?set.delete(p):set.add(p); original.allowed_pages=[...set]; b.classList.toggle('on') }; wrap.appendChild(b) }) }
-    function selectUser(id){ selected=users.find(u=>u.id===id); original=JSON.parse(JSON.stringify(selected)); document.getElementById('detailsEmpty').style.display='none'; document.getElementById('detailsWrap').style.display='block'; document.getElementById('detailUsername').value=selected.username||''; document.getElementById('detailEmail').value=selected.email||''; document.getElementById('detailRole').value=selected.role||'user'; document.getElementById('detailStatus').textContent=selected.approved ? 'approved' : 'pending'; document.getElementById('detailStatus').className='status '+(selected.approved ? 'approved' : 'pending'); renderChips(); renderUsers() }
-    function persist(){ saveProfiles(users); setNotice('Uložené lokálne do profiles_cache') }
-
-    async function saveToDb(u){
-      const payload={role:u.role||'user', approved:!!u.approved, allowed_pages:u.allowed_pages||[]}
-      const {error}=await supabase.from('profiles').update(payload).eq('id',u.id)
-      if(error){ setNotice('DB update error: '+error.message); throw error }
-      setNotice('Uložené do DB pre '+u.username)
-    }
-    document.getElementById('searchInput').addEventListener('input', renderUsers); document.getElementById('showPendingBtn').onclick=()=>{ view='pending'; renderUsers() }; document.getElementById('showAllBtn').onclick=()=>{ view='all'; renderUsers() }; document.getElementById('loadDbBtn').onclick=loadDb; document.getElementById('saveBtn').onclick=e=>{ e.preventDefault(); if(!selected) return; selected.role=document.getElementById('detailRole').value; users=users.map(u=>u.id===selected.id?{...selected}:u); persist(); await saveToDb(selected); alert('Uložené') }; document.getElementById('approveBtn').onclick=async e=>{ e.preventDefault(); if(!selected) return; selected.approved=true; users=users.map(u=>u.id===selected.id?{...selected}:u); persist(); await saveToDb(selected); selectUser(selected.id); alert('Schválené') }; document.getElementById('resetBtn').onclick=e=>{ e.preventDefault(); if(selected) selectUser(selected.id) }; document.getElementById('refreshBtn').onclick=()=>{ users=mergeById(getProfiles()); setNotice('Obnovené z profiles_cache'); renderUsers() }; document.getElementById('backBtn').onclick=()=>location.href='0.html'; document.getElementById('logoutBtn').onclick=()=>{ localStorage.removeItem('session_user'); location.replace('index.html') };
-    renderUsers();
-  })
+(()=>{
+  const PAGES=['1.html','2.html','3.html','4.html','5.html','admin.html'];
+  const ADMIN_USERNAME='Patrik';
+  const SUPABASE_URL='https://adpsrpsmfhokyqtvldki.supabase.co';
+  const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkcHNycHNtZmhva3lxdHZsZGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0MTAwMDAsImV4cCI6MjA5MDk4OTU4Nn0.CVrGlJpjtKTvIUJ2tHuYvDCs-TzNLHcO91R7GQJy6Y0';
+  const supabase=window.supabase?.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+  const $=id=>document.getElementById(id);
+  const state={users:[],selected:null,original:null,view:'all'};
+  const loadCache=()=>{ try{return JSON.parse(localStorage.getItem('profiles_cache')||'[]')}catch(e){return[]} };
+  const saveCache=arr=>{ localStorage.setItem('profiles_cache', JSON.stringify(arr)); localStorage.setItem('profiles_cache_updated_at', String(Date.now())); };
+  const mergeById=arr=>{ const m=new Map(); [...loadCache(), ...(arr||[])].forEach(u=>{ if(u&&u.id!=null) m.set(String(u.id),u); }); return [...m.values()]; };
+  const notice=t=>{$('cacheNotice').textContent=t};
+  const render=()=>{ const q=($('searchInput').value||'').toLowerCase(); const list=$('usersList'); list.innerHTML=''; let arr=state.users.filter(u=>`${u.username||''} ${u.email||''}`.toLowerCase().includes(q)); if(state.view==='pending') arr=arr.filter(u=>!u.approved); if(!arr.length){ list.innerHTML='<div class="muted">Žiadni používatelia v tomto zozname.</div>'; return; } arr.forEach(u=>{ const el=document.createElement('div'); el.className='user'+(state.selected?.id===u.id?' active':''); el.innerHTML=`<strong>${u.username||''}</strong><div class='muted'>${u.email||''}</div><div class='muted'>rola: ${u.role||'user'} • stránky: ${(u.allowed_pages||[]).join(', ')||'žiadne'}</div><div class='status ${u.approved ? 'approved' : 'pending'}'>${u.approved ? 'approved' : 'pending'}</div>`; el.onclick=()=>selectUser(u.id); list.appendChild(el); }); };
+  const renderChips=()=>{ const wrap=$('pageChips'); wrap.innerHTML=''; (state.selected?.allowed_pages||[]); PAGES.forEach(p=>{ const b=document.createElement('button'); b.type='button'; b.className='chip'+((state.selected?.allowed_pages||[]).includes(p)?' on':''); b.textContent=p; b.onclick=()=>{ const set=new Set(state.selected.allowed_pages||[]); set.has(p)?set.delete(p):set.add(p); state.selected.allowed_pages=[...set]; b.classList.toggle('on'); }; wrap.appendChild(b); }); };
+  const selectUser=id=>{ state.selected=state.users.find(u=>String(u.id)===String(id)); if(!state.selected) return; state.original=JSON.parse(JSON.stringify(state.selected)); $('detailsEmpty').style.display='none'; $('detailsWrap').style.display='block'; $('detailUsername').value=state.selected.username||''; $('detailEmail').value=state.selected.email||''; $('detailRole').value=state.selected.role||'user'; $('detailStatus').textContent=state.selected.approved ? 'approved' : 'pending'; $('detailStatus').className='status '+(state.selected.approved ? 'approved' : 'pending'); renderChips(); render(); };
+  const persistLocal=()=>{ saveCache(state.users); notice('Uložené lokálne do profiles_cache'); };
+  const saveToDb=async u=>{ if(!supabase) throw new Error('Supabase client sa nespustil'); const payload={role:u.role||'user', approved:!!u.approved, allowed_pages:u.allowed_pages||[]}; const {error}=await supabase.from('profiles').update(payload).eq('id',u.id); if(error) throw error; notice('Uložené do DB pre '+(u.username||u.id)); };
+  const loadDb=async()=>{ try{ notice('Načítavam z DB...'); if(!supabase) throw new Error('Supabase client sa nespustil'); const {data,error}=await supabase.from('profiles').select('*').order('created_at',{ascending:false}); if(error) throw error; state.users=mergeById(data||[]); saveCache(state.users); notice('Načítané z DB: '+state.users.length); render(); }catch(err){ console.error(err); notice('DB error: '+(err?.message||err)); } };
+  const init=async()=>{
+    try{
+      const me=JSON.parse(localStorage.getItem('session_user')||'null');
+      if(!me) return location.replace('index.html');
+      if((me.username||'')!==ADMIN_USERNAME && me.role!=='admin') return location.replace('0.html');
+      $('meBadge').textContent=`${me.username} • ${me.role||'user'}`;
+      state.users=mergeById(loadCache());
+      render();
+      notice('Pripravené');
+    }catch(e){ console.error(e); notice('Init error: '+(e?.message||e)); }
+  };
+  $('searchInput').addEventListener('input', render);
+  $('showPendingBtn').addEventListener('click', ()=>{ state.view='pending'; render(); });
+  $('showAllBtn').addEventListener('click', ()=>{ state.view='all'; render(); });
+  $('loadDbBtn').addEventListener('click', loadDb);
+  $('refreshBtn').addEventListener('click', async()=>{ await loadDb(); notice('Obnovené z DB'); });
+  $('backBtn').addEventListener('click', ()=>location.href='0.html');
+  $('logoutBtn').addEventListener('click', ()=>{ localStorage.removeItem('session_user'); location.replace('index.html'); });
+  $('saveBtn').addEventListener('click', async e=>{ e.preventDefault(); if(!state.selected) return; state.selected.role=$('detailRole').value; state.users=state.users.map(u=>String(u.id)===String(state.selected.id)?{...state.selected}:u); persistLocal(); try{ await saveToDb(state.selected); alert('Uložené'); }catch(err){ console.error(err); notice('DB update error: '+(err?.message||err)); } });
+  $('approveBtn').addEventListener('click', async e=>{ e.preventDefault(); if(!state.selected) return; state.selected.approved=true; state.users=state.users.map(u=>String(u.id)===String(state.selected.id)?{...state.selected}:u); persistLocal(); try{ await saveToDb(state.selected); selectUser(state.selected.id); alert('Schválené'); }catch(err){ console.error(err); notice('DB update error: '+(err?.message||err)); } });
+  $('resetBtn').addEventListener('click', e=>{ e.preventDefault(); if(state.original){ state.selected=JSON.parse(JSON.stringify(state.original)); state.users=state.users.map(u=>String(u.id)===String(state.selected.id)?{...state.selected}:u); selectUser(state.selected.id); notice('Zmeny zrušené'); } });
+  init();
+})();
 </script>
 </body>
 </html>
