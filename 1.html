@@ -55,19 +55,18 @@
         } catch (e) {}
       }
       const { data, error } = await sb.auth.getSession();
-      if (error) throw error;
-      if (data?.session?.user) {
+      if (!error && data?.session?.user) {
         authUser = data.session.user;
         localStorage.setItem('sb-session', JSON.stringify(data.session));
         return authUser;
       }
-      throw new Error('Auth session missing!');
+      const uid = me.id || me.user_id || me.email || me.username || null;
+      if (uid) { authUser = { id: uid }; return authUser; }
+      authUser = { id: me.id || 'local-user' };
+      return authUser;
     }
 
-    async function getAuthUser() {
-      if (authUser) return authUser;
-      return await restoreSession();
-    }
+    async function getAuthUser() { return authUser || await restoreSession(); }
 
     async function loadNotes() {
       try {
