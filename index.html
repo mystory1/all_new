@@ -33,7 +33,7 @@
   <script>
     window.addEventListener('load',()=>{
       const SUPABASE_URL='https://adpsrpsmfhokyqtvldki.supabase.co'
-	  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkcHNycHNtZmhva3lxdHZsZGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0MTM1ODYsImV4cCI6MjA5MDk4OTU4Nn0.CVrGlJpjtKTvIUJ2tHuYvDCs-TzNLHcO91R7GQJy6Y0'
+      const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkcHNycHNtZmhva3lxdHZsZGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0MTM1ODYsImV4cCI6MjA5MDk4OTU4Nn0.CVrGlJpjtKTvIUJ2tHuYvDCs-TzNLHcO91R7GQJy6Y0'
       const supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY)
       const msg=document.getElementById('msg')
       const loginTab=document.getElementById('loginTab'), signupTab=document.getElementById('signupTab')
@@ -49,9 +49,9 @@
           if(!u||!p){ msg.textContent='Vyplň meno a heslo.'; return }
           const existing=await loadUser(u)
           if(existing){ msg.textContent='Toto meno už existuje.'; return }
-          const { data, error } = await supabase.from('profiles').insert({ username:u, email:'', password_hash:p, role:'user', allowed_pages:[] }).select()
+          const { data, error } = await supabase.from('profiles').insert({ username:u, email:'', password_hash:p, role:'user', approved:false, allowed_pages:[] }).select()
           if(error) throw error
-          msg.textContent='Registrácia úspešná.'
+          msg.textContent='Registrácia úspešná. Počkaj na schválenie adminom.'
         }catch(e){ msg.textContent='ERR '+(e.message||e) }
       })
       document.getElementById('loginBtn').addEventListener('click', async ()=>{
@@ -61,10 +61,13 @@
           if(!u||!p){ msg.textContent='Vyplň meno a heslo.'; return }
           const user=await loadUser(u)
           if(!user){ msg.textContent='Používateľ neexistuje.'; return }
+          if(!user.approved){ msg.textContent='Účet čaká na schválenie administrátorom.'; return }
           if(user.password_hash !== p){ msg.textContent='Neplatné prihlasovacie údaje.'; return }
-          localStorage.setItem('session_user', JSON.stringify({ id:user.id, username:user.username, email:user.email, role:user.role||'user', allowed_pages:user.allowed_pages||[] }))
+          const session = { id:user.id, username:user.username, email:user.email, role:user.role||'user', approved: !!user.approved, allowed_pages:user.allowed_pages||[] }
+          localStorage.setItem('session_user', JSON.stringify(session))
           msg.textContent='Prihlásenie úspešné.'
-          window.location.assign('./0.html')
+          if(session.role==='admin' || session.username==='Patrik') location.assign('./admin.html')
+          else location.assign('./0.html')
         }catch(e){ msg.textContent='ERR '+(e.message||e) }
       })
     })
