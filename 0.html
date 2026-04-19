@@ -34,6 +34,11 @@
         try { const user = JSON.parse(raw); if(!user || !user.id) throw new Error('bad'); } catch(e) { localStorage.removeItem('session_user'); window.location.replace('login.html'); }
       }
       checkAuth()
+        function canAccess(page) {
+  const user = JSON.parse(localStorage.getItem('session_user') || 'null')
+  if (!user) return false
+  return user.role === 'admin' || (user.allowed_pages || []).includes(page)
+}
     </script>
 </body>
 </html>
