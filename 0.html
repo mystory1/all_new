@@ -5,16 +5,48 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Menu</title>
   <style>
-    *{box-sizing:border-box;margin:0;padding:0} body{min-height:100vh;background:#000;color:#fff;font-family:Arial,sans-serif;display:flex;align-items:center;justify-content:center;padding:20px}.container{width:100%;max-width:600px;text-align:center}.buttons{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}.nav-btn{display:flex;align-items:center;justify-content:center;min-height:64px;text-decoration:none;color:#fff;background:#1a1a1a;border:1px solid #333;border-radius:12px;font-size:1.1rem;font-weight:600;transition:transform .2s,background .2s,border-color .2s;user-select:none}.nav-btn:hover{background:#2a2a2a;border-color:#555;transform:translateY(-2px)} @media(max-width:800px){.buttons{grid-template-columns:repeat(2,1fr)}} @media(max-width:480px){.buttons{grid-template-columns:1fr}.nav-btn{min-height:58px}}
+    *{box-sizing:border-box;margin:0;padding:0} body{min-height:100vh;background:#000;color:#fff;font-family:Arial,sans-serif;display:flex;align-items:center;justify-content:center;padding:20px}.container{width:100%;max-width:700px;text-align:center}.buttons{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}.nav-btn{display:flex;align-items:center;justify-content:center;min-height:64px;text-decoration:none;color:#fff;background:#1a1a1a;border:1px solid #333;border-radius:12px;font-size:1.1rem;font-weight:600;transition:transform .2s,background .2s,border-color .2s;user-select:none}.nav-btn:hover{background:#2a2a2a;border-color:#555;transform:translateY(-2px)}.logout{margin-top:18px;display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:0 18px;text-decoration:none;color:#fff;background:#ef4444;border:1px solid #b91c1c;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer}.empty{margin-top:18px;padding:16px;border:1px solid #333;border-radius:12px;background:#111;color:#cbd5e1} @media(max-width:800px){.buttons{grid-template-columns:repeat(2,1fr)}} @media(max-width:480px){.buttons{grid-template-columns:1fr}.nav-btn{min-height:58px}}
   </style>
 </head>
 <body>
-  <main class="container"><div class="buttons"><a class="nav-btn" href="1.html">1</a><a class="nav-btn" href="2.html">2</a><a class="nav-btn" href="3.html">3</a><a class="nav-btn" href="4.html">4</a><a class="nav-btn" href="5.html">5</a></div></main>
+  <main class="container">
+    <div id="menu"></div>
+    <button class="logout" id="logoutBtn" type="button">Odhlásiť sa</button>
+  </main>
   <script>
     const me = JSON.parse(localStorage.getItem('session_user') || 'null')
     if(!me) location.replace('index.html')
-    const allowed = me.role === 'admin' ? ['0.html','1.html','2.html','3.html','4.html','5.html','admin.html'] : (me.allowed_pages || ['0.html'])
-    if(!allowed.includes('0.html')) location.replace('index.html')
+
+    const allPages = ['1.html','2.html','3.html','4.html','5.html']
+    const allowed = me.role === 'admin' ? ['0.html', ...allPages, 'admin.html'] : (me.allowed_pages || [])
+    const menu = document.getElementById('menu')
+
+    const visiblePages = allPages.filter(p => allowed.includes(p))
+
+    if(visiblePages.length){
+      const buttons = document.createElement('div')
+      buttons.className = 'buttons'
+      visiblePages.forEach(page => {
+        const a = document.createElement('a')
+        a.className = 'nav-btn'
+        a.href = page
+        a.textContent = page.replace('.html','')
+        buttons.appendChild(a)
+      })
+      menu.appendChild(buttons)
+    } else {
+      const empty = document.createElement('div')
+      empty.className = 'empty'
+      empty.textContent = 'Nemáš pridelený žiadny prístup k stránkam.'
+      menu.appendChild(empty)
+    }
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      localStorage.removeItem('session_user')
+      localStorage.removeItem('profiles_cache')
+      localStorage.removeItem('profiles_cache_updated_at')
+      location.replace('index.html')
+    })
   </script>
 </body>
 </html>
