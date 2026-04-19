@@ -17,8 +17,8 @@
     <div class="card">
       <h1>Účet</h1>
       <div class="tabs">
-        <button class="tab active" id="loginTab">Prihlásenie</button>
-        <button class="tab" id="signupTab">Registrácia</button>
+        <button class="tab active" id="loginTab" type="button">Prihlásenie</button>
+        <button class="tab" id="signupTab" type="button">Registrácia</button>
       </div>
       <form id="authForm">
         <div class="field"><label for="username">Meno</label><input id="username" type="text" required autocomplete="username" /></div>
@@ -34,7 +34,6 @@
 
     const SUPABASE_URL = 'https://adpsrpsmfhokyqtvldki.supabase.co'
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkcHNycHNtZmhva3lxdHZsZGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0MTM1ODYsImV4cCI6MjA5MDk4OTU4Nn0.CVrGlJpjtKTvIUJ2tHuYvDCs-TzNLHcO91R7GQJy6Y0'
-  
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
     const loginTab = document.getElementById('loginTab')
@@ -96,8 +95,8 @@
           msg.textContent = 'Prihlásenie úspešné.'
           msg.classList.add('success')
           setTimeout(() => {
-          window.location.href = '0.html';
-        }, 700);
+            window.location.replace('./0.html')
+          }, 500)
         }
       } catch (err) {
         msg.textContent = err.message || 'Nastala chyba.'
