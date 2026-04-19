@@ -113,7 +113,10 @@
   }
   async function createProject(){
     const name = document.getElementById('projectName').value.trim() || 'Nový projekt'
-    const {data, error} = await db.from('projects').insert({name}).select().single()
+    const {data, error} = await db.from('projects').insert({
+      name,
+      owner_id: user.id
+    }).select().single()
     if(error) return alert(error.message)
     const cols = [
       {title:'Todo', color:0, position:0, project_id:data.id},
