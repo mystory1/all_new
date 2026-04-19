@@ -1,89 +1,131 @@
 <!DOCTYPE html>
 <html lang="sk">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Cinema City 1+1</title>
   <style>
-    *{box-sizing:border-box} body{margin:0;font-family:Arial,sans-serif;background:#0b0b0b;color:#fff;min-height:100vh;padding:20px}.wrap{max-width:900px;margin:0 auto}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px}.card{background:#111;border:1px solid #2a2a2a;border-radius:18px;padding:18px;box-shadow:0 16px 40px rgba(0,0,0,.25)}h1{margin:0;font-size:clamp(28px,4vw,42px)}.muted{color:#9ca3af}.offer{background:#151515;border:1px solid #333;border-radius:16px;padding:18px;margin-top:16px}.offer h2{margin:0 0 10px;font-size:20px}.badge{display:inline-block;margin-top:10px;padding:6px 10px;border-radius:999px;background:#2563eb;color:#fff;font-size:12px;font-weight:700}.label{color:#93c5fd;font-size:13px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}.range{font-size:18px;font-weight:700}.refresh{border:0;background:#2563eb;color:#fff;padding:12px 16px;border-radius:12px;font-weight:700;cursor:pointer}.error{background:#3b0f14;border:1px solid #7f1d1d;color:#fecaca;padding:12px 14px;border-radius:12px;white-space:pre-wrap}.loading{padding:18px;color:#cbd5e1}.source{margin-top:18px;font-size:13px;color:#9ca3af} .stack{display:flex;flex-direction:column;gap:16px}@media(max-width:700px){body{padding:12px}}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:system-ui,Arial,sans-serif;background:#0b0b0b;color:#fff;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:40px 16px}
+    h1{font-size:clamp(24px,5vw,42px);font-weight:800;margin-bottom:6px}
+    h1 span{color:#2563eb}
+    .sub{color:#6b7280;font-size:14px;margin-bottom:36px;text-align:center}
+    .card{background:#111;border:1px solid #1e293b;border-radius:20px;padding:28px;width:100%;max-width:480px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:18px}
+    .badge{background:#1e3a5f;color:#93c5fd;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:5px 14px;border-radius:999px}
+    .film-title{font-size:clamp(26px,6vw,40px);font-weight:800;line-height:1.2;color:#fff}
+    .dates{display:flex;gap:0;border:1px solid #1e293b;border-radius:12px;overflow:hidden;width:100%}
+    .date-box{flex:1;padding:14px 10px;display:flex;flex-direction:column;align-items:center;gap:4px}
+    .date-box:first-child{border-right:1px solid #1e293b}
+    .date-label{font-size:11px;color:#4b5563;text-transform:uppercase;letter-spacing:.1em}
+    .date-value{font-size:22px;font-weight:700;color:#e2e8f0}
+    .note{font-size:12px;color:#4b5563;line-height:1.5;max-width:340px}
+    .refresh-btn{background:#2563eb;border:none;border-radius:12px;color:#fff;cursor:pointer;font-size:15px;font-weight:700;padding:13px 28px;width:100%;transition:opacity .15s}
+    .refresh-btn:hover{opacity:.85}
+    .refresh-btn:disabled{opacity:.4;cursor:not-allowed}
+    .status{font-size:13px;color:#4b5563;min-height:20px}
+    .status.err{color:#f87171}
+    .status.ok{color:#4ade80}
+    details{width:100%;text-align:left}
+    summary{font-size:12px;color:#374151;cursor:pointer;padding:4px 0}
+    pre{font-size:11px;color:#374151;white-space:pre-wrap;word-break:break-all;max-height:200px;overflow:auto;background:#0a0a0a;padding:10px;border-radius:8px;margin-top:6px}
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="top">
-      <div>
-        <h1>1+1 ponuky Cinema City</h1>
-        <div class="muted">Automaticky sa načíta pri otvorení stránky.</div>
-      </div>
-      <button class="refresh" id="refreshBtn" type="button">Obnoviť</button>
+<h1>Cinema<span>City</span></h1>
+<div class="sub">Filmánia 1+1 · aktuálny film a termín</div>
+<div class="card">
+  <div class="status" id="status">Načítavam…</div>
+  <div id="result" style="display:none;width:100%;display:flex;flex-direction:column;align-items:center;gap:16px">
+    <div class="badge">Filmánia 1+1</div>
+    <div class="film-title" id="filmTitle">—</div>
+    <div class="dates">
+      <div class="date-box"><div class="date-label">Od</div><div class="date-value" id="dateFrom">—</div></div>
+      <div class="date-box"><div class="date-label">Do</div><div class="date-value" id="dateTo">—</div></div>
     </div>
-    <div class="card" id="statusBox"><div class="loading">Načítavam údaje...</div></div>
-    <div id="offersBox" class="stack"></div>
-    <div class="source" id="sourceInfo"></div>
+    <div class="note" id="noteText"></div>
   </div>
-
-  <script>
-    const URL = 'https://www.cinemacity.sk/static/sk/sk/offers';
-    const box = document.getElementById('statusBox');
-    const offersBox = document.getElementById('offersBox');
-    const sourceInfo = document.getElementById('sourceInfo');
-    const esc = s => String(s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-
-    function renderStatus(title, detail=''){
-      box.innerHTML = '<div class="range">' + esc(title) + '</div>' + (detail ? '<div class="muted" style="margin-top:6px">' + esc(detail) + '</div>' : '');
-    }
-
-    function parse(text){
-      const items = [];
-      const re1 = /Od\s*(\d{1,2}\.\d{1,2}\.?)\s*-\s*(\d{1,2}\.\d{1,2}\.?)\s*platí\s*Filmánia\s*na\s*film:\s*([^
-\.]+)/gi;
-      const re2 = /Túto sobotu\s*(\d{1,2}\.\d{1,2}\.?)\s*je to film:\s*([^
-]+)/gi;
-      let m;
-      while ((m = re1.exec(text)) !== null) items.push({kind:'FILMÁNIA', title:m[3].trim(), from:m[1], to:m[2]});
-      while ((m = re2.exec(text)) !== null) items.push({kind:'CINEMAKIDS', title:m[2].trim(), from:m[1], to:'sobota'});
-      return items;
-    }
-
-    async function load(){
-      try{
-        renderStatus('Načítavam údaje...');
-        offersBox.innerHTML = '';
-        sourceInfo.textContent = '';
-        const res = await fetch(URL, { cache:'no-store', mode:'cors' });
-        const text = await res.text();
-        const items = parse(text);
-        if (!items.length){
-          const excerpt = text.slice(0, 1200);
-          box.innerHTML = '<div class="error">Našiel som stránku, ale nenašiel som 1+1 dáta v očakávanom tvare.
-
-Prvých 1200 znakov z odpovede:
-
-' + esc(excerpt) + '</div>';
-        } else {
-          renderStatus('Našiel som ' + items.length + ' ponúk.', 'Zobrazené sú len akcie 1+1 / Filmánia / CinemaKids.');
-          offersBox.innerHTML = items.map(i => `
-            <div class="offer">
-              <div class="label">${esc(i.kind)}</div>
-              <h2>${esc(i.title)}</h2>
-              <div class="muted">Platí od</div>
-              <div class="range">${esc(i.from)}</div>
-              <div class="muted" style="margin-top:10px">Platí do</div>
-              <div class="range">${esc(i.to)}</div>
-              <div class="badge">1+1</div>
-            </div>
-          `).join('');
+  <button class="refresh-btn" id="btn" onclick="load()">🔄 Obnoviť</button>
+  <details id="debugWrap" style="display:none"><summary>Debug – raw text stránky</summary><pre id="debugPre"></pre></details>
+</div>
+<script>
+const TARGET = 'https://www.cinemacity.sk/static/sk/sk/offers';
+const PROXY  = 'https://api.codetabs.com/v1/proxy?quest=';
+function setStatus(msg, type) { const el = document.getElementById('status'); el.textContent = msg; el.className = 'status' + (type ? ' ' + type : ''); }
+function show(title, from, to, note) { document.getElementById('filmTitle').textContent = title; document.getElementById('dateFrom').textContent = from; document.getElementById('dateTo').textContent = to; document.getElementById('noteText').textContent = note; document.getElementById('result').style.display = 'flex'; }
+function parse(html) {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  function findFilmaniaBlock(root) {
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    let node;
+    while ((node = walker.nextNode())) {
+      if (/filmán|1\s*\+\s*1/i.test(node.textContent)) {
+        let el = node.parentElement;
+        for (let i = 0; i < 5 && el; i++, el = el.parentElement) {
+          const heading = el.querySelector('h1,h2,h3,h4,h5,[class*="title"],[class*="name"],[class*="heading"],strong');
+          if (heading) {
+            const t = heading.textContent.trim();
+            if (t && !/^filmán|^1\s*\+\s*1$/i.test(t)) return { el, title: t };
+          }
         }
-        sourceInfo.textContent = 'Zdroj: ' + URL;
-      }catch(err){
-        box.innerHTML = '<div class="error">Chyba pri načítaní: ' + esc(err && (err.message || err.toString()) || 'neznáma chyba') + '
-
-Ak sa stránka otvára ako file://, niektoré prehliadače blokujú CORS/fetch. Skús ju otvoriť cez lokálny server.</div>';
       }
     }
-
-    document.getElementById('refreshBtn').addEventListener('click', load);
-    window.addEventListener('DOMContentLoaded', load);
-  </script>
+    return null;
+  }
+  const block = findFilmaniaBlock(doc.body);
+  let title = null, from = null, to = null, note = '';
+  if (block) {
+    title = block.title;
+    const bText = block.el.textContent || '';
+    const filmMatch = bText.match(/platí\s+Filmánia\s+na\s+film:\s*([^\.\n]+)/i);
+    if (filmMatch && filmMatch[1]) title = filmMatch[1].trim();
+    const dates = bText.match(/\d{1,2}\s*\.\s*\d{1,2}\.\s*/g) || [];
+    from = dates[0]?.replace(/\s/g,'').replace(/\.$/,'') || '?';
+    to = dates[1]?.replace(/\s/g,'').replace(/\.$/,'') || '?';
+  }
+  if (!title) {
+    const raw = doc.body.textContent || '';
+    const lines = raw.split(/[\n\r]/).map(l => l.trim()).filter(Boolean);
+    for (let i = 0; i < lines.length; i++) {
+      if (/filmán|1\s*\+\s*1/i.test(lines[i])) {
+        for (let j = i - 1; j >= Math.max(0, i - 6); j--) {
+          const candidate = lines[j];
+          if (candidate.length > 3 && !/^(dráma|komédia|akčný|thriller|animovan|dokumentár|horor|romantick|sci-fi|rodinný|Od|Do|\d)/i.test(candidate) && !/^https?:/i.test(candidate) && !/^(cinema|vivo|ponuka|offers|akcia|promo)/i.test(candidate)) { title = candidate; break; }
+        }
+        if (!title) {
+          for (let j = i + 1; j < Math.min(lines.length, i + 6); j++) {
+            const candidate = lines[j];
+            if (candidate.length > 3 && !/^(dráma|komédia|akčný|thriller|animovan|dokumentár|horor|romantick|sci-fi|rodinný|Od|Do|\d)/i.test(candidate) && !/^https?:/i.test(candidate)) { title = candidate; break; }
+          }
+        }
+        const ctx = lines.slice(Math.max(0, i - 3), i + 8).join(' ');
+        const dates = ctx.match(/\d{1,2}\s*\.\s*\d{1,2}\.\s*/g) || [];
+        from = dates[0]?.replace(/\s/g,'').replace(/\.$/,'') || '?';
+        to = dates[1]?.replace(/\s/g,'').replace(/\.$/,'') || '?';
+        for (let j = i + 1; j < Math.min(lines.length, i + 5); j++) { if (lines[j].length > 20 && !/^\d/.test(lines[j]) && lines[j] !== title) { note = lines[j].substring(0, 120); break; } }
+        break;
+      }
+    }
+  }
+  return { title, from, to, note };
+}
+async function load() {
+  const btn = document.getElementById('btn');
+  btn.disabled = true;
+  document.getElementById('result').style.display = 'none';
+  document.getElementById('debugWrap').style.display = 'none';
+  setStatus('Načítavam stránku…');
+  try {
+    const res = await fetch(PROXY + encodeURIComponent(TARGET), { cache: 'no-store', signal: AbortSignal.timeout(10000) });
+    if (!res.ok) throw new Error(`Proxy HTTP ${res.status}`);
+    const html = await res.text();
+    if (!html || html.length < 100) throw new Error('Prázdna odpoveď');
+    const { title, from, to, note } = parse(html);
+    if (title) { show(title, from, to, note); setStatus(`Aktualizované: ${new Date().toLocaleTimeString('sk-SK')}`, 'ok'); }
+    else { setStatus('Film nenájdený — pozri debug nižšie', 'err'); document.getElementById('debugPre').textContent = (new DOMParser().parseFromString(html,'text/html').body.textContent||'').substring(0, 2000); document.getElementById('debugWrap').style.display = 'block'; }
+  } catch(e) { setStatus('Chyba: ' + e.message, 'err'); }
+  btn.disabled = false;
+}
+load();
+</script>
 </body>
 </html>
