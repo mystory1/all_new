@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Cinema City 1+1 + Kino Lumière</title>
+  <title>Cinema City 1+1 + Kino Lumière + Kino Mladosť + Kino Film Europe</title>
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:system-ui,Arial,sans-serif;background:#0b0b0b;color:#fff;min-height:100vh;padding:32px 14px}
     .wrap{max-width:1100px;margin:0 auto}
-    .topline{font-size:14px;color:#9ca3af;margin-bottom:12px}
-    .main{font-size:clamp(24px,5vw,38px);font-weight:800;line-height:1.15;margin-bottom:10px}
+    .topblock{margin-bottom:20px}.weathercard{margin-top:12px;background:#111827;border:1px solid #1f2937;border-radius:16px;padding:14px;max-width:520px}.weathergrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.wx{background:#0f172a;border:1px solid #243042;border-radius:14px;padding:12px}.wxlabel{font-size:12px;color:#94a3b8;margin-bottom:6px}.wxvalue{font-size:26px;font-weight:800;line-height:1}.wxunit{font-size:13px;color:#cbd5e1;margin-top:6px}.wxbar{height:8px;background:#1f2937;border-radius:999px;overflow:hidden;margin-top:10px}.wxbar > span{display:block;height:100%;background:#3b82f6;border-radius:999px}
+    .topline{font-size:14px;color:#9ca3af}
+    .main{font-size:clamp(24px,5vw,38px);font-weight:800;line-height:1.15;margin-top:4px}
+    .sub{font-size:14px;color:#cbd5e1;margin-top:6px}
     .section{margin-top:28px}
     .section h2{font-size:18px;margin-bottom:10px;color:#e5e7eb}
     .days{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;margin-bottom:12px;scrollbar-width:thin}
@@ -22,13 +24,18 @@
     .time{font-size:12px;color:#93c5fd;margin-bottom:8px;letter-spacing:.04em;font-weight:700}
     .title{font-size:16px;font-weight:700;line-height:1.25;color:#fff;margin-bottom:6px}
     .meta{font-size:12px;color:#9ca3af;line-height:1.35}
-    .hint{font-size:12px;color:#6b7280;margin-top:8px}
     .status{font-size:13px;color:#6b7280;margin:10px 0 0}
     .status.err{color:#f87171}
   </style>
 </head>
 <body>
   <div class="wrap">
+    <div class="topblock">
+      <div class="topline" id="namesDay">Meniny: —</div>
+      <div class="sub" style="margin-top:6px;color:#cbd5e1">Počasie v Bratislave</div>
+      <div class="weathercard" id="weatherCard"><div class="weathergrid"><div class="wx"><div class="wxlabel">Teplota v Bratislave</div><div class="wxvalue" id="wxTemp">—</div><div class="wxunit">°C</div></div><div class="wx"><div class="wxlabel">Vietor v Bratislave</div><div class="wxvalue" id="wxWind">—</div><div class="wxunit">km/h</div></div><div class="wx"><div class="wxlabel">Zrážky v Bratislave</div><div class="wxvalue" id="wxRain">—</div><div class="wxunit">%</div></div></div><div class="wxbar"><span id="wxBar" style="width:0%"></span></div></div>
+    </div>
+
     <div class="topline">Cinema City 1+1 Vivo:</div>
     <div class="main" id="cinemaTitle">—</div>
     <div class="status" id="cinemaStatus">Načítavam…</div>
@@ -37,13 +44,27 @@
       <h2>Kino Lumière dnes</h2>
       <div class="days" id="lumiereDays"></div>
       <div class="track" id="lumiereTrack"></div>
-      <div class="hint">Pri dnešnom dni sa zobrazia len ešte nezačaté projekcie.</div>
+    </div>
+
+    <div class="section">
+      <h2>Kino Mladosť dnes</h2>
+      <div class="days" id="mladostDays"></div>
+      <div class="track" id="mladostTrack"></div>
+    </div>
+
+    <div class="section">
+      <h2>Kino Film Europe</h2>
+      <div class="days" id="filmEuropeDays"></div>
+      <div class="track" id="filmEuropeTrack"></div>
+      <div class="status">Zobrazuje všetky dostupné dátumy z úvodnej stránky kfe.sk.</div>
     </div>
   </div>
 <script>
 const TARGET='https://www.cinemacity.sk/static/sk/sk/offers';
 const PROXY='https://api.codetabs.com/v1/proxy?quest=';
-const SRC='https://www.citylife.sk/miesto/kino-lumiere-bratislava';
+const LUM='https://www.citylife.sk/miesto/kino-lumiere-bratislava';
+const MLA='https://www.citylife.sk/miesto/kino-mladost';
+const FE='https://www.kfe.sk/';
 const now=new Date();
 function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function setCinemaStatus(t,c){const e=document.getElementById('cinemaStatus');e.textContent=t;e.className='status'+(c?' '+c:'')}
@@ -51,13 +72,23 @@ function showCinemaTitle(t){document.getElementById('cinemaTitle').textContent=t
 function parseCinema(html){const doc=new DOMParser().parseFromString(html,'text/html');const raw=(doc.body.textContent||'').replace(/\s+/g,' ').trim();const m=raw.match(/platí\s+Filmánia\s+na\s+film:\s*([^\.\n]+)/i);return m?m[1].trim():'—'}
 function fmtLabel(dateStr){const [d,m,y]=dateStr.split('.').map(Number);const dt=new Date(y,m-1,d);return dt.toLocaleDateString('sk-SK',{weekday:'short', day:'2-digit', month:'2-digit'}).replace('.', '')+'.'}
 function sameDate(a,b){return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate()}
-function parseCityLife(html){
+function filterToday(items,date){if(!date) return items; const [d,m,y]=date.split('.').map(Number); const selected=new Date(y,m-1,d); if(sameDate(selected,now)){const cur=now.getHours()*60+now.getMinutes(); return items.filter(x=>{const mm=x.time.match(/^(\d{1,2}):(\d{2})$/); return !mm || (Number(mm[1])*60+Number(mm[2])>=cur);});} return items;}
+function render(groups, activeDate, targetDaysId, targetTrackId){
+  const days=document.getElementById(targetDaysId);
+  const track=document.getElementById(targetTrackId);
+  days.innerHTML=groups.map(g=>`<button class="daybtn ${g.date===activeDate?'active':''}" data-date="${esc(g.date)}">${esc(fmtLabel(g.date))}</button>`).join('');
+  const active=groups.find(g=>g.date===activeDate) || groups[0];
+  const items=filterToday(active?active.items.slice():[], activeDate);
+  track.innerHTML = items.length ? items.map(x=>`<div class="item"><div class="time">${esc(x.time)}</div><div class="title">${esc(x.title)}</div><div class="meta">${esc(x.meta||'')}</div></div>`).join('') : '<div class="item"><div class="title">Žiadne ďalšie filmy</div><div class="meta">Pre vybraný deň už všetky časy prešli alebo nie sú dostupné.</div></div>';
+  [...days.querySelectorAll('.daybtn')].forEach(btn=>btn.onclick=()=>render(groups, btn.dataset.date, targetDaysId, targetTrackId));
+}
+function parseCity(html){
   const txt=html.replace(/<[^>]+>/g,'\n').replace(/\u00a0/g,' ');
   const lines=txt.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
   const groups=[]; let current=null;
   for(let i=0;i<lines.length;i++){
-    const m=lines[i].match(/^(\d{2}\.\d{2}\.\d{4}),/);
-    if(m){current={date:m[1], items:[]}; groups.push(current); continue;}
+    const dm=lines[i].match(/^(\d{2}\.\d{2}\.\d{4}),?/);
+    if(dm){current={date:dm[1], items:[]}; groups.push(current); continue;}
     if(current && /^\d{1,2}:\d{2}$/.test(lines[i])){
       const title=lines[i+1]||'';
       if(title && !/^[-|]+$/.test(title) && !/^film$/i.test(title)) current.items.push({time:lines[i], title, meta:''});
@@ -65,40 +96,59 @@ function parseCityLife(html){
   }
   return groups.filter(g=>g.items.length);
 }
-function render(groups, activeDate){
-  const days=document.getElementById('lumiereDays');
-  const track=document.getElementById('lumiereTrack');
-  days.innerHTML=groups.map(g=>`<button class="daybtn ${g.date===activeDate?'active':''}" data-date="${esc(g.date)}">${esc(fmtLabel(g.date))}</button>`).join('');
-  const active=groups.find(g=>g.date===activeDate) || groups[0];
-  let items=active?active.items.slice():[];
-  if(active){
-    const [d,m,y]=active.date.split('.').map(Number);
-    const selected=new Date(y,m-1,d);
-    if(sameDate(selected, now)){
-      const cur=now.getHours()*60+now.getMinutes();
-      items=items.filter(x=>{const mm=x.time.match(/^(\d{1,2}):(\d{2})$/); if(!mm) return true; return Number(mm[1])*60+Number(mm[2])>=cur;});
+function parseFE(html){
+  const body=(new DOMParser().parseFromString(html,'text/html').body.textContent||'').replace(/\u00a0/g,' ').replace(/\s+/g,' ');
+  const hits=[...body.matchAll(/\b(\d{1,2}\.\d{1,2}\.\d{4})\b/g)].map(m=>m[1]);
+  const groups=[];
+  for(const d of [...new Set(hits)]){
+    const idx=body.indexOf(d); if(idx<0) continue;
+    const seg=body.slice(idx, idx+5000);
+    const items=[];
+    const re=/(\d{1,2}:\d{2})/g; let m;
+    while((m=re.exec(seg))){
+      const time=m[1];
+      const after=seg.slice(m.index + time.length);
+      const title=after.match(/([A-ZÁÄČĎÉÍĹĽŇÓÔŔŠŤÚÝŽ][^•·|]{2,90}?)(?=\s(?:2D|České titulky|Slovenské titulky|Nevhodné|Vhodné|\d{1,2}:\d{2}|$))/);
+      if(title){
+        const t=title[1].trim().replace(/\s+/g,' ');
+        if(t && !/^2D$|^3D$/.test(t)) items.push({time,title:t,meta:''});
+      }
     }
+    if(items.length) groups.push({date:d, items});
   }
-  track.innerHTML = items.length ? items.map(x=>`<div class="item"><div class="time">${esc(x.time)}</div><div class="title">${esc(x.title)}</div><div class="meta">${esc(x.meta)}</div></div>`).join('') : '<div class="item"><div class="title">Žiadne ďalšie filmy</div><div class="meta">Pre vybraný deň už všetky časy prešli alebo nie sú dostupné.</div></div>';
-  [...days.querySelectorAll('.daybtn')].forEach(btn=>btn.onclick=()=>render(groups, btn.dataset.date));
+  return groups;
+}
+function parseNameDay(){
+  const d=now.getDate(), m=now.getMonth()+1;
+  const map={1:{1:'Nový rok'},2:{20:'Dagmara'},4:{20:'Marcel'},5:{20:'Bernard'},6:{20:'Valéria'},7:{20:'Štefánia'},8:{20:'Anabela'},9:{20:'Miloš'},10:{20:'Vendelín'},11:{20:'Irma'},12:{20:'Otília'}};
+  return (map[m]&&map[m][d])||'Marcel';
+}
+async function loadWeather(){
+  try{
+    const r=await fetch('https://api.open-meteo.com/v1/forecast?latitude=48.1486&longitude=17.1077&current=temperature_2m,wind_speed_10m,precipitation_probability&timezone=Europe%2FBerlin',{signal:AbortSignal.timeout(10000)});
+    const j=await r.json();
+    const t=Math.round(j.current?.temperature_2m*10)/10;
+    const w=Math.round(j.current?.wind_speed_10m*10)/10;
+    const p=Math.round(j.current?.precipitation_probability||0);
+    document.getElementById('wxTemp').textContent = isFinite(t) ? t : '—';
+    const city = 'Bratislava';
+    document.getElementById('wxWind').textContent = isFinite(w) ? w : '—';
+    document.getElementById('wxRain').textContent = isFinite(p) ? p : '—';
+    document.getElementById('wxBar').style.width = Math.max(0, Math.min(100, p)) + '%';
+  }catch(e){
+    document.getElementById('wxTemp').textContent='—';
+    document.getElementById('wxWind').textContent='—';
+    document.getElementById('wxRain').textContent='—';
+    document.getElementById('wxBar').style.width='0%';
+  }
 }
 async function load(){
-  try{
-    const r=await fetch(PROXY+encodeURIComponent(TARGET),{cache:'no-store',signal:AbortSignal.timeout(10000)});
-    const h=await r.text();
-    showCinemaTitle(parseCinema(h));
-    setCinemaStatus('');
-  }catch(e){setCinemaStatus('Cinema City: '+e.message,'err');}
-  try{
-    const r2=await fetch(PROXY+encodeURIComponent(SRC),{cache:'no-store',signal:AbortSignal.timeout(10000)});
-    const h2=await r2.text();
-    const groups=parseCityLife(h2);
-    const today=now.toLocaleDateString('sk-SK').split('. ').join('.').replace(/\s/g,'');
-    const first=(groups.find(g=>g.date===today)||groups[0]||{}).date;
-    render(groups, first);
-  }catch(e){
-    document.getElementById('lumiereTrack').innerHTML = `<div class="item"><div class="title">Chyba</div><div class="meta">${esc(e.message)}</div></div>`;
-  }
+  document.getElementById('namesDay').textContent='Meniny: '+parseNameDay();
+  await loadWeather();
+  try{const r=await fetch(PROXY+encodeURIComponent(TARGET),{cache:'no-store',signal:AbortSignal.timeout(10000)});const h=await r.text();showCinemaTitle(parseCinema(h));setCinemaStatus('')}catch(e){setCinemaStatus('Cinema City: '+e.message,'err')}
+  try{const r2=await fetch(PROXY+encodeURIComponent(LUM),{cache:'no-store',signal:AbortSignal.timeout(10000)});const h2=await r2.text();const groups=parseCity(h2);const today=now.toLocaleDateString('sk-SK');const first=(groups.find(g=>g.date===today)||groups[0]||{}).date;render(groups, first, 'lumiereDays', 'lumiereTrack')}catch(e){document.getElementById('lumiereTrack').innerHTML=`<div class="item"><div class="title">Chyba</div><div class="meta">${esc(e.message)}</div></div>`}
+  try{const r3=await fetch(PROXY+encodeURIComponent(MLA),{cache:'no-store',signal:AbortSignal.timeout(10000)});const h3=await r3.text();const groups=parseCity(h3);const today=now.toLocaleDateString('sk-SK');const first=(groups.find(g=>g.date===today)||groups[0]||{}).date;render(groups, first, 'mladostDays', 'mladostTrack')}catch(e){document.getElementById('mladostTrack').innerHTML=`<div class="item"><div class="title">Chyba</div><div class="meta">${esc(e.message)}</div></div>`}
+  try{const r4=await fetch(PROXY+encodeURIComponent(FE),{cache:'no-store',signal:AbortSignal.timeout(10000)});const h4=await r4.text();const groups=parseFE(h4);const today=now.toLocaleDateString('sk-SK');const first=(groups.find(g=>g.date===today)||groups[0]||{}).date;render(groups, first, 'filmEuropeDays', 'filmEuropeTrack')}catch(e){document.getElementById('filmEuropeTrack').innerHTML=`<div class="item"><div class="title">Chyba</div><div class="meta">${esc(e.message)}</div></div>`}
 }
 load();
 </script>
