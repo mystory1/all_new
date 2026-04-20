@@ -64,6 +64,20 @@
       loginTab.addEventListener('click',()=>setMode('login'))
       signupTab.addEventListener('click',()=>setMode('signup'))
       async function loadUser(u){ const {data,error}=await supabase.from('profiles').select('*').eq('username',u).maybeSingle(); if(error) throw error; return data }
+      async function sendApprovalEmail(username){
+        const endpoint = window.APP_CONFIG?.APPROVAL_EMAIL_ENDPOINT
+        const apiKey = window.APP_CONFIG?.APPROVAL_EMAIL_KEY
+        if(!endpoint) return
+        await fetch(endpoint, {
+          method:'POST',
+          headers:{ 'Content-Type':'application/json', ...(apiKey ? { 'x-api-key': apiKey } : {}) },
+          body: JSON.stringify({
+            to: 'patrikmolnar1@gmail.com',
+            subject: 'Nový klient čaká na schválenie',
+            message: `Nový klient "${username}" sa zaregistroval a čaká na schválenie.`
+          })
+        })
+      }
       async function doSignup(){
         try{
           const u=signupUsername.value.trim()
@@ -73,6 +87,7 @@
           if(existing){ msg.textContent='Toto meno už existuje.'; return }
           const { error } = await supabase.from('profiles').insert({ username:u, email:'', password_hash:p, role:'user', approved:false, allowed_pages:[] }).select()
           if(error) throw error
+          try { await sendApprovalEmail(u) } catch(e) {}
           msg.textContent='Registrácia úspešná. Počkaj na schválenie adminom.'
         }catch(e){ msg.textContent='ERR '+(e.message||e) }
       }
