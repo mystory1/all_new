@@ -23,7 +23,7 @@
     .item{min-width:220px;max-width:220px;background:#111;border:1px solid #1f2937;border-radius:16px;padding:14px 14px 12px;flex:0 0 auto}
     .time{font-size:12px;color:#93c5fd;margin-bottom:8px;letter-spacing:.04em;font-weight:700}
     .title{font-size:16px;font-weight:700;line-height:1.25;color:#fff;margin-bottom:6px}
-    .meta{font-size:12px;color:#9ca3af;line-height:1.35}
+    .meta{font-size:12px;color:#9ca3af;line-height:1.35}.rating{margin-top:8px;font-size:12px;color:#fbbf24;font-weight:700}.rating a{color:#fbbf24;text-decoration:none}.rating a:hover{text-decoration:underline}.rating.missing{color:#6b7280}
     .status{font-size:13px;color:#6b7280;margin:10px 0 0}
     .status.err{color:#f87171}
   </style>
@@ -86,7 +86,7 @@ function render(groups, activeDate, targetDaysId, targetTrackId){
   days.innerHTML=groups.map(g=>`<button class="daybtn ${g.date===activeDate?'active':''}" data-date="${esc(g.date)}">${esc(fmtLabel(g.date))}</button>`).join('');
   const active=groups.find(g=>g.date===activeDate) || groups[0];
   const items=filterToday(active?active.items.slice():[], activeDate);
-  track.innerHTML = items.length ? items.map(x=>`<div class="item"><div class="time">${esc(x.time)}</div><div class="title">${esc(x.title)}</div><div class="meta">${esc(x.meta||'')}</div></div>`).join('') : '<div class="item"><div class="title">Žiadne ďalšie filmy</div><div class="meta">Pre vybraný deň už všetky časy prešli alebo nie sú dostupné.</div></div>';
+  track.innerHTML = items.length ? items.map(x=>`<div class="item"><div class="time">${esc(x.time)}</div><div class="title">${esc(x.title)}</div><div class="meta">${esc(x.meta||'')}</div>${(() => { const r=getRating(x.title); return r ? `<div class="rating"><a href="${r.url}" target="_blank" rel="noopener noreferrer">ČSFD: ${r.rating}</a></div>` : `<div class="rating missing">ČSFD: —</div>`; })()}</div>`).join('') : '<div class="item"><div class="title">Žiadne ďalšie filmy</div><div class="meta">Pre vybraný deň už všetky časy prešli alebo nie sú dostupné.</div></div>';
   [...days.querySelectorAll('.daybtn')].forEach(btn=>btn.onclick=()=>render(groups, btn.dataset.date, targetDaysId, targetTrackId));
 }
 function parseCity(html){
@@ -129,6 +129,33 @@ function parseNameDay(){
   const d=now.getDate(), m=now.getMonth()+1;
   const map={1:{1:'Nový rok'},2:{20:'Dagmara'},4:{20:'Marcel'},5:{20:'Bernard'},6:{20:'Valéria'},7:{20:'Štefánia'},8:{20:'Anabela'},9:{20:'Miloš'},10:{20:'Vendelín'},11:{20:'Irma'},12:{20:'Otília'}};
   return (map[m]&&map[m][d])||'Marcel';
+}
+const ratingMap={
+  'posledna sanca':{rating:'85%', url:'https://www.csfd.sk/film/1018007-posledna-sanca/prehlad/'},
+  'posledny viking':{rating:'74%', url:'https://www.csfd.sk/film/1563219-posledny-viking/prehlad/'},
+  'stur':{rating:'57%', url:'https://www.csfd.sk/film/1767223-stur/prehlad/'},
+  'ak by som mala nohy tak ta nakopem':{rating:'78%', url:'https://www.csfd.sk/film/1618340-ak-by-som-mala-nohy-tak-ta-nakopem/prehlad/'},
+  'kdybych mela nohy tak ti nakopu':{rating:'78%', url:'https://www.csfd.cz/film/1618340-kdybych-mela-nohy-tak-ti-nakopu/prehled/'},
+  'if i had legs id kick you':{rating:'78%', url:'https://www.csfd.cz/en/film/1618340-if-i-had-legs-i-d-kick-you/overview/'},
+  'turisti':{rating:'61%', url:'https://www.csfd.cz/film/1811096-turisti/prehled/'},
+  'turista':{rating:'61%', url:'https://www.csfd.cz/film/1811096-turisti/prehled/'},
+  'pan nikto proti putinovi':{rating:'77%', url:'https://www.csfd.sk/film/1606307-pan-nikto-proti-putinovi/prehlad/'},
+  'pan nikdo proti putinovi':{rating:'77%', url:'https://www.csfd.cz/film/1606307-pan-nikdo-proti-putinovi/prehled/'},
+  'mr nobody against putin':{rating:'77%', url:'https://www.csfd.cz/en/film/1606307-mr-nobody-against-putin/overview/'},
+  'posledna sanca':{rating:'85%', url:'https://www.csfd.sk/film/1018007-posledna-sanca/prehlad/'},
+  'drama':{rating:'—', url:'https://www.csfd.sk'}
+};
+function norm(s){return (s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,' ').trim();}
+function getRating(title){
+  const n=norm(title);
+  const exact = Object.keys(ratingMap).find(k => n===k);
+  if(exact) return ratingMap[exact];
+  const hit = Object.keys(ratingMap).find(k => n.includes(k) || k.includes(n));
+  if(hit) return ratingMap[hit];
+  return {rating:'—', url:fallbackUrl(title)};
+}
+function fallbackUrl(title){
+  return `https://www.csfd.sk/sk/film/search/?search=${encodeURIComponent(title)}`;
 }
 async function loadWeatherForCoords(lat, lon, label){
   try{
