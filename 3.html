@@ -32,8 +32,15 @@
   <div class="wrap">
     <div class="topblock">
       <div class="topline" id="namesDay">Meniny: —</div>
-      <div class="sub" style="margin-top:6px;color:#cbd5e1">Počasie v Bratislave</div>
-      <div class="weathercard" id="weatherCard"><div class="weathergrid"><div class="wx"><div class="wxlabel">Teplota v Bratislave</div><div class="wxvalue" id="wxTemp">—</div><div class="wxunit">°C</div></div><div class="wx"><div class="wxlabel">Vietor v Bratislave</div><div class="wxvalue" id="wxWind">—</div><div class="wxunit">km/h</div></div><div class="wx"><div class="wxlabel">Zrážky v Bratislave</div><div class="wxvalue" id="wxRain">—</div><div class="wxunit">%</div></div></div><div class="wxbar"><span id="wxBar" style="width:0%"></span></div></div>
+      <div class="sub" id="weatherTitle">Počasie v Bratislave</div>
+      <div class="weathercard" id="weatherCard">
+        <div class="weathergrid">
+          <div class="wx"><div class="wxlabel">Teplota</div><div class="wxvalue" id="wxTemp">—</div><div class="wxunit">°C</div></div>
+          <div class="wx"><div class="wxlabel">Vietor</div><div class="wxvalue" id="wxWind">—</div><div class="wxunit">km/h</div></div>
+          <div class="wx"><div class="wxlabel">Zrážky</div><div class="wxvalue" id="wxRain">—</div><div class="wxunit">%</div></div>
+        </div>
+        <div class="wxbar"><span id="wxBar" style="width:0%"></span></div>
+      </div>
     </div>
 
     <div class="topline">Cinema City 1+1 Vivo:</div>
@@ -123,15 +130,15 @@ function parseNameDay(){
   const map={1:{1:'Nový rok'},2:{20:'Dagmara'},4:{20:'Marcel'},5:{20:'Bernard'},6:{20:'Valéria'},7:{20:'Štefánia'},8:{20:'Anabela'},9:{20:'Miloš'},10:{20:'Vendelín'},11:{20:'Irma'},12:{20:'Otília'}};
   return (map[m]&&map[m][d])||'Marcel';
 }
-async function loadWeather(){
+async function loadWeatherForCoords(lat, lon, label){
   try{
-    const r=await fetch('https://api.open-meteo.com/v1/forecast?latitude=48.1486&longitude=17.1077&current=temperature_2m,wind_speed_10m,precipitation_probability&timezone=Europe%2FBerlin',{signal:AbortSignal.timeout(10000)});
+    const r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,wind_speed_10m,precipitation_probability&timezone=auto`,{signal:AbortSignal.timeout(10000)});
     const j=await r.json();
     const t=Math.round(j.current?.temperature_2m*10)/10;
     const w=Math.round(j.current?.wind_speed_10m*10)/10;
     const p=Math.round(j.current?.precipitation_probability||0);
+    document.getElementById('weatherTitle').textContent = `Počasie: ${label}`;
     document.getElementById('wxTemp').textContent = isFinite(t) ? t : '—';
-    const city = 'Bratislava';
     document.getElementById('wxWind').textContent = isFinite(w) ? w : '—';
     document.getElementById('wxRain').textContent = isFinite(p) ? p : '—';
     document.getElementById('wxBar').style.width = Math.max(0, Math.min(100, p)) + '%';
@@ -140,6 +147,17 @@ async function loadWeather(){
     document.getElementById('wxWind').textContent='—';
     document.getElementById('wxRain').textContent='—';
     document.getElementById('wxBar').style.width='0%';
+  }
+}
+async function loadWeather(){
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(
+      pos => loadWeatherForCoords(pos.coords.latitude, pos.coords.longitude, 'tvoja poloha'),
+      () => loadWeatherForCoords(48.1486, 17.1077, 'Bratislava'),
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
+    );
+  } else {
+    loadWeatherForCoords(48.1486, 17.1077, 'Bratislava');
   }
 }
 async function load(){
