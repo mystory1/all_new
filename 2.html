@@ -17,7 +17,6 @@
 <div id="taskModal" class="modal-backdrop"><div class="modal"><h3>Úloha</h3><div class="field"><label>Stav</label><select id="taskStatus"></select></div><div class="field"><label>Názov úlohy</label><input id="taskName" type="text" placeholder="Zadaj názov úlohy" /></div><div class="field"><label>Poznámka</label><textarea id="taskNote" placeholder="Voliteľná poznámka"></textarea></div><div class="modal-actions"><button class="secondary" id="closeTaskBtn">Zrušiť</button><button class="primary" id="saveTaskBtn">Uložiť</button></div></div></div>
 <div id="columnModal" class="modal-backdrop"><div class="modal"><h3>Stav</h3><div class="field"><label>Názov stavu</label><input id="columnName" type="text" placeholder="Napr. Testovanie" /></div><div class="field"><label>Farba stavu</label><div class="colors" id="colorPicker"><button class="swatch color-blue selected" type="button" onclick="selectColor(0)"></button><button class="swatch color-green" type="button" onclick="selectColor(1)"></button><button class="swatch color-orange" type="button" onclick="selectColor(2)"></button><button class="swatch color-purple" type="button" onclick="selectColor(3)"></button><button class="swatch color-red" type="button" onclick="selectColor(4)"></button></div></div><div class="modal-actions"><button class="secondary" id="closeColumnBtn">Zrušiť</button><button class="success" id="saveColumnBtn">Pridať</button></div></div></div>
 <script src="config.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
 (() => {
   const COLORS=['#3b82f6','#22c55e','#f59e0b','#a855f7','#ef4444'];
@@ -34,25 +33,39 @@
   const persist=()=>localStorage.setItem('kanban_projects_v1',JSON.stringify(state));
   const setDbStatus=t=>document.getElementById('dbStatus').textContent=t;
   const uid=()=>String(me.id || me.user_id || me.email || me.username || 'local-user');
-  const supabase = window.supabase.createClient(window.APP_CONFIG.SUPABASE_URL, window.APP_CONFIG.SUPABASE_ANON_KEY);
+  const supabaseUrl = window.APP_CONFIG?.SUPABASE_URL;
+  const supabaseKey = window.APP_CONFIG?.SUPABASE_ANON_KEY;
+  const tableName = window.APP_CONFIG?.KANBAN_TABLE || 'kanban_projects';
+  function apiBase(){ return String(supabaseUrl||'').replace(/\/$/,'') + '/rest/v1'; }
+  function headers(){ return { 'Content-Type':'application/json', 'apikey': supabaseKey, 'Authorization': 'Bearer ' + supabaseKey, 'Prefer':'return=representation' }; }
+  async function dbRequest(path, opts={}){
+    if(!supabaseUrl || !supabaseKey) throw new Error('Chýba Supabase konfigurácia');
+    const res = await fetch(apiBase()+path, { ...opts, headers: { ...headers(), ...(opts.headers||{}) } });
+    const text = await res.text();
+    let data = null; try{ data = text ? JSON.parse(text) : null; } catch(e) { data = text; }
+    if(!res.ok) throw new Error((data && data.message) ? data.message : text || ('HTTP '+res.status));
+    return data;
+  }
+  async function ensureDb(){
+    if(!supabaseUrl || !supabaseKey) return;
+    await dbRequest('/'+tableName+'?select=user_id&limit=1', { method:'GET' });
+  }
+  async function loadFromDb(){
+    setDbStatus('Načítavam z DB...');
+    const data = await dbRequest('/'+tableName+'?select=projects&user_id=eq.'+encodeURIComponent(uid())+'&limit=1', { method:'GET' });
+    if(Array.isArray(data) && data[0] && Array.isArray(data[0].projects)) state.projects=data[0].projects;
+    else state.projects=[];
+    state.activeProjectId=state.projects.find(p=>p.id===state.activeProjectId)?.id || state.projects[0]?.id || null;
+    setDbStatus('Načítané z DB');
+  }
   async function saveDb(){
-    const payload={ user_id: uid(), projects: state.projects };
-    const { error } = await supabase.from('kanban_projects').upsert(payload, { onConflict: 'user_id' });
-    if(error) throw error;
+    const payload=[{ user_id: uid(), projects: state.projects, updated_at: new Date().toISOString() }];
+    await dbRequest('/'+tableName+'?on_conflict=user_id', { method:'POST', body: JSON.stringify(payload) });
   }
   async function syncToDb(){
     setDbStatus('Ukladám do DB...');
     try{ await saveDb(); setDbStatus('Uložené do DB'); }
     catch(error){ console.error('DB sync error:', error); setDbStatus('DB chyba: ' + (error?.message || error)); }
-  }
-  async function loadFromDb(){
-    setDbStatus('Načítavam z DB...');
-    const { data, error } = await supabase.from('kanban_projects').select('user_id, projects').eq('user_id', uid()).maybeSingle();
-    if(error) throw error;
-    if(data?.projects && Array.isArray(data.projects)) state.projects=data.projects;
-    else state.projects=[];
-    state.activeProjectId=state.projects.find(p=>p.id===state.activeProjectId)?.id || state.projects[0]?.id || null;
-    setDbStatus('Načítané z DB');
   }
   function loadLocal(){ try{ const raw=localStorage.getItem('kanban_projects_v1'); if(raw){ const parsed=JSON.parse(raw); if(parsed&&Array.isArray(parsed.projects)){ state=parsed; return } } }catch(e){} }
   function renderProjectList(){const list=document.getElementById('projectList'); list.innerHTML=''; state.projects.filter(p=>isAdmin || (Array.isArray(p.allowed_roles) ? p.allowed_roles.includes(me.role||'user') : true)).forEach(p=>{const b=document.createElement('button'); b.className='project-item'+(p.id===state.activeProjectId?' active':''); b.textContent=p.name; b.onclick=()=>{state.activeProjectId=p.id; persist(); render()}; list.appendChild(b)})}
