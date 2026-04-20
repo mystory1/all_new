@@ -3,70 +3,101 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Cinema City 1+1</title>
+  <title>Cinema City 1+1 + Kino Lumière</title>
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:system-ui,Arial,sans-serif;background:#0b0b0b;color:#fff;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:32px 14px}
-    .wrap{width:100%;max-width:560px}
-    .top{font-size:14px;color:#9ca3af;margin-bottom:14px}
-    .film{font-size:clamp(24px,6vw,38px);font-weight:800;line-height:1.15;margin-bottom:10px}
-    .meta{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .box{background:#111;border:1px solid #1f2937;border-radius:14px;padding:14px 16px}
-    .label{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#6b7280;margin-bottom:6px}
-    .value{font-size:18px;font-weight:700;color:#e5e7eb}
-    .status{margin-top:12px;font-size:13px;color:#6b7280;min-height:18px}
+    body{font-family:system-ui,Arial,sans-serif;background:#0b0b0b;color:#fff;min-height:100vh;padding:32px 14px}
+    .wrap{max-width:1100px;margin:0 auto}
+    .topline{font-size:14px;color:#9ca3af;margin-bottom:12px}
+    .main{font-size:clamp(24px,5vw,38px);font-weight:800;line-height:1.15;margin-bottom:10px}
+    .section{margin-top:28px}
+    .section h2{font-size:18px;margin-bottom:10px;color:#e5e7eb}
+    .days{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;margin-bottom:12px;scrollbar-width:thin}
+    .days::-webkit-scrollbar{height:8px}.days::-webkit-scrollbar-thumb{background:#374151;border-radius:999px}
+    .daybtn{border:1px solid #374151;background:#111827;color:#e5e7eb;padding:8px 12px;border-radius:999px;cursor:pointer;white-space:nowrap;font-size:13px}
+    .daybtn.active{background:#2563eb;border-color:#2563eb;color:#fff}
+    .track{display:flex;gap:10px;overflow-x:auto;padding-bottom:8px;scrollbar-width:thin}
+    .track::-webkit-scrollbar{height:8px}.track::-webkit-scrollbar-thumb{background:#374151;border-radius:999px}
+    .item{min-width:220px;max-width:220px;background:#111;border:1px solid #1f2937;border-radius:16px;padding:14px 14px 12px;flex:0 0 auto}
+    .time{font-size:12px;color:#93c5fd;margin-bottom:8px;letter-spacing:.04em;font-weight:700}
+    .title{font-size:16px;font-weight:700;line-height:1.25;color:#fff;margin-bottom:6px}
+    .meta{font-size:12px;color:#9ca3af;line-height:1.35}
+    .hint{font-size:12px;color:#6b7280;margin-top:8px}
+    .status{font-size:13px;color:#6b7280;margin:10px 0 0}
     .status.err{color:#f87171}
-    .status.ok{color:#4ade80}
-    .note{display:none}
   </style>
 </head>
 <body>
   <div class="wrap">
-    <div class="top">Cinema City 1+1 Vivo:</div>
-    <div id="film" class="film">Načítavam…</div>
-    <div class="meta">
-      <div class="box"><div class="label">Od</div><div id="from" class="value">—</div></div>
-      <div class="box"><div class="label">Do</div><div id="to" class="value">—</div></div>
+    <div class="topline">Cinema City 1+1 Vivo:</div>
+    <div class="main" id="cinemaTitle">—</div>
+    <div class="status" id="cinemaStatus">Načítavam…</div>
+
+    <div class="section">
+      <h2>Kino Lumière dnes</h2>
+      <div class="days" id="lumiereDays"></div>
+      <div class="track" id="lumiereTrack"></div>
+      <div class="hint">Pri dnešnom dni sa zobrazia len ešte nezačaté projekcie.</div>
     </div>
-    <div id="status" class="status"></div>
-    <div id="note" class="note"></div>
   </div>
 <script>
-const TARGET = 'https://www.cinemacity.sk/static/sk/sk/offers';
-const PROXY = 'https://api.codetabs.com/v1/proxy?quest=';
-function setStatus(t,c){const e=document.getElementById('status');e.textContent=t;e.className='status'+(c?' '+c:'')}
-function show(f,fr,to,n){document.getElementById('film').textContent=f||'—';document.getElementById('from').textContent=fr||'—';document.getElementById('to').textContent=to||'—';document.getElementById('note').textContent=n||''}
-function parse(html){
-  const doc=new DOMParser().parseFromString(html,'text/html');
-  const raw=(doc.body.textContent||'').replace(/\s+/g,' ').trim();
-  let title='',from='—',to='—',note='';
-  const m=raw.match(/platí\s+Filmánia\s+na\s+film:\s*([^\.\n]+).*?(\d{1,2}\.\d{1,2}\.?).*?(\d{1,2}\.\d{1,2}\.?)/i);
-  if(m){title=m[1].trim();from=m[2].replace(/\s/g,'');to=m[3].replace(/\s/g,'');}
-  if(!title){
-    const lines=raw.split(/[\n\r]+/).map(s=>s.trim()).filter(Boolean);
-    for(let i=0;i<lines.length;i++){
-      if(/filmán|1\s*\+\s*1/i.test(lines[i])){
-        title=(lines.slice(Math.max(0,i-4),i).reverse().find(s=>s.length>3&&!/^(od|do|vstupenky|filmán|1\s*\+\s*1|cinema|vivo|offers)/i.test(s)))||'';
-        const ctx=lines.slice(Math.max(0,i-3),i+8).join(' ');
-        const d=ctx.match(/\d{1,2}\.\d{1,2}\.?/g)||[];
-        from=d[0]||'—';to=d[1]||'—';
-        break;
-      }
+const TARGET='https://www.cinemacity.sk/static/sk/sk/offers';
+const PROXY='https://api.codetabs.com/v1/proxy?quest=';
+const SRC='https://www.citylife.sk/miesto/kino-lumiere-bratislava';
+const now=new Date();
+function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function setCinemaStatus(t,c){const e=document.getElementById('cinemaStatus');e.textContent=t;e.className='status'+(c?' '+c:'')}
+function showCinemaTitle(t){document.getElementById('cinemaTitle').textContent=t||'—'}
+function parseCinema(html){const doc=new DOMParser().parseFromString(html,'text/html');const raw=(doc.body.textContent||'').replace(/\s+/g,' ').trim();const m=raw.match(/platí\s+Filmánia\s+na\s+film:\s*([^\.\n]+)/i);return m?m[1].trim():'—'}
+function fmtLabel(dateStr){const [d,m,y]=dateStr.split('.').map(Number);const dt=new Date(y,m-1,d);return dt.toLocaleDateString('sk-SK',{weekday:'short', day:'2-digit', month:'2-digit'}).replace('.', '')+'.'}
+function sameDate(a,b){return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate()}
+function parseCityLife(html){
+  const txt=html.replace(/<[^>]+>/g,'\n').replace(/\u00a0/g,' ');
+  const lines=txt.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+  const groups=[]; let current=null;
+  for(let i=0;i<lines.length;i++){
+    const m=lines[i].match(/^(\d{2}\.\d{2}\.\d{4}),/);
+    if(m){current={date:m[1], items:[]}; groups.push(current); continue;}
+    if(current && /^\d{1,2}:\d{2}$/.test(lines[i])){
+      const title=lines[i+1]||'';
+      if(title && !/^[-|]+$/.test(title) && !/^film$/i.test(title)) current.items.push({time:lines[i], title, meta:''});
     }
   }
-  return {title,from,to,note};
+  return groups.filter(g=>g.items.length);
+}
+function render(groups, activeDate){
+  const days=document.getElementById('lumiereDays');
+  const track=document.getElementById('lumiereTrack');
+  days.innerHTML=groups.map(g=>`<button class="daybtn ${g.date===activeDate?'active':''}" data-date="${esc(g.date)}">${esc(fmtLabel(g.date))}</button>`).join('');
+  const active=groups.find(g=>g.date===activeDate) || groups[0];
+  let items=active?active.items.slice():[];
+  if(active){
+    const [d,m,y]=active.date.split('.').map(Number);
+    const selected=new Date(y,m-1,d);
+    if(sameDate(selected, now)){
+      const cur=now.getHours()*60+now.getMinutes();
+      items=items.filter(x=>{const mm=x.time.match(/^(\d{1,2}):(\d{2})$/); if(!mm) return true; return Number(mm[1])*60+Number(mm[2])>=cur;});
+    }
+  }
+  track.innerHTML = items.length ? items.map(x=>`<div class="item"><div class="time">${esc(x.time)}</div><div class="title">${esc(x.title)}</div><div class="meta">${esc(x.meta)}</div></div>`).join('') : '<div class="item"><div class="title">Žiadne ďalšie filmy</div><div class="meta">Pre vybraný deň už všetky časy prešli alebo nie sú dostupné.</div></div>';
+  [...days.querySelectorAll('.daybtn')].forEach(btn=>btn.onclick=()=>render(groups, btn.dataset.date));
 }
 async function load(){
   try{
-    setStatus('');
     const r=await fetch(PROXY+encodeURIComponent(TARGET),{cache:'no-store',signal:AbortSignal.timeout(10000)});
-    if(!r.ok) throw new Error('HTTP '+r.status);
-    const html=await r.text();
-    const x=parse(html);
-    show(x.title||'—',x.from,x.to,x.note);
+    const h=await r.text();
+    showCinemaTitle(parseCinema(h));
+    setCinemaStatus('');
+  }catch(e){setCinemaStatus('Cinema City: '+e.message,'err');}
+  try{
+    const r2=await fetch(PROXY+encodeURIComponent(SRC),{cache:'no-store',signal:AbortSignal.timeout(10000)});
+    const h2=await r2.text();
+    const groups=parseCityLife(h2);
+    const today=now.toLocaleDateString('sk-SK').split('. ').join('.').replace(/\s/g,'');
+    const first=(groups.find(g=>g.date===today)||groups[0]||{}).date;
+    render(groups, first);
   }catch(e){
-    show('—','—','—','');
-    setStatus('Chyba: '+e.message,'err');
+    document.getElementById('lumiereTrack').innerHTML = `<div class="item"><div class="title">Chyba</div><div class="meta">${esc(e.message)}</div></div>`;
   }
 }
 load();
