@@ -13,14 +13,16 @@
   <aside class="side"><div class="brand">Admin panel</div><div class="badge" id="meBadge">Načítavam...</div><button class="secondary" id="backBtn">Späť do menu</button><button class="secondary" id="refreshBtn">Obnoviť</button><button class="danger" id="logoutBtn">Odhlásiť sa</button><div class="notice" id="cacheNotice">Načítavam dáta...</div></aside>
   <main class="main"><div class="top"><div><div class="title">Správa oprávnení</div><div class="muted">Admin schvaľuje používateľov a priraďuje stránky</div></div></div><div class="grid"><section class="card"><h3 style="margin:0 0 14px;color:#fff">Používatelia</h3><div class="field"><label>Vyhľadať</label><input id="searchInput" placeholder="username alebo email" /></div><div class="toolbar"><button class="secondary" id="showPendingBtn">Čakať na schválenie</button><button class="secondary" id="showAllBtn">Všetci</button><button class="secondary" id="loadDbBtn">Načítať z DB</button></div><div id="usersList" class="list"></div></section><section class="card"><h3 style="margin:0 0 14px;color:#fff">Vybraný používateľ</h3><div id="detailsEmpty" class="muted">Vyber používateľa zo zoznamu.</div><div id="detailsWrap" style="display:none"><div class="field"><label>Username</label><input id="detailUsername" disabled /></div><div class="field"><label>Email</label><input id="detailEmail" disabled /></div><div class="field"><label>Stav</label><div id="detailStatus" class="status pending">pending</div></div><div class="field"><label>Rola</label><select id="detailRole"><option value="user">user</option><option value="admin">admin</option></select></div><div class="field"><label>Prístup k stránkam</label><div class="pagechips" id="pageChips"></div></div><div style="display:flex;gap:10px;flex-wrap:wrap"><button class="primary" id="saveBtn">Uložiť</button><button class="secondary" id="approveBtn">Schváliť</button><button class="secondary" id="resetBtn">Zrušiť zmeny</button></div></div></section></div></main>
 </div>
+  <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
 (()=>{
   const PAGES=['1.html','2.html','3.html','4.html','5.html','admin.html'];
   const ADMIN_USERNAME='Patrik';
-  const SUPABASE_URL='https://adpsrpsmfhokyqtvldki.supabase.co';
-  const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFkcHNycHNtZmhva3lxdHZsZGtpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0MTM1ODYsImV4cCI6MjA5MDk4OTU4Nn0.CVrGlJpjtKTvIUJ2tHuYvDCs-TzNLHcO91R7GQJy6Y0';
-  const supabase=window.supabase?.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+  window.addEventListener('load', () => {
+    const { SUPABASE_URL, SUPABASE_ANON_KEY } = window.APP_CONFIG;
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // ... zvyšok kódu
   const $=id=>document.getElementById(id);
   const state={users:[],selected:null,original:null,view:'all'};
   const loadCache=()=>{ try{return JSON.parse(localStorage.getItem('profiles_cache')||'[]')}catch(e){return[]} };
