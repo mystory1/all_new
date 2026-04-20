@@ -70,7 +70,7 @@
           const session = { id:user.id, username:user.username, email:user.email, role:user.role||'user', approved: !!user.approved, allowed_pages:user.allowed_pages||[] }
           localStorage.setItem('session_user', JSON.stringify(session))
           msg.textContent='Prihlásenie úspešné.'
-          if(session.role==='admin' || session.username==='Patrik') location.assign('./admin.html')
+          if(session.role==='admin' || session.username==='Patrik') location.assign('./0.html')
           else location.assign('./0.html')
         }catch(e){ msg.textContent='ERR '+(e.message||e) }
       }
