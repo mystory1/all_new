@@ -23,11 +23,8 @@
     .note h3{margin:0 0 10px 0;color:#ccc;font-size:18px;border-bottom:1px solid #333;padding-bottom:5px}
     .note .content{width:100%;background:transparent;color:#fff;border:none;resize:vertical;font-size:16px;min-height:80px;outline:none}
     .note .title{width:100%;background:transparent;color:#fff;border:none;font-size:15px;font-weight:700;margin-bottom:10px;outline:none}
-    .note-actions{margin-top:10px}
-    .delete-btn{background:#a00}
-    .delete-btn:hover{background:#FF6666}
-    .save-btn{background:#009933}
-    .save-btn:hover{background:#0c0}
+    .note-actions{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+    .delete-btn{background:#a00}.delete-btn:hover{background:#FF6666}.save-btn{background:#009933}.save-btn:hover{background:#0c0}
     .divider{width:100%;height:15px;background:#FFFFFF;opacity:0.25;margin:25px 0 10px}
     .empty{margin-top:24px;padding:16px;border:1px solid #333;border-radius:8px;background:#111;color:#bbb}
     @media(max-width:600px){.notes-grid{grid-template-columns:1fr} body{padding:10px}}
@@ -43,7 +40,7 @@
     <div id="status" class="status">Pripájam sa k databáze.</div>
     <input id="noteTitleInput" type="text" placeholder="Title">
     <textarea id="noteContentInput" placeholder="Poznámka"></textarea>
-    <button onclick="addNote()">Add</button>
+    <button id="addBtn" type="button">Add</button>
     <div class="divider"></div>
     <div id="notesList" class="notes-grid"></div>
   </div>
@@ -53,38 +50,31 @@
   <script>
     window.addEventListener('load', () => {
       const cfg = window.APP_CONFIG || {};
+      const statusEl = document.getElementById('status');
+      const notesList = document.getElementById('notesList');
+      const titleInput = document.getElementById('noteTitleInput');
+      const contentInput = document.getElementById('noteContentInput');
+      const addBtn = document.getElementById('addBtn');
+      const me = JSON.parse(localStorage.getItem('session_user') || 'null');
+      let authUser = null;
+      const loadedIds = new Set();
+
       if (!cfg.SUPABASE_URL || !cfg.SUPABASE_ANON_KEY) {
-        document.getElementById('status').textContent = 'Chýba config.js alebo Supabase kľúč.';
+        statusEl.textContent = 'Chýba config.js alebo Supabase kľúč.';
         console.error('Missing SUPABASE_URL or SUPABASE_ANON_KEY');
         return;
       }
-
       const supabase = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
-      const statusEl = document.getElementById('status');
-      const me = JSON.parse(localStorage.getItem('session_user') || 'null');
 
       if (!me) return location.replace('index.html');
-
       const allowed = me.role === 'admin'
         ? ['0.html','1.html','2.html','3.html','4.html','5.html','admin.html','notes.html']
         : (me.allowed_pages || []);
+      if (!(allowed.includes('notes.html') || allowed.includes('1.html'))) return location.replace('0.html');
 
-      if (!allowed.some(p => ['notes.html','1.html'].includes(p))) return location.replace('0.html');
-
-      let authUser = null;
-
-      function setStatus(msg, isError = false) {
-        statusEl.textContent = msg;
-        statusEl.style.color = isError ? '#ff7b7b' : '#bbb';
-      }
-
-      function generateTitle(title, content) {
-        const cleanTitle = (title || '').trim();
-        if (cleanTitle) return cleanTitle;
-        const clean = (content || '').trim().replace(/\s+/g, ' ');
-        if (!clean) return 'Bez názvu';
-        return clean.slice(0, 30) + (clean.length > 30 ? '...' : '');
-      }
+      function setStatus(msg, isError = false) { statusEl.textContent = msg; statusEl.style.color = isError ? '#ff7b7b' : '#bbb'; }
+      function generateTitle(title, content) { const cleanTitle = (title || '').trim(); if (cleanTitle) return cleanTitle; const clean = (content || '').trim().replace(/\s+/g, ' '); if (!clean) return 'Bez názvu'; return clean.slice(0, 30) + (clean.length > 30 ? '...' : ''); }
+      function escHtml(s){ return String(s ?? '').replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
 
       async function restoreSession() {
         const saved = localStorage.getItem('sb-session');
@@ -92,14 +82,8 @@
           try {
             const session = JSON.parse(saved);
             if (session?.access_token && session?.refresh_token) {
-              const { data, error } = await supabase.auth.setSession({
-                access_token: session.access_token,
-                refresh_token: session.refresh_token
-              });
-              if (!error && data?.user) {
-                authUser = data.user;
-                return authUser;
-              }
+              const { data, error } = await supabase.auth.setSession({ access_token: session.access_token, refresh_token: session.refresh_token });
+              if (!error && data?.user) { authUser = data.user; return authUser; }
             }
           } catch (e) {}
         }
@@ -110,88 +94,52 @@
           return authUser;
         }
         const uid = me.id || me.user_id || me.email || me.username || null;
-        if (uid) {
-          authUser = { id: uid };
-          return authUser;
-        }
-        authUser = { id: me.id || 'local-user' };
+        authUser = { id: uid || me.id || 'local-user' };
         return authUser;
       }
-
-      async function getAuthUser() {
-        return authUser || await restoreSession();
-      }
+      async function getAuthUser() { return authUser || await restoreSession(); }
 
       async function loadNotes() {
         try {
           const user = await getAuthUser();
           setStatus('Načítavam poznámky...');
-          const { data: notes, error } = await supabase
-            .from('notes')
-            .select('id, title, content, created_at, user_id')
-            .eq('user_id', user.id)
-            .order('created_at', { ascending: false });
+          const { data: notes, error } = await supabase.from('notes').select('id, title, content, created_at, user_id').eq('user_id', user.id).order('created_at', { ascending: false });
           if (error) throw error;
-
-          const notesList = document.getElementById('notesList');
-          if (!notes || !notes.length) {
-            notesList.innerHTML = '<div class="empty">Zatiaľ tu nemáš žiadne poznámky.</div>';
-            setStatus('Zatiaľ tu nie sú žiadne poznámky.');
-            return;
-          }
-
-          notesList.innerHTML = notes.map((note, index) => {
+          const arr = notes || [];
+          notesList.innerHTML = arr.length ? arr.map((note, index) => {
             const shownTitle = generateTitle(note.title, note.content);
-            const escapedTitle = (note.title || '').replaceAll('"', '&quot;');
+            const escapedTitle = escHtml(note.title || '');
+            const escapedContent = escHtml(note.content || '');
             return `
-              <div class="note">
-                <h3>#${index + 1} ${shownTitle}</h3>
+              <div class="note" data-note-id="${note.id}">
+                <h3>#${index + 1} ${escHtml(shownTitle)}</h3>
                 <input class="title" id="title-${note.id}" value="${escapedTitle}" placeholder="Názov poznámky">
-                <textarea class="content" id="content-${note.id}" oninput="updateTitlePreview('${note.id}', this.value)">${note.content || ''}</textarea>
+                <textarea class="content" id="content-${note.id}">${escapedContent}</textarea>
                 <div class="note-actions">
-                  <button class="save-btn" onclick="updateNote('${note.id}')">Save</button>
-                  <button class="delete-btn" onclick="deleteNote('${note.id}')">Delete</button>
+                  <button class="save-btn" type="button" data-action="save" data-id="${note.id}">Save</button>
+                  <button class="delete-btn" type="button" data-action="delete" data-id="${note.id}">Delete</button>
                 </div>
               </div>
             `;
-          }).join('');
-
-          setStatus(`Načítané ${notes.length} poznámok.`);
+          }).join('') : '<div class="empty">Zatiaľ tu nemáš žiadne poznámky.</div>';
+          setStatus(arr.length ? `Načítané ${arr.length} poznámok.` : 'Zatiaľ tu nie sú žiadne poznámky.');
         } catch (error) {
           console.error('Chyba pri načítavaní:', error);
           setStatus('Chyba pri načítavaní: ' + (error?.message || error), true);
         }
       }
 
-      function updateTitlePreview(id, content) {
-        const card = document.getElementById(`content-${id}`)?.closest('.note');
-        if (!card) return;
-        const h3 = card.querySelector('h3');
-        const number = h3.textContent.match(/^#\d+/)?.[0] || '';
-        const titleInput = document.getElementById(`title-${id}`);
-        const title = titleInput?.value.trim();
-        h3.textContent = `${number} ${generateTitle(title, content)}`;
-      }
-
       async function addNote() {
         try {
           const user = await getAuthUser();
-          const titleInput = document.getElementById('noteTitleInput');
-          const contentInput = document.getElementById('noteContentInput');
           const title = titleInput.value.trim();
           const content = contentInput.value.trim();
-          if (!title && !content) {
-            setStatus('Najprv vyplň názov alebo poznámku.', true);
-            return;
-          }
+          if (!title && !content) { setStatus('Najprv vyplň názov alebo poznámku.', true); return; }
           setStatus('Ukladám poznámku...');
-          const { data, error } = await supabase
-            .from('notes')
-            .insert([{ user_id: user.id, title, content }])
-            .select('id, title, content, created_at, user_id');
+          const payload = { user_id: user.id, title, content };
+          const { data, error } = await supabase.from('notes').insert([payload]).select('id, title, content, created_at, user_id');
           if (error) throw error;
-          titleInput.value = '';
-          contentInput.value = '';
+          titleInput.value = ''; contentInput.value = '';
           setStatus('Poznámka uložená.');
           await loadNotes();
           console.log('Inserted:', data);
@@ -204,18 +152,11 @@
       async function updateNote(id) {
         try {
           const user = await getAuthUser();
-          const title = document.getElementById(`title-${id}`).value.trim();
-          const content = document.getElementById(`content-${id}`).value.trim();
-          if (!title && !content) {
-            setStatus('Poznámka nemôže byť úplne prázdna.', true);
-            return;
-          }
+          const title = document.getElementById(`title-${id}`)?.value.trim() || '';
+          const content = document.getElementById(`content-${id}`)?.value.trim() || '';
+          if (!title && !content) { setStatus('Poznámka nemôže byť úplne prázdna.', true); return; }
           setStatus('Ukladám zmeny...');
-          const { error } = await supabase
-            .from('notes')
-            .update({ title, content })
-            .eq('id', id)
-            .eq('user_id', user.id);
+          const { error } = await supabase.from('notes').update({ title, content }).eq('id', id).eq('user_id', user.id);
           if (error) throw error;
           setStatus('Zmeny uložené.');
           await loadNotes();
@@ -230,11 +171,7 @@
         try {
           const user = await getAuthUser();
           setStatus('Mažem poznámku...');
-          const { error } = await supabase
-            .from('notes')
-            .delete()
-            .eq('id', id)
-            .eq('user_id', user.id);
+          const { error } = await supabase.from('notes').delete().eq('id', id).eq('user_id', user.id);
           if (error) throw error;
           setStatus('Poznámka zmazaná.');
           await loadNotes();
@@ -244,19 +181,37 @@
         }
       }
 
+      notesList.addEventListener('input', (e) => {
+        const ta = e.target.closest('.content');
+        if (!ta) return;
+        const card = ta.closest('.note');
+        const h3 = card?.querySelector('h3');
+        const titleInputEl = card?.querySelector('.title');
+        const number = h3?.textContent.match(/^#\d+/)?.[0] || '';
+        const title = titleInputEl?.value.trim();
+        if (h3) h3.textContent = `${number} ${generateTitle(title, ta.value)}`;
+      });
+
+      notesList.addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-action]');
+        if (!btn) return;
+        const id = btn.dataset.id;
+        if (btn.dataset.action === 'save') updateNote(id);
+        if (btn.dataset.action === 'delete') deleteNote(id);
+      });
+
       document.getElementById('noteContentInput').addEventListener('keypress', (e) => {
         if (e.key === 'Enter' && e.ctrlKey) addNote();
       });
 
       document.getElementById('logoutBtn').addEventListener('click', async () => {
-        try {
-          await supabase.auth.signOut();
-        } catch (e) {}
+        try { await supabase.auth.signOut(); } catch (e) {}
         localStorage.removeItem('session_user');
         localStorage.removeItem('sb-session');
         location.replace('index.html');
       });
 
+      addBtn.addEventListener('click', addNote);
       loadNotes();
     });
   </script>
