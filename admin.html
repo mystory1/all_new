@@ -19,6 +19,7 @@
 (()=>{
   const PAGES=['1.html','2.html','3.html','4.html','5.html','admin.html'];
   const ADMIN_USERNAME='Patrik';
+  console.log('window.APP_CONFIG:', window.APP_CONFIG);
   window.addEventListener('load', () => {
     const { SUPABASE_URL, SUPABASE_ANON_KEY } = window.APP_CONFIG;
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
