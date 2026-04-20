@@ -67,15 +67,19 @@
         const endpoint = window.APP_CONFIG?.APPROVAL_EMAIL_ENDPOINT
         const apiKey = window.APP_CONFIG?.APPROVAL_EMAIL_KEY
         if(!endpoint) return
-        await fetch(endpoint, {
-          method:'POST',
-          headers:{ 'Content-Type':'application/json', ...(apiKey ? { 'x-api-key': apiKey } : {}) },
-          body: JSON.stringify({
-            to: 'patrikmolnar1@gmail.com',
-            subject: 'Nový klient čaká na schválenie',
-            message: `Nový klient "${username}" sa zaregistroval a čaká na schválenie.`
-          })
-        })
+    await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${window.APP_CONFIG.SUPABASE_ANON_KEY}`,
+        'x-api-key': apiKey
+      },
+      body: JSON.stringify({
+        to: 'patrikmolnar1@gmail.com',
+        subject: 'Nový klient čaká na schválenie',
+        message: `Nový klient "${username}" sa zaregistroval a čaká na schválenie.`
+      })
+    })
       }
       async function doSignup(){
         try{
