@@ -24,7 +24,7 @@
     .note .content{width:100%;background:transparent;color:#fff;border:none;resize:vertical;font-size:16px;min-height:80px;outline:none}
     .note .title{width:100%;background:transparent;color:#fff;border:none;font-size:15px;font-weight:700;margin-bottom:10px;outline:none}
     .note-actions{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
-    .delete-btn{background:#a00}.delete-btn:hover{background:#FF6666}.save-btn{background:#009933}.save-btn:hover{background:#0c0}
+    .delete-btn{background:#a00}.delete-btn:hover{background:#FF6666}.save-btn{background:#009933}.save-btn:hover{background:#0c0}.project-btn{background:#666}.project-btn:hover{background:#888}
     .divider{width:100%;height:15px;background:#FFFFFF;opacity:0.25;margin:25px 0 10px}
     .empty{margin-top:24px;padding:16px;border:1px solid #333;border-radius:8px;background:#111;color:#bbb}
     @media(max-width:600px){.notes-grid{grid-template-columns:1fr} body{padding:10px}}
@@ -74,7 +74,7 @@
 
       function setStatus(msg, isError = false) { statusEl.textContent = msg; statusEl.style.color = isError ? '#ff7b7b' : '#bbb'; }
       function generateTitle(title, content) { const cleanTitle = (title || '').trim(); if (cleanTitle) return cleanTitle; const clean = (content || '').trim().replace(/\s+/g, ' '); if (!clean) return 'Bez názvu'; return clean.slice(0, 30) + (clean.length > 30 ? '...' : ''); }
-      function escHtml(s){ return String(s ?? '').replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
+      function escHtml(s){ return String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[m])); }
 
       async function restoreSession() {
         const saved = localStorage.getItem('sb-session');
@@ -118,6 +118,7 @@
                 <div class="note-actions">
                   <button class="save-btn" type="button" data-action="save" data-id="${note.id}">Save</button>
                   <button class="delete-btn" type="button" data-action="delete" data-id="${note.id}">Delete</button>
+                  <button class="project-btn" type="button" data-action="project" data-id="${note.id}">Create project</button>
                 </div>
               </div>
             `;
@@ -181,6 +182,30 @@
         }
       }
 
+      async function createProjectFromNote(id) {
+        try {
+          const user = await getAuthUser();
+          const { data: note, error } = await supabase
+            .from('notes')
+            .select('id, title, content, created_at')
+            .eq('id', id)
+            .eq('user_id', user.id)
+            .maybeSingle();
+
+          if (error) throw error;
+          if (!note) { setStatus('Poznámka sa nenašla.', true); return; }
+
+          const projectName = generateTitle(note.title, note.content);
+          const now = new Date().toISOString();
+          const { error: projectError } = await supabase.from('projects').insert([{ name: projectName, owner_id: user.id, created_at: now, updated_at: now }]);
+          if (projectError) throw projectError;
+          setStatus('Kanban projekt vytvorený z poznámky.');
+        } catch (error) {
+          console.error('Chyba pri vytváraní projektu:', error);
+          setStatus('Chyba pri vytváraní projektu: ' + (error?.message || error), true);
+        }
+      }
+
       notesList.addEventListener('input', (e) => {
         const ta = e.target.closest('.content');
         if (!ta) return;
@@ -198,6 +223,7 @@
         const id = btn.dataset.id;
         if (btn.dataset.action === 'save') updateNote(id);
         if (btn.dataset.action === 'delete') deleteNote(id);
+        if (btn.dataset.action === 'project') createProjectFromNote(id);
       });
 
       document.getElementById('noteContentInput').addEventListener('keypress', (e) => {
