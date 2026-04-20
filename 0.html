@@ -22,8 +22,9 @@
     const menu = document.getElementById('menu')
 
     const visiblePages = allPages.filter(p => allowed.includes(p))
+    const isAdmin = me.role === 'admin' && allowed.includes('admin.html')
 
-    if(visiblePages.length){
+    if(visiblePages.length || isAdmin){
       const buttons = document.createElement('div')
       buttons.className = 'buttons'
       visiblePages.forEach(page => {
@@ -33,6 +34,13 @@
         a.textContent = page.replace('.html','')
         buttons.appendChild(a)
       })
+      if(isAdmin){
+        const a = document.createElement('a')
+        a.className = 'nav-btn'
+        a.href = 'admin.html'
+        a.textContent = 'Admin portal'
+        buttons.appendChild(a)
+      }
       menu.appendChild(buttons)
     } else {
       const empty = document.createElement('div')
