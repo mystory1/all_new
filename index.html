@@ -5,120 +5,47 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Účet</title>
   <style>
-    :root{
-      --bg:#0b0b0b;
-      --panel:#111;
-      --panel-2:#161616;
-      --text:#f5f5f5;
-      --muted:#b3b3b3;
-      --line:#3a3a3a;
-      --line-2:#555;
-      --accent:#7a7a7a;
-      --accent-hover:#949494;
-      --input:#0c0c0c;
-    }
+    :root{--bg:#0a0a0a;--card:#111;--line:#2d2d2d;--line2:#444;--text:#f2f2f2;--muted:#a6a6a6;--accent:#8b8b8b;--accent2:#b5b5b5;--input:#0d0d0d}
     *{box-sizing:border-box}
-    body{
-      margin:0;
-      min-height:100vh;
-      display:grid;
-      place-items:center;
-      padding:24px;
-      font-family:Arial,sans-serif;
-      background:var(--bg);
-      color:var(--text);
-    }
-    .wrap{width:100%;max-width:460px}
-    .card{
-      background:var(--panel);
-      border:2px dashed var(--line);
-      border-radius:16px;
-      padding:20px;
-      box-shadow:0 10px 30px rgba(0,0,0,.35);
-    }
-    .tabs{
-      display:flex;
-      gap:10px;
-      margin-bottom:14px;
-    }
-    .tab{
-      flex:1;
-      border:2px dashed var(--line);
-      background:#1b1b1b;
-      color:var(--text);
-      border-radius:10px;
-      padding:12px;
-      cursor:pointer;
-      font-weight:700;
-      transition:.15s ease;
-    }
-    .tab:hover{
-      background:#202020;
-      border-color:var(--line-2);
-    }
-    .tab.active{
-      background:var(--accent);
-      color:#111;
-      border-color:var(--accent-hover);
-    }
-    .panel{display:none}
-    .panel.active{display:block}
-    input{
-      width:100%;
-      padding:12px;
-      border-radius:10px;
-      border:2px dashed var(--line);
-      background:var(--input);
-      color:var(--text);
-      margin-bottom:12px;
-      outline:none;
-    }
-    input:focus{
-      border-color:var(--accent);
-      box-shadow:0 0 0 2px rgba(122,122,122,.15);
-    }
-    button.submit{
-      width:100%;
-      padding:12px;
-      border:2px dashed var(--line);
-      border-radius:10px;
-      background:var(--accent);
-      color:#111;
-      font-weight:700;
-      cursor:pointer;
-      transition:.15s ease;
-    }
-    button.submit:hover{
-      background:var(--accent-hover);
-      border-color:var(--line-2);
-    }
-    .msg{
-      margin-top:12px;
-      min-height:20px;
-      white-space:pre-wrap;
-      font-size:14px;
-      color:var(--muted);
-    }
+    body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;font-family:Inter,Segoe UI,Arial,sans-serif;background:radial-gradient(circle at top,#141414 0%,#0a0a0a 58%);color:var(--text)}
+    .wrap{width:100%;max-width:420px}
+    .card{background:rgba(17,17,17,.92);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:0 18px 50px rgba(0,0,0,.45);backdrop-filter:blur(8px)}
+    .brand{font-size:22px;font-weight:800;letter-spacing:.2px;color:#fff;margin-bottom:16px;text-align:center}
+    .tabs{display:flex;gap:8px;margin-bottom:16px;padding:4px;background:#0d0d0d;border:1px solid var(--line);border-radius:14px}
+    .tab{flex:1;border:1px solid transparent;background:transparent;color:var(--muted);border-radius:10px;padding:11px 12px;cursor:pointer;font-weight:700;transition:.18s ease}
+    .tab:hover{color:#fff;background:#151515}
+    .tab.active{background:#f2f2f2;color:#111;border-color:#f2f2f2}
+    .panel{display:none}.panel.active{display:block}
+    .field{margin-bottom:12px}
+    input{width:100%;padding:13px 14px;border-radius:12px;border:1px solid var(--line);background:var(--input);color:var(--text);outline:none;transition:.15s ease;font-size:15px}
+    input::placeholder{color:#7f7f7f}
+    input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(139,139,139,.12)}
+    button.submit{width:100%;padding:13px 14px;border:1px solid var(--line2);border-radius:12px;background:#e5e5e5;color:#111;font-weight:800;cursor:pointer;transition:.15s ease;font-size:15px}
+    button.submit:hover{background:var(--accent2)}
+    .msg{margin-top:14px;min-height:22px;white-space:pre-wrap;font-size:14px;color:var(--muted);line-height:1.4;text-align:center}
+    .hint{margin-top:10px;text-align:center;color:#7f7f7f;font-size:12px}
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="card">
+      <div class="brand">Účet</div>
       <div class="tabs">
         <button class="tab active" id="loginTab" type="button">Prihlásenie</button>
         <button class="tab" id="signupTab" type="button">Registrácia</button>
       </div>
       <div class="panel active" id="loginPanel">
-        <input id="loginUsername" placeholder="Meno">
-        <input id="loginPassword" type="password" placeholder="Heslo">
+        <div class="field"><input id="loginUsername" placeholder="Meno"></div>
+        <div class="field"><input id="loginPassword" type="password" placeholder="Heslo"></div>
         <button class="submit" id="loginBtn" type="button">Prihlásiť sa</button>
       </div>
       <div class="panel" id="signupPanel">
-        <input id="signupUsername" placeholder="Meno">
-        <input id="signupPassword" type="password" placeholder="Heslo">
+        <div class="field"><input id="signupUsername" placeholder="Meno"></div>
+        <div class="field"><input id="signupPassword" type="password" placeholder="Heslo"></div>
         <button class="submit" id="signupBtn" type="button">Registrovať</button>
       </div>
       <div class="msg" id="msg"></div>
+      <div class="hint">Minimalistický prístup. Tmavý režim. Bez zbytočností.</div>
     </div>
   </div>
   <script src="config.js"></script>
@@ -144,7 +71,7 @@
           if(!u||!p){ msg.textContent='Vyplň meno a heslo.'; return }
           const existing=await loadUser(u)
           if(existing){ msg.textContent='Toto meno už existuje.'; return }
-          const { data, error } = await supabase.from('profiles').insert({ username:u, email:'', password_hash:p, role:'user', approved:false, allowed_pages:[] }).select()
+          const { error } = await supabase.from('profiles').insert({ username:u, email:'', password_hash:p, role:'user', approved:false, allowed_pages:[] }).select()
           if(error) throw error
           msg.textContent='Registrácia úspešná. Počkaj na schválenie adminom.'
         }catch(e){ msg.textContent='ERR '+(e.message||e) }
@@ -161,8 +88,7 @@
           const session = { id:user.id, username:user.username, email:user.email, role:user.role||'user', approved: !!user.approved, allowed_pages:user.allowed_pages||[] }
           localStorage.setItem('session_user', JSON.stringify(session))
           msg.textContent='Prihlásenie úspešné.'
-          if(session.role==='admin' || session.username==='Patrik') location.assign('./0.html')
-          else location.assign('./0.html')
+          location.assign('./0.html')
         }catch(e){ msg.textContent='ERR '+(e.message||e) }
       }
       loginBtn.addEventListener('click', doLogin)
