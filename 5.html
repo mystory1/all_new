@@ -3,92 +3,182 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dostihový Master QUAD - Responzívny</title>
+    <title>Dostihový Master QUAD - Bratislava</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #080b14;
-            --card-bg: #111827;
-            --text-color: #e2e8f0;
-            --success-green: #22c55e;
-            --success-bg: rgba(34, 197, 94, 0.15);
-            --border-color: #1f2937;
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f1f5f9;
+            --text-dim: #94a3b8;
             --accent: #818cf8;
+            --success-green: #22c55e;
+            --fav1-color: #fbbf24;
+            --fav2-color: #94a3b8;
+            --border: #334155;
         }
 
-        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 10px; line-height: 1.4; }
-        .container { max-width: 1600px; margin: 0 auto; }
-        
-        header { text-align: center; padding: 15px; background: #1a202e; border-radius: 12px; margin-bottom: 15px; border: 1px solid var(--border-color); }
-        h1 { margin: 0; font-size: 1.3rem; color: #fff; text-transform: uppercase; letter-spacing: 1px; }
+        body { 
+            font-family: 'Inter', -apple-system, sans-serif; 
+            background-color: var(--bg-color); 
+            color: var(--text-main); 
+            margin: 0; 
+            padding: 10px; 
+            line-height: 1.5;
+        }
 
-        .table-container { background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color); overflow: hidden; }
-        
-        table { width: 100%; border-collapse: collapse; }
-        th { background: #0b0f1a; padding: 12px; font-size: 0.7rem; text-transform: uppercase; color: #94a3b8; text-align: left; border-bottom: 2px solid var(--border-color); }
-        td { padding: 12px; border-bottom: 1px solid var(--border-color); vertical-align: top; }
+        .container { max-width: 1200px; margin: 0 auto; }
 
-        /* ZVÝRAZNENIE ZHODY */
-        .consensus-row { background-color: var(--success-bg); }
-        .consensus-row td:first-child { border-left: 4px solid var(--success-green); }
+        header { 
+            text-align: center; 
+            padding: 25px 15px; 
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border-radius: 16px; 
+            margin-bottom: 20px; 
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
 
-        .race-info { min-width: 120px; }
-        .race-num { font-weight: bold; color: #4b5563; font-size: 1.1rem; }
-        .race-name { font-weight: bold; color: var(--accent); font-size: 0.9rem; display: block; }
-        .race-time { font-size: 0.7rem; color: #64748b; }
+        h1 { margin: 0; font-size: 1.4rem; letter-spacing: 1px; text-transform: uppercase; }
 
-        .fav-block { margin-bottom: 8px; background: rgba(255,255,255,0.03); padding: 6px; border-radius: 6px; }
-        .fav-2 { opacity: 0.6; border-top: 1px dashed rgba(255,255,255,0.1); margin-top: 5px; }
+        /* TABLE STYLING (Desktop) */
+        .race-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
 
-        .label { font-size: 0.55rem; text-transform: uppercase; font-weight: 800; display: block; margin-bottom: 2px; color: #94a3b8; }
-        .horse-line { display: flex; align-items: center; gap: 6px; }
-        .horse-name { font-weight: 600; color: #fff; font-size: 0.85rem; }
-        .horse-num-badge { background: #334155; padding: 2px 5px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; color: #fff; }
-        .jockey { font-size: 0.7rem; color: #94a3b8; font-style: italic; display: block; margin-top: 2px; }
+        .race-header {
+            background: rgba(0,0,0,0.2);
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
 
-        /* POZNÁMKY */
-        .notes-section { background: #1a202e; border-radius: 12px; border: 1px solid var(--border-color); padding: 15px; margin-top: 15px; }
-        .notes-title { font-size: 0.9rem; font-weight: bold; color: var(--accent); text-transform: uppercase; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
-        .note-line { font-family: monospace; display: block; padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .race-title { font-weight: 800; font-size: 1.1rem; color: var(--accent); }
+        .race-time { font-size: 0.85rem; color: var(--text-dim); background: rgba(255,255,255,0.05); padding: 2px 8px; border-radius: 4px; }
 
-        /* RESPONSIVE DESIGN - MOBIL */
+        /* GRID PRE MODELY */
+        .ai-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr); /* 4 stĺpce na desktope */
+            gap: 1px;
+            background: var(--border);
+        }
+
+        .ai-model-box {
+            background: var(--card-bg);
+            padding: 15px;
+        }
+
+        .model-name {
+            display: block;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            font-weight: 900;
+            color: var(--text-dim);
+            margin-bottom: 12px;
+            letter-spacing: 1px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding-bottom: 5px;
+        }
+
+        /* HORSE STYLING */
+        .horse-entry { margin-bottom: 12px; }
+        .horse-entry:last-child { margin-bottom: 0; }
+
+        .rank-label { 
+            font-size: 0.6rem; 
+            font-weight: bold; 
+            display: block; 
+            margin-bottom: 3px;
+        }
+        .rank-1 { color: var(--fav1-color); }
+        .rank-2 { color: var(--fav2-color); }
+
+        .horse-main { display: flex; align-items: center; gap: 8px; }
+        .horse-num { 
+            background: #0f172a; 
+            color: #fff; 
+            width: 22px; 
+            height: 22px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            border-radius: 4px; 
+            font-size: 0.75rem; 
+            font-weight: bold;
+            border: 1px solid var(--border);
+        }
+        .horse-name { font-weight: 600; font-size: 0.9rem; }
+        .jockey-name { 
+            display: block; 
+            font-size: 0.75rem; 
+            color: var(--text-dim); 
+            margin-left: 30px; 
+            font-style: italic;
+        }
+
+        /* ZHODA / CONSENSUS */
+        .consensus-active {
+            border: 2px solid var(--success-green);
+            box-shadow: 0 0 15px rgba(34, 197, 94, 0.2);
+        }
+        .consensus-badge {
+            background: var(--success-green);
+            color: #000;
+            font-size: 0.6rem;
+            font-weight: 900;
+            padding: 2px 6px;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        /* NOTES SECTION */
+        .notes-section {
+            background: #1e293b;
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 30px;
+            border: 1px solid var(--border);
+        }
+        .notes-title { font-weight: bold; margin-bottom: 15px; color: var(--accent); display: flex; align-items: center; gap: 10px; }
+        .note-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        .note-item { 
+            font-family: monospace; 
+            font-size: 0.9rem; 
+            padding: 8px; 
+            background: rgba(0,0,0,0.2); 
+            border-radius: 6px;
+            border-left: 3px solid var(--accent);
+        }
+
+        /* RESPONSIVE - MOBILE */
         @media (max-width: 900px) {
-            th { display: none; } /* Schová hlavičku tabuľky */
+            .ai-grid {
+                grid-template-columns: repeat(2, 1fr); /* 2 stĺpce na tablete */
+            }
+        }
+
+        @media (max-width: 600px) {
+            .ai-grid {
+                grid-template-columns: 1fr; /* 1 stĺpec na mobile */
+            }
+            .ai-model-box {
+                border-bottom: 1px solid var(--border);
+            }
+            .ai-model-box:last-child { border-bottom: none; }
             
-            tr { 
-                display: flex; 
-                flex-direction: column; 
-                border-bottom: 8px solid #080b14; 
-                padding: 10px;
-            }
-
-            td { 
-                display: block; 
-                width: auto !important; 
-                padding: 8px 0; 
-                border: none;
-            }
-
-            /* Pridanie názvu modelu pred dáta na mobile */
-            td:not(:first-child):not(:nth-child(2))::before {
-                content: attr(data-label);
-                display: block;
-                font-size: 0.65rem;
-                font-weight: bold;
-                color: var(--accent);
-                text-transform: uppercase;
-                margin-bottom: 5px;
-                background: rgba(129, 140, 248, 0.1);
-                padding: 2px 8px;
-                border-radius: 4px;
-            }
-
-            .race-info { 
-                background: #1e293b; 
-                padding: 10px !important; 
-                border-radius: 8px; 
-                margin-bottom: 10px;
-            }
+            h1 { font-size: 1.1rem; }
+            .race-title { font-size: 1rem; }
         }
     </style>
 </head>
@@ -97,113 +187,110 @@
 <div class="container">
     <header>
         <h1>Dostihový Master QUAD</h1>
+        <p style="font-size: 0.8rem; color: var(--text-dim); margin: 5px 0 0 0;">Analýza favoritov pomocou AI</p>
     </header>
 
-    <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Dostihy</th>
-                    <th>Gemini</th>
-                    <th>Perplexity</th>
-                    <th>Claude</th>
-                    <th>ChatGPT</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td class="race-num">1.</td>
-                    <td class="race-info"><span class="race-name">Proud Boris</span><span class="race-time">14:00</span></td>
-                    <td data-label="Gemini">
-                        <div class="fav-block"><div class="horse-line"><span class="horse-num-badge">9</span><span class="horse-name">Emperor River</span></div><span class="jockey">M. Madihi</span></div>
-                    </td>
-                    <td data-label="Perplexity">
-                        <div class="fav-block"><div class="horse-line"><span class="horse-num-badge">3</span><span class="horse-name">Jablonj</span></div><span class="jockey">J. Línek</span></div>
-                    </td>
-                    <td data-label="Claude">
-                        <div class="fav-block"><div class="horse-line"><span class="horse-num-badge">9</span><span class="horse-name">Emperor River</span></div><span class="jockey">M. Madihi</span></div>
-                    </td>
-                    <td data-label="ChatGPT">
-                        <div class="fav-block"><div class="horse-line"><span class="horse-num-badge">10</span><span class="horse-name">It's Eddy</span></div><span class="jockey">I. Hrubšová</span></div>
-                    </td>
-                </tr>
+    <div class="race-card">
+        <div class="race-header">
+            <div>
+                <span style="color: var(--text-dim); font-weight: bold; margin-right: 8px;">1.</span>
+                <span class="race-title">Proud Boris</span>
+            </div>
+            <span class="race-time">14:00</span>
+        </div>
+        <div class="ai-grid">
+            <div class="ai-model-box">
+                <span class="model-name">Gemini</span>
+                <div class="horse-entry">
+                    <span class="rank-label rank-1">1. FAVORIT</span>
+                    <div class="horse-main"><div class="horse-num">9</div><span class="horse-name">Emperor River</span></div>
+                    <span class="jockey-name">Monir Madihi</span>
+                </div>
+                <div class="horse-entry">
+                    <span class="rank-label rank-2">2. FAVORIT</span>
+                    <div class="horse-main"><div class="horse-num">3</div><span class="horse-name">Jablonj</span></div>
+                    <span class="jockey-name">Jaroslav Línek</span>
+                </div>
+            </div>
+            <div class="ai-model-box">
+                <span class="model-name">Perplexity</span>
+                <div class="horse-entry">
+                    <span class="rank-label rank-1">1. FAVORIT</span>
+                    <div class="horse-main"><div class="horse-num">3</div><span class="horse-name">Jablonj</span></div>
+                    <span class="jockey-name">Jaroslav Línek</span>
+                </div>
+                <div class="horse-entry">
+                    <span class="rank-label rank-2">2. FAVORIT</span>
+                    <div class="horse-main"><div class="horse-num">6</div><span class="horse-name">Roxo</span></div>
+                    <span class="jockey-name">Ján Havlík</span>
+                </div>
+            </div>
+            <div class="ai-model-box">
+                <span class="model-name">Claude</span>
+                <div class="horse-entry">
+                    <span class="rank-label rank-1">1. FAVORIT</span>
+                    <div class="horse-main"><div class="horse-num">9</div><span class="horse-name">Emperor River</span></div>
+                    <span class="jockey-name">Monir Madihi</span>
+                </div>
+                <div class="horse-entry">
+                    <span class="rank-label rank-2">2. FAVORIT</span>
+                    <div class="horse-main"><div class="horse-num">3</div><span class="horse-name">Jablonj</span></div>
+                    <span class="jockey-name">Jaroslav Línek</span>
+                </div>
+            </div>
+            <div class="ai-model-box">
+                <span class="model-name">ChatGPT</span>
+                <div class="horse-entry">
+                    <span class="rank-label rank-1">1. FAVORIT</span>
+                    <div class="horse-main"><div class="horse-num">10</div><span class="horse-name">It's Eddy</span></div>
+                    <span class="jockey-name">Ivana Hrubšová</span>
+                </div>
+                <div class="horse-entry">
+                    <span class="rank-label rank-2">2. FAVORIT</span>
+                    <div class="horse-main"><div class="horse-num">7</div><span class="horse-name">Mondovi</span></div>
+                    <span class="jockey-name">Klára Brišková</span>
+                </div>
+            </div>
+        </div>
+    </div>
 
-                <tr class="consensus-row">
-                    <td class="race-num">2.</td>
-                    <td class="race-info"><span class="race-name">Cena Rezona</span><span class="race-time">14:30</span></td>
-                    <td data-label="Gemini"><div class="fav-block"><div class="horse-line"><span class="horse-num-badge">3</span><span class="horse-name">Kracken</span></div><span class="jockey">J. Palík</span></div></td>
-                    <td data-label="Perplexity"><div class="fav-block"><div class="horse-line"><span class="horse-num-badge">3</span><span class="horse-name">Kracken</span></div><span class="jockey">J. Palík</span></div></td>
-                    <td data-label="Claude"><div class="fav-block"><div class="horse-line"><span class="horse-num-badge">3</span><span class="horse-name">Kracken</span></div><span class="jockey">J. Palík</span></div></td>
-                    <td data-label="ChatGPT"><div class="fav-block"><div class="horse-line"><span class="horse-num-badge">3</span><span class="horse-name">Kracken</span></div><span class="jockey">J. Palík</span></div></td>
-                </tr>
-
-                <tr class="consensus-row">
-                    <td class="race-num">3.</td>
-                    <td class="race-info"><span class="race-name">Lord Patrick</span><span class="race-time">15:00</span></td>
-                    <td data-label="Gemini"><div class="fav-block"><div class="horse-line"><span class="horse-num-badge">9</span><span class="horse-name">Spanish Blessings</span></div></div></td>
-                    <td data-label="Perplexity"><div class="fav-block"><div class="horse-line"><span class="horse-num-badge">9</span><span class="horse-name">Spanish Blessings</span></div></div></td>
-                    <td data-label="Claude"><div class="fav-block"><div class="horse-line"><span class="horse-num-badge">9</span><span class="horse-name">Spanish Blessings</span></div></div></td>
-                    <td data-label="ChatGPT"><div class="fav-block"><div class="horse-line"><span class="horse-num-badge">9</span><span class="horse-name">Spanish Blessings</span></div></div></td>
-                </tr>
-
-                <tr class="consensus-row">
-                    <td class="race-num">4.</td>
-                    <td class="race-info"><span class="race-name">Mem. J. Břečku</span><span class="race-time">15:30</span></td>
-                    <td data-label="Gemini"><div class="fav-block"><div class="horse-line"><span class="horse-num-badge">6</span><span class="horse-name">Materana</span></div></div></td>
-                    <td data-label="Perplexity"><div class="fav-block"><div class="horse-line"><span class="horse-num-badge">6</span><span class="horse-name">Materana</span></div></div></td>
-                    <td data-label="Claude"><div class="fav-block"><div class="horse-line"><span class="horse-num-badge">6</span><span class="horse-name">Materana</span></div></div></td>
-                    <td data-label="ChatGPT"><div class="fav-block"><div class="horse-line"><span class="horse-num-badge">6</span><span class="horse-name">Materana</span></div></div></td>
-                </tr>
-
-                <tr class="consensus-row">
-                    <td class="race-num">5.</td>
-                    <td class="race-info"><span class="race-name">Cena Legionara</span><span class="race-time">16:05</span></td>
-                    <td data-label="Gemini"><div class="fav-block"><div class="horse-line"><span class="horse-num-badge">9</span><span class="horse-name">Perfect Bay</span></div></div></td>
-                    <td data-label="Perplexity"><div class="fav-block"><div class="horse-line"><span class="horse-num-badge">9</span><span class="horse-name">Perfect Bay</span></div></div></td>
-                    <td data-label="Claude"><div class="fav-block"><div class="horse-line"><span class="horse-num-badge">5</span><span class="horse-name">Quer Solution</span></div></div></td>
-                    <td data-label="ChatGPT"><div class="fav-block"><div class="horse-line"><span class="horse-num-badge">9</span><span class="horse-name">Perfect Bay</span></div></div></td>
-                </tr>
-
-                <tr>
-                    <td class="race-num">6.</td>
-                    <td class="race-info"><span class="race-name">Veľká aprílová</span><span class="race-time">16:40</span></td>
-                    <td data-label="Gemini"><div class="fav-block"><div class="horse-line"><span class="horse-num-badge">10</span><span class="horse-name">Torin</span></div></div></td>
-                    <td data-label="Perplexity"><div class="fav-block"><div class="horse-line"><span class="horse-num-badge">2</span><span class="horse-name">Rain Bee</span></div></div></td>
-                    <td data-label="Claude"><div class="fav-block"><div class="horse-line"><span class="horse-num-badge">10</span><span class="horse-name">Torin</span></div></div></td>
-                    <td data-label="ChatGPT"><div class="fav-block"><div class="horse-line"><span class="horse-num-badge">2</span><span class="horse-name">Rain Bee</span></div></div></td>
-                </tr>
-
-                <tr class="consensus-row">
-                    <td class="race-num">7.</td>
-                    <td class="race-info"><span class="race-name">Innovatora</span><span class="race-time">17:10</span></td>
-                    <td data-label="Gemini"><div class="fav-block"><div class="horse-line"><span class="horse-num-badge">8</span><span class="horse-name">Galadriela</span></div></div></td>
-                    <td data-label="Perplexity"><div class="fav-block"><div class="horse-line"><span class="horse-num-badge">8</span><span class="horse-name">Galadriela</span></div></div></td>
-                    <td data-label="Claude"><div class="fav-block"><div class="horse-line"><span class="horse-num-badge">8</span><span class="horse-name">Galadriela</span></div></div></td>
-                    <td data-label="ChatGPT"><div class="fav-block"><div class="horse-line"><span class="horse-num-badge">8</span><span class="horse-name">Galadriela</span></div></div></td>
-                </tr>
-
-                <tr class="consensus-row">
-                    <td class="race-num">8.</td>
-                    <td class="race-info"><span class="race-name">Cena Dunaja</span><span class="race-time">17:40</span></td>
-                    <td data-label="Gemini"><div class="fav-block"><div class="horse-line"><span class="horse-num-badge">6</span><span class="horse-name">Fair Mercury</span></div></div></td>
-                    <td data-label="Perplexity"><div class="fav-block"><div class="horse-line"><span class="horse-num-badge">6</span><span class="horse-name">Fair Mercury</span></div></div></td>
-                    <td data-label="Claude"><div class="fav-block"><div class="horse-line"><span class="horse-num-badge">6</span><span class="horse-name">Fair Mercury</span></div></div></td>
-                    <td data-label="ChatGPT"><div class="fav-block"><div class="horse-line"><span class="horse-num-badge">1</span><span class="horse-name">Scamander</span></div></div></td>
-                </tr>
-            </tbody>
-        </table>
+    <div class="race-card consensus-active">
+        <div class="race-header">
+            <div>
+                <span style="color: var(--text-dim); font-weight: bold; margin-right: 8px;">2.</span>
+                <span class="race-title">Cena Rezona</span>
+                <span class="consensus-badge" style="margin-left:10px">Zhoda AI</span>
+            </div>
+            <span class="race-time">14:30</span>
+        </div>
+        <div class="ai-grid">
+            <div class="ai-model-box">
+                <span class="model-name">Všetky AI modely</span>
+                <div class="horse-entry">
+                    <span class="rank-label rank-1">Spoločný 1. Favorit</span>
+                    <div class="horse-main"><div class="horse-num">3</div><span class="horse-name">Kracken</span></div>
+                    <span class="jockey-name">Jiří Palík</span>
+                </div>
+                <div class="horse-entry">
+                    <span class="rank-label rank-2">Sekundárny tip</span>
+                    <div class="horse-main"><div class="horse-num">2</div><span class="horse-name">Victory Star</span></div>
+                    <span class="jockey-name">Jaroslav Línek</span>
+                </div>
+            </div>
+            </div>
     </div>
 
     <div class="notes-section">
-        <div class="notes-title"><i class="fas fa-pen-nib"></i> Konsenzus (Top výbery)</div>
-        <div class="notes-content">
-            <span class="note-line">B2: KRACKEN (3)</span>
-            <span class="note-line">B3: SPANISH BLESSINGS (9)</span>
-            <span class="note-line">B4: MATERANA (6)</span>
-            <span class="note-line">B5: PERFECT BAY (9)</span>
-            <span class="note-line">B7: GALADRIELA (8)</span>
-            <span class="note-line">B8: FAIR MERCURY (6)</span>
+        <div class="notes-title"><i class="fas fa-clipboard-list"></i> Zhrnutie top favoritov</div>
+        <div class="note-grid">
+            <div class="note-item">1. Jablonj (3)</div>
+            <div class="note-item">2. KRACKEN (3)</div>
+            <div class="note-item">3. Spanish Blessings (9)</div>
+            <div class="note-item">4. Materana (6)</div>
+            <div class="note-item">5. Perfect Bay (9)</div>
+            <div class="note-item">6. TORIN (10)</div>
+            <div class="note-item">7. GALADRIELA (8)</div>
+            <div class="note-item">8. Scamander (1)</div>
         </div>
     </div>
 </div>
