@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dostihový Master QUAD - Bratislava</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #080b14;
+            --card-bg: #111827;
+            --text-color: #e2e8f0;
+            --success-green: #22c55e;
+            --success-bg: rgba(34, 197, 94, 0.15);
+            --border-color: #1f2937;
+        }
+
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 10px; line-height: 1.3; }
+        .container { max-width: 1600px; margin: 0 auto; }
+        
+        header { text-align: center; padding: 20px; background: #1a202e; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--border-color); }
+        h1 { margin: 0; font-size: 1.6rem; color: #fff; text-transform: uppercase; letter-spacing: 1px; }
+
+        .legend { display: flex; justify-content: center; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; font-size: 0.7rem; }
+        .legend-item { display: flex; align-items: center; gap: 5px; background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: 15px; border: 1px solid var(--border-color); }
+        .dot { width: 8px; height: 8px; border-radius: 50%; }
+
+        .table-container { background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color); overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 1200px; }
+        th { background: #0b0f1a; padding: 12px; font-size: 0.65rem; text-transform: uppercase; color: #94a3b8; text-align: left; border-bottom: 2px solid var(--border-color); }
+        td { padding: 12px 10px; border-bottom: 1px solid var(--border-color); vertical-align: top; }
+
+        /* ZVÝRAZNENIE: Zhoda aspoň 3 AI na 1. FAVORITOVI */
+        .consensus-row { background-color: var(--success-bg); }
+        .consensus-row td:nth-child(2) { border-left: 5px solid var(--success-green); }
+
+        .race-num { font-weight: bold; color: #4b5563; font-size: 1.1rem; width: 30px; text-align: center; }
+        .race-name { font-weight: bold; color: #818cf8; font-size: 0.85rem; display: block; }
+        
+        .fav-block { margin-bottom: 8px; }
+        .fav-2 { opacity: 0.6; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 4px; margin-top: 4px; }
+
+        .label { font-size: 0.55rem; text-transform: uppercase; font-weight: 800; display: block; margin-bottom: 2px; }
+        .l-1 { color: #fff; }
+        .l-2 { color: #64748b; }
+
+        .horse-line { display: flex; align-items: baseline; gap: 4px; }
+        .horse-name { font-weight: 600; color: #fff; font-size: 0.8rem; }
+        .horse-num-badge { background: rgba(255,255,255,0.1); padding: 1px 4px; border-radius: 3px; font-size: 0.7rem; min-width: 14px; text-align: center; color: #fff; }
+        .jockey { font-size: 0.65rem; color: #94a3b8; font-style: italic; display: block; margin-left: 22px; }
+
+
+
+        /* BLOK S POZNÁMKOU */
+        .notes-section { background: #1a202e; border-radius: 12px; border: 1px solid var(--border-color); padding: 20px; margin-top: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .notes-title { font-size: 0.9rem; font-weight: bold; color: #818cf8; text-transform: uppercase; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+        .notes-content { font-family: 'Courier New', Courier, monospace; font-size: 0.95rem; color: #e2e8f0; line-height: 1.6; }
+        .note-line { display: block; border-left: 3px solid #4b5563; padding-left: 12px; margin-bottom: 4px; }
+
+        @media (max-width: 1100px) {
+            th { display: none; }
+            td { display: block; padding: 10px; }
+            tr { display: block; border-bottom: 5px solid #1f2937; margin-bottom: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Dostihový Master QUAD</h1>
+    </header>
+
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Dostihy</th>
+                    <th>Gemini</th>
+                    <th>Perplexity</th>
+                    <th>Claude</th>
+                    <th>ChatGPT</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="race-num">1.</td>
+                    <td><span class="race-name">Proud Boris</span><span style="font-size:0.6rem;color:#4b5563">14:00</span></td>
+                    <td>
+                        <div class="fav-block"><span class="label l-1">1. Favorit</span><div class="horse-line"><span class="horse-num-badge">9</span><span class="horse-name">Emperor River</span></div><span class="jockey">Monir Madihi</span></div>
+                        <div class="fav-block fav-2"><span class="label l-2">2. Favorit</span><div class="horse-line"><span class="horse-num-badge">3</span><span class="horse-name">Jablonj</span></div><span class="jockey">Jaroslav Línek</span></div>
+                    </td>
+                    <td>
+                        <div class="fav-block"><span class="label l-1">1. Favorit</span><div class="horse-line"><span class="horse-num-badge">3</span><span class="horse-name">Jablonj</span></div><span class="jockey">Jaroslav Línek</span></div>
+                        <div class="fav-block fav-2"><span class="label l-2">2. Favorit</span><div class="horse-line"><span class="horse-num-badge">6</span><span class="horse-name">Roxo</span></div><span class="jockey">Ján Havlík</span></div>
+                    </td>
+                    <td>
+                        <div class="fav-block"><span class="label l-1">1. Favorit</span><div class="horse-line"><span class="horse-num-badge">9</span><span class="horse-name">Emperor River</span></div><span class="jockey">Monir Madihi</span></div>
+                        <div class="fav-block fav-2"><span class="label l-2">2. Favorit</span><div class="horse-line"><span class="horse-num-badge">3</span><span class="horse-name">Jablonj</span></div><span class="jockey">Jaroslav Línek</span></div>
+                    </td>
+                    <td>
+                        <div class="fav-block"><span class="label l-1">1. Favorit</span><div class="horse-line"><span class="horse-num-badge">10</span><span class="horse-name">It's Eddy</span></div><span class="jockey">Ivana Hrubšová</span></div>
+                        <div class="fav-block fav-2"><span class="label l-2">2. Favorit</span><div class="horse-line"><span class="horse-num-badge">7</span><span class="horse-name">Mondovi</span></div><span class="jockey">Klára Brišková</span></div>
+                    </td>
+                </tr>
+
+                <tr class="consensus-row">
+                    <td class="race-num">2.</td>
+                    <td><span class="race-name">Cena Rezona</span><span style="font-size:0.6rem;color:#4b5563">14:30</span></td>
+                    <td>
+                        <div class="fav-block"><span class="label l-1">1. Favorit</span><div class="horse-line"><span class="horse-num-badge">3</span><span class="horse-name">Kracken</span></div><span class="jockey">Jiří Palík</span></div>
+                        <div class="fav-block fav-2"><span class="label l-2">2. Favorit</span><div class="horse-line"><span class="horse-num-badge">2</span><span class="horse-name">Victory Star</span></div><span class="jockey">Jaroslav Línek</span></div>
+                    </td>
+                    <td>
+                        <div class="fav-block"><span class="label l-1">1. Favorit</span><div class="horse-line"><span class="horse-num-badge">3</span><span class="horse-name">Kracken</span></div><span class="jockey">Jiří Palík</span></div>
+                        <div class="fav-block fav-2"><span class="label l-2">2. Favorit</span><div class="horse-line"><span class="horse-num-badge">5</span><span class="horse-name">Cape Crown</span></div><span class="jockey">Martin Laube</span></div>
+                    </td>
+                    <td>
+                        <div class="fav-block"><span class="label l-1">1. Favorit</span><div class="horse-line"><span class="horse-num-badge">3</span><span class="horse-name">Kracken</span></div><span class="jockey">Jiří Palík</span></div>
+                        <div class="fav-block fav-2"><span class="label l-2">2. Favorit</span><div class="horse-line"><span class="horse-num-badge">2</span><span class="horse-name">Victory Star</span></div><span class="jockey">Jaroslav Línek</span></div>
+                    </td>
+                    <td>
+                        <div class="fav-block"><span class="label l-1">1. Favorit</span><div class="horse-line"><span class="horse-num-badge">3</span><span class="horse-name">Kracken</span></div><span class="jockey">Jiří Palík</span></div>
+                        <div class="fav-block fav-2"><span class="label l-2">2. Favorit</span><div class="horse-line"><span class="horse-num-badge">2</span><span class="horse-name">Victory Star</span></div><span class="jockey">Jaroslav Línek</span></div>
+                    </td>
+                </tr>
+
+                <tr class="consensus-row">
+                    <td class="race-num">3.</td>
+                    <td><span class="race-name">Lord Patrick</span><span style="font-size:0.6rem;color:#4b5563">15:00</span></td>
+                    <td>
+                        <div class="fav-block"><span class="label l-1">1. Favorit</span><div class="horse-line"><span class="horse-num-badge">9</span><span class="horse-name">Spanish Blessings</span></div><span class="jockey">Jaroslav Línek</span></div>
+                        <div class="fav-block fav-2"><span class="label l-2">2. Favorit</span><div class="horse-line"><span class="horse-num-badge">7</span><span class="horse-name">Blue Neptun</span></div><span class="jockey">Jiří Palík</span></div>
+                    </td>
+                    <td>
+                        <div class="fav-block"><span class="label l-1">1. Favorit</span><div class="horse-line"><span class="horse-num-badge">9</span><span class="horse-name">Spanish Blessings</span></div><span class="jockey">Jaroslav Línek</span></div>
+                        <div class="fav-block fav-2"><span class="label l-2">2. Favorit</span><div class="horse-line"><span class="horse-num-badge">7</span><span class="horse-name">Blue Neptun</span></div><span class="jockey">Ján Havlík</span></div>
+                    </td>
+                    <td>
+                        <div class="fav-block"><span class="label l-1">1. Favorit</span><div class="horse-line"><span class="horse-num-badge">9</span><span class="horse-name">Spanish Blessings</span></div><span class="jockey">Jaroslav Línek</span></div>
+                        <div class="fav-block fav-2"><span class="label l-2">2. Favorit</span><div class="horse-line"><span class="horse-num-badge">7</span><span class="horse-name">Blue Neptun</span></div><span class="jockey">Jiří Palík</span></div>
+                    </td>
+                    <td>
+                        <div class="fav-block"><span class="label l-1">1. Favorit</span><div class="horse-line"><span class="horse-num-badge">9</span><span class="horse-name">Spanish Blessings</span></div><span class="jockey">Jaroslav Línek</span></div>
+                        <div class="fav-block fav-2"><span class="label l-2">2. Favorit</span><div class="horse-line"><span class="horse-num-badge">7</span><span class="horse-name">Blue Neptun</span></div><span class="jockey">Jiří Palík</span></div>
+                    </td>
+                </tr>
+
+                <tr class="consensus-row">
+                    <td class="race-num">4.</td>
+                    <td><span class="race-name">Mem. J. Břečku</span><span style="font-size:0.6rem;color:#4b5563">15:30</span></td>
+                    <td>
+                        <div class="fav-block"><span class="label l-1">1. Favorit</span><div class="horse-line"><span class="horse-num-badge">6</span><span class="horse-name">Materana</span></div><span class="jockey">Martina Havelková</span></div>
+                        <div class="fav-block fav-2"><span class="label l-2">2. Favorit</span><div class="horse-line"><span class="horse-num-badge">4</span><span class="horse-name">Maximum Risk</span></div><span class="jockey">Adam Florian</span></div>
+                    </td>
+                    <td>
+                        <div class="fav-block"><span class="label l-1">1. Favorit</span><div class="horse-line"><span class="horse-num-badge">6</span><span class="horse-name">Materana</span></div><span class="jockey">Martina Havelková</span></div>
+                        <div class="fav-block fav-2"><span class="label l-2">2. Favorit</span><div class="horse-line"><span class="horse-num-badge">2</span><span class="horse-name">Loch Pike</span></div><span class="jockey">Monir Madihi</span></div>
+                    </td>
+                    <td>
+                        <div class="fav-block"><span class="label l-1">1. Favorit</span><div class="horse-line"><span class="horse-num-badge">6</span><span class="horse-name">Materana</span></div><span class="jockey">Martina Havelková</span></div>
+                        <div class="fav-block fav-2"><span class="label l-2">2. Favorit</span><div class="horse-line"><span class="horse-num-badge">7</span><span class="horse-name">Loch Pike</span></div><span class="jockey">Jiří Palík</span></div>
+                    </td>
+                    <td>
+                        <div class="fav-block"><span class="label l-1">1. Favorit</span><div class="horse-line"><span class="horse-num-badge">6</span><span class="horse-name">Materana</span></div><span class="jockey">Martina Havelková</span></div>
+                        <div class="fav-block fav-2"><span class="label l-2">2. Favorit</span><div class="horse-line"><span class="horse-num-badge">2</span><span class="horse-name">Loch Pike</span></div><span class="jockey">Monir Madihi</span></div>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="race-num">5.</td>
+                    <td><span class="race-name">Cena Legionara</span><span style="font-size:0.6rem;color:#4b5563">16:05</span></td>
+                    <td>
+                        <div class="fav-block"><span class="label l-1">1. Favorit</span><div class="horse-line"><span class="horse-num-badge">9</span><span class="horse-name">Perfect Bay</span></div><span class="jockey">Sofie Kvízová</span></div>
+                        <div class="fav-block fav-2"><span class="label l-2">2. Favorit</span><div class="horse-line"><span class="horse-num-badge">5</span><span class="horse-name">Quer Solution</span></div><span class="jockey">Jaroslav Línek</span></div>
+                    </td>
+                    <td>
+                        <div class="fav-block"><span class="label l-1">1. Favorit</span><div class="horse-line"><span class="horse-num-badge">9</span><span class="horse-name">Perfect Bay</span></div><span class="jockey">Sofie Kvízová</span></div>
+                        <div class="fav-block fav-2"><span class="label l-2">2. Favorit</span><div class="horse-line"><span class="horse-num-badge">5</span><span class="horse-name">Quer Solution</span></div><span class="jockey">Jaroslav Línek</span></div>
+                    </td>
+                    <td>
+                        <div class="fav-block"><span class="label l-1">1. Favorit</span><div class="horse-line"><span class="horse-num-badge">5</span><span class="horse-name">Quer Solution</span></div><span class="jockey">Jaroslav Línek</span></div>
+                        <div class="fav-block fav-2"><span class="label l-2">2. Favorit</span><div class="horse-line"><span class="horse-num-badge">9</span><span class="horse-name">Perfect Bay</span></div><span class="jockey">Sofie Kvízová</span></div>
+                    </td>
+                    <td>
+                        <div class="fav-block"><span class="label l-1">1. Favorit</span><div class="horse-line"><span class="horse-num-badge">9</span><span class="horse-name">Perfect Bay</span></div><span class="jockey">Sofie Kvízová</span></div>
+                        <div class="fav-block fav-2"><span class="label l-2">2. Favorit</span><div class="horse-line"><span class="horse-num-badge">5</span><span class="horse-name">Quer Solution</span></div><span class="jockey">Jaroslav Línek</span></div>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="race-num">6.</td>
+                    <td><span class="race-name">Veľká aprílová</span><span style="font-size:0.6rem;color:#4b5563">16:40</span></td>
+                    <td>
+                        <div class="fav-block"><span class="label l-1">1. Favorit</span><div class="horse-line"><span class="horse-num-badge">10</span><span class="horse-name">Torin</span></div><span class="jockey">Jaroslav Línek</span></div>
+                        <div class="fav-block fav-2"><span class="label l-2">2. Favorit</span><div class="horse-line"><span class="horse-num-badge">8</span><span class="horse-name">Discovery Day</span></div><span class="jockey">Adam Florian</span></div>
+                    </td>
+                    <td>
+                        <div class="fav-block"><span class="label l-1">1. Favorit</span><div class="horse-line"><span class="horse-num-badge">2</span><span class="horse-name">Rain Bee</span></div><span class="jockey">Tomáš Roman</span></div>
+                        <div class="fav-block fav-2"><span class="label l-2">2. Favorit</span><div class="horse-line"><span class="horse-num-badge">3</span><span class="horse-name">Bella Mimi</span></div><span class="jockey">Ján Havlík</span></div>
+                    </td>
+                    <td>
+                        <div class="fav-block"><span class="label l-1">1. Favorit</span><div class="horse-line"><span class="horse-num-badge">10</span><span class="horse-name">Torin</span></div><span class="jockey">Jaroslav Línek</span></div>
+                        <div class="fav-block fav-2"><span class="label l-2">2. Favorit</span><div class="horse-line"><span class="horse-num-badge">1</span><span class="horse-name">Shellby</span></div><span class="jockey">Monir Madihi</span></div>
+                    </td>
+                    <td>
+                        <div class="fav-block"><span class="label l-1">1. Favorit</span><div class="horse-line"><span class="horse-num-badge">2</span><span class="horse-name">Rain Bee</span></div><span class="jockey">Tomáš Roman</span></div>
+                        <div class="fav-block fav-2"><span class="label l-2">2. Favorit</span><div class="horse-line"><span class="horse-num-badge">1</span><span class="horse-name">Shellby</span></div><span class="jockey">Petr Foret</span></div>
+                    </td>
+                </tr>
+
+                <tr class="consensus-row">
+                    <td class="race-num">7.</td>
+                    <td><span class="race-name">Innovatora</span><span style="font-size:0.6rem;color:#4b5563">17:10</span></td>
+                    <td>
+                        <div class="fav-block"><span class="label l-1">1. Favorit</span><div class="horse-line"><span class="horse-num-badge">8</span><span class="horse-name">Galadriela</span></div><span class="jockey">Nikola Miklová</span></div>
+                        <div class="fav-block fav-2"><span class="label l-2">2. Favorit</span><div class="horse-line"><span class="horse-num-badge">2</span><span class="horse-name">West Bay</span></div><span class="jockey">Anna-Lena Weidler</span></div>
+                    </td>
+                    <td>
+                        <div class="fav-block"><span class="label l-1">1. Favorit</span><div class="horse-line"><span class="horse-num-badge">8</span><span class="horse-name">Galadriela</span></div><span class="jockey">Nikola Miklová</span></div>
+                        <div class="fav-block fav-2"><span class="label l-2">2. Favorit</span><div class="horse-line"><span class="horse-num-badge">5</span><span class="horse-name">Holy Way</span></div><span class="jockey">Monir Madihi</span></div>
+                    </td>
+                    <td>
+                        <div class="fav-block"><span class="label l-1">1. Favorit</span><div class="horse-line"><span class="horse-num-badge">8</span><span class="horse-name">Galadriela</span></div><span class="jockey">Nikola Miklová</span></div>
+                        <div class="fav-block fav-2"><span class="label l-2">2. Favorit</span><div class="horse-line"><span class="horse-num-badge">5</span><span class="horse-name">Holy Way</span></div><span class="jockey">Eva Buriánková</span></div>
+                    </td>
+                    <td>
+                        <div class="fav-block"><span class="label l-1">1. Favorit</span><div class="horse-line"><span class="horse-num-badge">8</span><span class="horse-name">Galadriela</span></div><span class="jockey">Nikola Miklová</span></div>
+                        <div class="fav-block fav-2"><span class="label l-2">2. Favorit</span><div class="horse-line"><span class="horse-num-badge">5</span><span class="horse-name">Holy Way</span></div><span class="jockey">Eva Buriánková</span></div>
+                    </td>
+                </tr>
+
+                <tr class="consensus-row">
+                    <td class="race-num">8.</td>
+                    <td><span class="race-name">Cena Dunaja</span><span style="font-size:0.6rem;color:#4b5563">17:40</span></td>
+                    <td>
+                        <div class="fav-block"><span class="label l-1">1. Favorit</span><div class="horse-line"><span class="horse-num-badge">6</span><span class="horse-name">Fair Mercury</span></div><span class="jockey">Jiří Palík</span></div>
+                        <div class="fav-block fav-2"><span class="label l-2">2. Favorit</span><div class="horse-line"><span class="horse-num-badge">1</span><span class="horse-name">Scamander</span></div><span class="jockey">Jaroslav Línek</span></div>
+                    </td>
+                    <td>
+                        <div class="fav-block"><span class="label l-1">1. Favorit</span><div class="horse-line"><span class="horse-num-badge">6</span><span class="horse-name">Fair Mercury</span></div><span class="jockey">Jiří Palík</span></div>
+                        <div class="fav-block fav-2"><span class="label l-2">2. Favorit</span><div class="horse-line"><span class="horse-num-badge">1</span><span class="horse-name">Scamander</span></div><span class="jockey">Peter Hodáň</span></div>
+                    </td>
+                    <td>
+                        <div class="fav-block"><span class="label l-1">1. Favorit</span><div class="horse-line"><span class="horse-num-badge">6</span><span class="horse-name">Fair Mercury</span></div><span class="jockey">Jiří Palík</span></div>
+                        <div class="fav-block fav-2"><span class="label l-2">2. Favorit</span><div class="horse-line"><span class="horse-num-badge">1</span><span class="horse-name">Scamander</span></div><span class="jockey">Jaroslav Línek</span></div>
+                    </td>
+                    <td>
+                        <div class="fav-block"><span class="label l-1">1. Favorit</span><div class="horse-line"><span class="horse-num-badge">1</span><span class="horse-name">Scamander</span></div><span class="jockey">Peter Hodáň</span></div>
+                        <div class="fav-block fav-2"><span class="label l-2">2. Favorit</span><div class="horse-line"><span class="horse-num-badge">6</span><span class="horse-name">Fair Mercury</span></div><span class="jockey">Jiří Palík</span></div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+    <div class="notes-section">
+        <div class="notes-title"><i class="fas fa-pen-nib"></i> Poznámka k favoritom</div>
+        <div class="notes-content">
+            <strong>Favorit:</strong><br>
+            <span class="note-line">Beh č.1: Jablonj 3</span>
+            <span class="note-line">Beh č.2: KRACKEN 3</span>
+			<span class="note-line">Beh č.3: Spanish Blessings 9</span>
+			<span class="note-line">Beh č.4: Materana 6</span>
+			<span class="note-line">Beh č.5: ???</span>
+            <span class="note-line">Beh č.6: TORIN 10</span>
+            <span class="note-line">Beh č.7: GALADRIELA 8</span>
+            <span class="note-line">Beh č.8: Scamander 1</span>
+        </div>
+    </div>
+</body>
+</html>
