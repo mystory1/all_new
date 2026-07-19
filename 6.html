@@ -1,0 +1,721 @@
+<!doctype html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>InvestMatch MVP (UI)</title>
+  <style>
+    :root{
+      --bg:#0b1220;
+      --panel:#111b31;
+      --panel2:#0f1730;
+      --text:#e8eefc;
+      --muted:#aab6da;
+      --brand:#6aa8ff;
+      --good:#2ee59d;
+      --warn:#ffcc66;
+      --bad:#ff6b6b;
+      --border: rgba(255,255,255,.10);
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius: 16px;
+    }
+    *{ box-sizing: border-box; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+      background: radial-gradient(1200px 600px at 20% -10%, rgba(106,168,255,.30), transparent 60%),
+                  radial-gradient(900px 500px at 90% 10%, rgba(46,229,157,.16), transparent 55%),
+                  var(--bg);
+      color: var(--text);
+      line-height: 1.4;
+    }
+    header{
+      position: sticky;
+      top: 0;
+      background: rgba(11,18,32,.75);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      z-index: 20;
+    }
+    .wrap{ max-width: 1080px; margin: 0 auto; padding: 18px 16px; }
+    .topbar{
+      display:flex; align-items:center; justify-content:space-between; gap: 12px;
+    }
+    .brand{
+      display:flex; align-items:center; gap: 10px;
+      font-weight: 800; letter-spacing: .2px;
+    }
+    .logo{
+      width: 34px; height: 34px; border-radius: 10px;
+      background: linear-gradient(135deg, rgba(106,168,255,1), rgba(46,229,157,1));
+      box-shadow: 0 10px 25px rgba(106,168,255,.25);
+    }
+    nav{
+      display:flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end;
+    }
+    .tab{
+      appearance:none; border: 1px solid var(--border);
+      background: rgba(255,255,255,.03);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 12px;
+      cursor:pointer;
+      font-weight: 650;
+      transition: transform .08s ease, background .15s ease, border-color .15s ease;
+    }
+    .tab:hover{ transform: translateY(-1px); border-color: rgba(106,168,255,.45); }
+    .tab.active{ border-color: rgba(106,168,255,.75); background: rgba(106,168,255,.12); }
+    main .grid{
+      display:grid; grid-template-columns: 1.2fr .8fr;
+      gap: 14px; margin-top: 16px;
+    }
+    @media (max-width: 900px){
+      main .grid{ grid-template-columns: 1fr; }
+    }
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .card .hd{
+      padding: 16px 16px 12px 16px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,.02);
+      display:flex; align-items:flex-start; justify-content:space-between; gap: 10px;
+    }
+    .card .hd h2{ margin:0; font-size: 18px; }
+    .badge{
+      font-size: 12px;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.02);
+      white-space: nowrap;
+    }
+    .card .bd{ padding: 14px 16px 16px 16px; }
+    .pillrow{ display:flex; gap: 8px; flex-wrap: wrap; }
+    .pill{
+      padding: 8px 10px; border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.03);
+      color: var(--muted);
+      font-weight: 650;
+      font-size: 12px;
+    }
+
+    form{
+      display:grid; gap: 12px;
+    }
+    label{
+      display:grid; gap: 6px;
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--text);
+    }
+    input, select, textarea{
+      width: 100%;
+      padding: 11px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,.15);
+      color: var(--text);
+      outline: none;
+    }
+    textarea{ min-height: 96px; resize: vertical; }
+    input::placeholder, textarea::placeholder{ color: rgba(170,182,218,.7); }
+    .row2{
+      display:grid; grid-template-columns: 1fr 1fr; gap: 12px;
+    }
+    @media (max-width: 520px){ .row2{ grid-template-columns: 1fr; } }
+    .actions{
+      display:flex; gap: 10px; flex-wrap: wrap; align-items:center;
+      justify-content:flex-start;
+      margin-top: 4px;
+    }
+    .btn{
+      appearance:none; cursor:pointer;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-weight: 800;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.04);
+      color: var(--text);
+      transition: transform .08s ease, border-color .15s ease, background .15s ease, opacity .15s ease;
+    }
+    .btn:hover{ transform: translateY(-1px); border-color: rgba(106,168,255,.45); }
+    .btn.primary{
+      background: linear-gradient(135deg, rgba(106,168,255,.95), rgba(46,229,157,.75));
+      border-color: rgba(255,255,255,.18);
+    }
+    .btn.danger{
+      border-color: rgba(255,107,107,.35);
+      background: rgba(255,107,107,.08);
+    }
+    .hint{ color: var(--muted); font-size: 12px; }
+    .list{
+      display:grid; gap: 10px;
+      margin-top: 10px;
+    }
+    .item{
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      background: rgba(255,255,255,.02);
+    }
+    .item .top{
+      display:flex; justify-content:space-between; gap: 10px; align-items:flex-start;
+    }
+    .item h3{ margin:0; font-size: 15px; }
+    .meta{
+      color: var(--muted); font-size: 12px; margin-top: 4px;
+    }
+    .kvs{
+      display:flex; gap: 8px; flex-wrap:wrap; margin-top: 10px;
+    }
+    .tag{
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.03);
+      color: var(--muted);
+      font-weight: 650;
+    }
+    .score{
+      font-weight: 900;
+      font-size: 13px;
+      padding: 8px 10px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.03);
+      color: var(--text);
+      white-space: nowrap;
+    }
+    .score.good{ border-color: rgba(46,229,157,.45); background: rgba(46,229,157,.10); }
+    .score.warn{ border-color: rgba(255,204,102,.50); background: rgba(255,204,102,.10); }
+    .score.bad{ border-color: rgba(255,107,107,.45); background: rgba(255,107,107,.10); }
+
+    footer{
+      color: var(--muted);
+      text-align:center;
+      padding: 28px 16px 34px 16px;
+      border-top: 1px solid var(--border);
+      margin-top: 22px;
+    }
+    .section-hidden{ display:none !important; }
+  </style>
+</head>
+
+<body>
+<header>
+  <div class="wrap topbar">
+    <div class="brand">
+      <div class="logo" aria-hidden="true"></div>
+      <div>
+        InvestMatch <span style="color:var(--muted); font-weight:700;">MVP</span>
+      </div>
+    </div>
+    <nav>
+      <button class="tab active" data-tab="home">Home</button>
+      <button class="tab" data-tab="investor">Investor</button>
+      <button class="tab" data-tab="startup">Startup</button>
+      <button class="tab" data-tab="matching">Matching</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="grid">
+    <!-- LEFT -->
+    <section class="card" id="home">
+      <div class="hd">
+        <div>
+          <h2>Matching nápadu vs. investor (demo)</h2>
+          <div class="hint">Jedna stránka = rýchle overenie UX. Následne to vieme napojiť na Supabase.</div>
+        </div>
+        <div class="badge">UI-only MVP</div>
+      </div>
+      <div class="bd">
+        <div class="pillrow" style="margin-bottom:10px;">
+          <div class="pill">Startup: pitch + podmienky</div>
+          <div class="pill">Investor: thesis + stage + ticket</div>
+          <div class="pill">Mock matching score</div>
+        </div>
+
+        <div class="list">
+          <div class="item">
+            <div class="top">
+              <div>
+                <h3>1) Vyplň investor kritériá</h3>
+                <div class="meta">thesis, stage, sektor, min. ticket (mock)</div>
+              </div>
+              <div class="score good">Krok A</div>
+            </div>
+          </div>
+          <div class="item">
+            <div class="top">
+              <div>
+                <h3>2) Vyplň startup pitch</h3>
+                <div class="meta">1-vetvalue, sektor, stage, deck link, potreba kapitálu</div>
+              </div>
+              <div class="score warn">Krok B</div>
+            </div>
+          </div>
+          <div class="item">
+            <div class="top">
+              <div>
+                <h3>3) Pozri matching</h3>
+                <div class="meta">vypočíta sa skóre kompatibility (mock)</div>
+              </div>
+              <div class="score good">Krok C</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn primary" data-go="investor">Začať ako Investor</button>
+          <button class="btn" data-go="startup">Pridať Startup</button>
+        </div>
+
+        <p class="hint" style="margin-top:10px;">
+          Dáta v demo sa uložia lokálne v prehliadači (localStorage), aby si to videl rovno fungovať.
+        </p>
+      </div>
+    </section>
+
+    <!-- RIGHT panel -->
+    <aside class="card" style="align-self:start;">
+      <div class="hd">
+        <h2 id="sideTitle">Rýchly status</h2>
+        <div class="badge">demo storage</div>
+      </div>
+      <div class="bd">
+        <div class="list" style="margin-top:0;">
+          <div class="item">
+            <div class="top">
+              <div>
+                <h3>Investor profil</h3>
+                <div class="meta" id="investorStatus">nie je vyplnený</div>
+              </div>
+              <div class="score" id="investorScore">—</div>
+            </div>
+          </div>
+          <div class="item">
+            <div class="top">
+              <div>
+                <h3>Startup pitchy</h3>
+                <div class="meta" id="startupCount">0 pitchov</div>
+              </div>
+              <div class="score" id="startupScore">—</div>
+            </div>
+          </div>
+          <div class="item">
+            <div class="top">
+              <div>
+                <h3>Matching</h3>
+                <div class="meta" id="matchingHint">vyplň investor + startup</div>
+              </div>
+              <div class="score good" id="matchingScore">ready?</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="actions" style="margin-top:12px;">
+          <button class="btn danger" id="resetBtn">Reset demo dát</button>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Investor -->
+  <section class="card section-hidden" id="investor" style="margin-top:14px;">
+    <div class="hd">
+      <h2>Investor profil</h2>
+      <div class="badge">vyplň a ulož</div>
+    </div>
+    <div class="bd">
+      <form id="investorForm">
+        <div class="row2">
+          <label>
+            Investičná fáza (stage)
+            <select name="stage" required>
+              <option value="pre-seed">Pre-seed</option>
+              <option value="seed" selected>Seed</option>
+              <option value="series_a">Series A</option>
+            </select>
+          </label>
+          <label>
+            Sektory (1–3, oddel čiarkou)
+            <input name="sectors" placeholder="SaaS, AI, Fintech" required />
+          </label>
+        </div>
+
+        <label>
+          Investor thesis (stručne)
+          <textarea name="thesis" placeholder="Do ktorých problémov investuješ a čomu veríš?"></textarea>
+        </label>
+
+        <div class="row2">
+          <label>
+            Min. požadovaná investícia (kEUR) – mock
+            <input type="number" name="minTicket" min="0" step="1" placeholder="napr. 20" required />
+          </label>
+          <label>
+            Max. požadovaná investícia (kEUR) – mock
+            <input type="number" name="maxTicket" min="0" step="1" placeholder="napr. 120" required />
+          </label>
+        </div>
+
+        <div class="actions">
+          <button class="btn primary" type="submit">Uložiť investor</button>
+          <button class="btn" type="button" data-go="matching">Prejsť na matching</button>
+        </div>
+
+        <div class="hint">
+          To je zatiaľ lokálny demo profil. Následne to prepojíme so Supabase tabuľkami.
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- Startup -->
+  <section class="card section-hidden" id="startup" style="margin-top:14px;">
+    <div class="hd">
+      <h2>Startup pitch</h2>
+      <div class="badge">pridaj pitch</div>
+    </div>
+    <div class="bd">
+      <form id="startupForm">
+        <div class="row2">
+          <label>
+            Startup názov
+            <input name="name" placeholder="Napr. GreenFlow" required />
+          </label>
+          <label>
+            Sektor (1 výber)
+            <input name="sector" placeholder="SaaS / Health / Marketplace..." required />
+          </label>
+        </div>
+
+        <div class="row2">
+          <label>
+            Fáza (stage)
+            <select name="stage" required>
+              <option value="pre-seed">Pre-seed</option>
+              <option value="seed" selected>Seed</option>
+              <option value="series_a">Series A</option>
+            </select>
+          </label>
+          <label>
+            Požadovaná investícia (kEUR)
+            <input type="number" name="raiseK" min="0" step="1" required />
+          </label>
+        </div>
+
+        <label>
+          1-vet value prop
+          <input name="valueProp" placeholder="Napr. Pomáhame firmám X dosiahnuť Y bez Z." required />
+        </label>
+
+        <label>
+          Deck link (URL) – mock
+          <input name="deck" placeholder="https://..." />
+        </label>
+
+        <label>
+          Traction / dôkaz (stručne)
+          <textarea name="traction" placeholder="Napr. ARR, počet zákazníkov, pilot, PoC..."></textarea>
+        </label>
+
+        <div class="actions">
+          <button class="btn primary" type="submit">Uložiť pitch</button>
+          <button class="btn" type="button" data-go="matching">Prejsť na matching</button>
+        </div>
+      </form>
+
+      <div class="hint" style="margin-top:12px;">
+        Tip: V demo uvidíš uložené pitchy v sekcii Matching.
+      </div>
+    </div>
+  </section>
+
+  <!-- Matching -->
+  <section class="card section-hidden" id="matching" style="margin-top:14px;">
+    <div class="hd">
+      <h2>Matching (mock)</h2>
+      <div class="badge">kompatibilita</div>
+    </div>
+    <div class="bd">
+      <div class="actions" style="margin-top:0;">
+        <button class="btn" id="recalcBtn" type="button">Prepočítať</button>
+        <button class="btn" type="button" data-go="investor">Upraviť investor</button>
+        <button class="btn" type="button" data-go="startup">Pridať startup</button>
+      </div>
+
+      <div id="emptyState" class="item" style="margin-top:12px;">
+        <div class="top">
+          <div>
+            <h3>Žiadne matching výsledky</h3>
+            <div class="meta">Vyplň najprv investor profil a aspoň 1 startup pitch.</div>
+          </div>
+          <div class="score bad">—</div>
+        </div>
+      </div>
+
+      <div class="list" id="results" style="margin-top:12px;"></div>
+
+      <p class="hint" style="margin-top:12px;">
+        Skóre je len demo (stage + sektor + rozsah investície). Keď prepojíme Supabase, spravíme “reálny” matching engine.
+      </p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  InvestMatch MVP demo • UI-only • pripravené na napojenie na Supabase
+</footer>
+
+<script>
+  const STORAGE = {
+    investor: "im_investor_v1",
+    startups: "im_startups_v1"
+  };
+
+  function loadJSON(key, fallback){
+    try{
+      const raw = localStorage.getItem(key);
+      if(!raw) return fallback;
+      return JSON.parse(raw);
+    }catch{
+      return fallback;
+    }
+  }
+  function saveJSON(key, obj){
+    localStorage.setItem(key, JSON.stringify(obj));
+  }
+
+  function setSection(tab){
+    document.querySelectorAll("main .card.section-hidden, main .card:not(.section-hidden)").forEach(()=>{});
+    const ids = ["home","investor","startup","matching"];
+    ids.forEach(id=>{
+      const el = document.getElementById(id);
+      if(!el) return;
+      el.classList.toggle("section-hidden", id !== tab);
+    });
+    document.querySelectorAll(".tab").forEach(btn=>{
+      btn.classList.toggle("active", btn.dataset.tab === tab);
+    });
+  }
+
+  function normalizeList(s){
+    return (s || "")
+      .split(",")
+      .map(x=>x.trim())
+      .filter(Boolean)
+      .map(x=>x.toLowerCase());
+  }
+
+  function computeScore(investor, startup){
+    // stage match
+    const stageMatch = investor.stage === startup.stage ? 40 : 0;
+
+    // sector overlap: investor.sectors may contain multiple
+    const invSectors = normalizeList(investor.sectors);
+    const sectorMatch = invSectors.includes(String(startup.sector||"").toLowerCase()) ? 35 : 0;
+
+    // ticket compatibility mock
+    const raise = Number(startup.raiseK || 0);
+    const minT = Number(investor.minTicket ?? 0);
+    const maxT = Number(investor.maxTicket ?? 0);
+
+    let ticketScore = 0;
+    if(raise >= minT && raise <= maxT){
+      ticketScore = 25;
+    } else {
+      // partial: closest distance in/out
+      const dist = raise < minT ? (minT - raise) : (raise - maxT);
+      ticketScore = Math.max(0, 25 - dist * 0.6);
+    }
+
+    const total = Math.round(stageMatch + sectorMatch + ticketScore);
+    let bucket = "bad";
+    if(total >= 70) bucket = "good";
+    else if(total >= 40) bucket = "warn";
+    return { total, bucket };
+  }
+
+  function refreshSideStatus(){
+    const investor = loadJSON(STORAGE.investor, null);
+    const startups = loadJSON(STORAGE.startups, []);
+    document.getElementById("startupCount").textContent = `${startups.length} pitchov`;
+
+    if(investor){
+      document.getElementById("investorStatus").textContent = `vyplnený (${investor.stage})`;
+      document.getElementById("investorScore").textContent = "OK";
+      document.getElementById("investorScore").className = "score good";
+    }else{
+      document.getElementById("investorStatus").textContent = "nie je vyplnený";
+      document.getElementById("investorScore").textContent = "—";
+      document.getElementById("investorScore").className = "score";
+    }
+
+    const matchingReady = !!investor && startups.length > 0;
+    document.getElementById("matchingHint").textContent = matchingReady ? "môžeš prejsť na matching" : "vyplň investor + startup";
+    document.getElementById("matchingScore").textContent = matchingReady ? "ready" : "wait";
+    document.getElementById("matchingScore").className = matchingReady ? "score good" : "score";
+  }
+
+  function renderMatching(){
+    const investor = loadJSON(STORAGE.investor, null);
+    const startups = loadJSON(STORAGE.startups, []);
+
+    const empty = document.getElementById("emptyState");
+    const results = document.getElementById("results");
+    results.innerHTML = "";
+
+    if(!investor || startups.length === 0){
+      empty.style.display = "block";
+      return;
+    }
+    empty.style.display = "none";
+
+    // score each startup
+    const scored = startups.map(s=>{
+      const sc = computeScore(investor, s);
+      return { startup: s, score: sc.total, bucket: sc.bucket };
+    }).sort((a,b)=>b.score - a.score);
+
+    scored.forEach(row=>{
+      const s = row.startup;
+      const el = document.createElement("div");
+      el.className = "item";
+      el.innerHTML = `
+        <div class="top">
+          <div>
+            <h3>${escapeHtml(s.name || "Startup")}</h3>
+            <div class="meta">
+              Sektor: ${escapeHtml(s.sector || "-")} • Stage: ${escapeHtml(s.stage || "-")} • Raise: ${escapeHtml(String(s.raiseK ?? "-"))} kEUR
+            </div>
+            <div class="meta" style="margin-top:8px;">
+              <b>Value prop:</b> ${escapeHtml(s.valueProp || "-")}
+            </div>
+          </div>
+          <div class="score ${row.bucket}">${row.score}%</div>
+        </div>
+        <div class="kvs">
+          <div class="tag">Deck: ${s.deck ? "link" : "—"}</div>
+          <div class="tag">Traction: ${s.traction ? "uvedené" : "—"}</div>
+        </div>
+      `;
+      results.appendChild(el);
+    });
+  }
+
+  function escapeHtml(str){
+    return String(str)
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  // tabs
+  document.querySelectorAll(".tab").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      setSection(btn.dataset.tab);
+      if(btn.dataset.tab === "matching") renderMatching();
+      refreshSideStatus();
+      document.getElementById("sideTitle").textContent =
+        btn.dataset.tab === "home" ? "Rýchly status" :
+        btn.dataset.tab === "investor" ? "Investor: demo" :
+        btn.dataset.tab === "startup" ? "Startup: demo" : "Matching: demo";
+    });
+  });
+
+  document.querySelectorAll("[data-go]").forEach(b=>{
+    b.addEventListener("click", ()=>{
+      const id = b.getAttribute("data-go");
+      setSection(id);
+      if(id === "matching") renderMatching();
+      refreshSideStatus();
+    });
+  });
+
+  // reset
+  document.getElementById("resetBtn").addEventListener("click", ()=>{
+    if(confirm("Naozaj resetovať demo dáta v prehliadači?")){ // ok in this tool; but user may not want confirm
+      localStorage.removeItem(STORAGE.investor);
+      localStorage.removeItem(STORAGE.startups);
+      refreshSideStatus();
+      renderMatching();
+      // go home
+      setSection("home");
+    }
+  });
+
+  // Investor save
+  document.getElementById("investorForm").addEventListener("submit", (e)=>{
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const investor = {
+      stage: fd.get("stage"),
+      sectors: fd.get("sectors"),
+      thesis: fd.get("thesis") || "",
+      minTicket: Number(fd.get("minTicket") || 0),
+      maxTicket: Number(fd.get("maxTicket") || 0),
+      updatedAt: new Date().toISOString()
+    };
+    saveJSON(STORAGE.investor, investor);
+    refreshSideStatus();
+    if(document.getElementById("matching").classList.contains("section-hidden") === false){
+      renderMatching();
+    }
+    alert("Investor uložený (demo).");
+    e.target.reset();
+  });
+
+  // Startup save
+  document.getElementById("startupForm").addEventListener("submit", (e)=>{
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const startups = loadJSON(STORAGE.startups, []);
+
+    const startup = {
+      id: crypto.randomUUID(),
+      name: fd.get("name"),
+      sector: fd.get("sector"),
+      stage: fd.get("stage"),
+      raiseK: Number(fd.get("raiseK") || 0),
+      valueProp: fd.get("valueProp"),
+      deck: fd.get("deck") || "",
+      traction: fd.get("traction") || "",
+      createdAt: new Date().toISOString()
+    };
+
+    startups.push(startup);
+    saveJSON(STORAGE.startups, startups);
+
+    refreshSideStatus();
+    if(document.getElementById("matching").classList.contains("section-hidden") === false){
+      renderMatching();
+    }
+    alert("Pitch uložený (demo).");
+    e.target.reset();
+  });
+
+  document.getElementById("recalcBtn").addEventListener("click", ()=>{
+    renderMatching();
+  });
+
+  // init
+  (function init(){
+    refreshSideStatus();
+    renderMatching();
+  })();
+</script>
+</body>
+</html>
