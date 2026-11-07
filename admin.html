@@ -17,45 +17,75 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
 (function(){
-  const PAGES=['1.html','2.html','3.html','4.html','5.html','6.html','admin.html'];
-  const ADMIN_USERNAME='Patrik';
+  const PAGES=['1.html','2.html','3.html','4.html','5.html','6.html','7.html','admin.html'];
   const $=id=>document.getElementById(id);
-  const state={users:[],selected:null,original:null,view:'all'};
-  const loadCache=()=>{ try{return JSON.parse(localStorage.getItem('profiles_cache')||'[]')}catch(e){return[]} };
-  const saveCache=arr=>{ localStorage.setItem('profiles_cache', JSON.stringify(arr)); localStorage.setItem('profiles_cache_updated_at', String(Date.now())); };
-  const mergeById=arr=>{ const m=new Map(); [...loadCache(), ...(arr||[])].forEach(u=>{ if(u&&u.id!=null) m.set(String(u.id),u); }); return [...m.values()]; };
+  const state={users:[],selected:null,original:null,view:'all',client:null,session:null};
   const notice=t=>{$('cacheNotice').textContent=t};
-  const render=()=>{ const q=($('searchInput').value||'').toLowerCase(); const list=$('usersList'); list.innerHTML=''; let arr=state.users.filter(u=>`${u.username||''} ${u.email||''}`.toLowerCase().includes(q)); if(state.view==='pending') arr=arr.filter(u=>!u.approved); if(!arr.length){ list.innerHTML='<div class="muted">Žiadni používatelia v tomto zozname.</div>'; return; } arr.forEach(u=>{ const el=document.createElement('div'); el.className='user'+(state.selected?.id===u.id?' active':''); el.innerHTML=`<strong>${u.username||''}</strong><div class='muted'>${u.email||''}</div><div class='muted'>rola: ${u.role||'user'} • stránky: ${(u.allowed_pages||[]).join(', ')||'žiadne'}</div><div class='status ${u.approved ? 'approved' : 'pending'}'>${u.approved ? 'approved' : 'pending'}</div>`; el.onclick=()=>selectUser(u.id); list.appendChild(el); }); };
-  const renderChips=()=>{ const wrap=$('pageChips'); wrap.innerHTML=''; PAGES.forEach(p=>{ const b=document.createElement('button'); b.type='button'; b.className='chip'+((state.selected?.allowed_pages||[]).includes(p)?' on':''); b.textContent=p; b.onclick=()=>{ const set=new Set(state.selected.allowed_pages||[]); set.has(p)?set.delete(p):set.add(p); state.selected.allowed_pages=[...set]; b.classList.toggle('on'); }; wrap.appendChild(b); }); };
-  const selectUser=id=>{ state.selected=state.users.find(u=>String(u.id)===String(id)); if(!state.selected) return; state.original=JSON.parse(JSON.stringify(state.selected)); $('detailsEmpty').style.display='none'; $('detailsWrap').style.display='block'; $('detailUsername').value=state.selected.username||''; $('detailEmail').value=state.selected.email||''; $('detailRole').value=state.selected.role||'user'; $('detailStatus').textContent=state.selected.approved ? 'approved' : 'pending'; $('detailStatus').className='status '+(state.selected.approved ? 'approved' : 'pending'); renderChips(); render(); };
-  const persistLocal=()=>{ saveCache(state.users); notice('Uložené lokálne do profiles_cache'); };
-  const saveToDb=async u=>{ if(!window.supabaseClient) throw new Error('Supabase client sa nespustil'); const payload={role:u.role||'user', approved:!!u.approved, allowed_pages:u.allowed_pages||[]}; const {error}=await window.supabaseClient.from('profiles').update(payload).eq('id',u.id); if(error) throw error; notice('Uložené do DB pre '+(u.username||u.id)); };
-  const loadDb=async()=>{ try{ notice('Načítavam z DB...'); if(!window.supabaseClient) throw new Error('Supabase client sa nespustil'); const {data,error}=await window.supabaseClient.from('profiles').select('*').order('created_at',{ascending:false}); if(error) throw error; state.users=mergeById(data||[]); saveCache(state.users); notice('Načítané z DB: '+state.users.length); render(); }catch(err){ console.error(err); notice('DB error: '+(err?.message||err)); } };
+  const token=()=>state.session&&(state.session.habits_token||state.session.token);
+  const rpc=async(name,args)=>{const {data,error}=await state.client.rpc(name,args);if(error)throw error;return data};
+  const render=()=>{
+    const q=($('searchInput').value||'').toLowerCase(),list=$('usersList');list.innerHTML='';
+    let arr=state.users.filter(u=>`${u.username||''} ${u.email||''}`.toLowerCase().includes(q));
+    if(state.view==='pending')arr=arr.filter(u=>!u.approved);
+    if(!arr.length){list.innerHTML='<div class="muted">Žiadni používatelia v tomto zozname.</div>';return;}
+    arr.forEach(u=>{const el=document.createElement('div');el.className='user'+(state.selected&&String(state.selected.id)===String(u.id)?' active':'');
+      const name=document.createElement('strong');name.textContent=u.username||'';
+      const email=document.createElement('div');email.className='muted';email.textContent=u.email||'';
+      const meta=document.createElement('div');meta.className='muted';meta.textContent=`rola: ${u.role||'user'} • stránky: ${(u.allowed_pages||[]).join(', ')||'žiadne'}`;
+      const status=document.createElement('div');status.className='status '+(u.approved?'approved':'pending');status.textContent=u.approved?'approved':'pending';
+      el.append(name,email,meta,status);el.onclick=()=>selectUser(u.id);list.appendChild(el);
+    });
+  };
+  const renderChips=()=>{
+    const wrap=$('pageChips');wrap.innerHTML='';
+    PAGES.forEach(p=>{const b=document.createElement('button');b.type='button';b.className='chip'+((state.selected.allowed_pages||[]).includes(p)?' on':'');b.textContent=p;
+      b.onclick=()=>{const set=new Set(state.selected.allowed_pages||[]);set.has(p)?set.delete(p):set.add(p);state.selected.allowed_pages=[...set];b.classList.toggle('on');};wrap.appendChild(b);});
+  };
+  const selectUser=id=>{
+    state.selected=state.users.find(u=>String(u.id)===String(id));if(!state.selected)return;
+    state.original=JSON.parse(JSON.stringify(state.selected));$('detailsEmpty').style.display='none';$('detailsWrap').style.display='block';
+    $('detailUsername').value=state.selected.username||'';$('detailEmail').value=state.selected.email||'';
+    $('detailRole').value=state.selected.role||'user';$('detailStatus').textContent=state.selected.approved?'approved':'pending';
+    $('detailStatus').className='status '+(state.selected.approved?'approved':'pending');renderChips();render();
+  };
+  const loadDb=async()=>{
+    try{notice('Načítavam z DB...');const data=await rpc('habits_legacy_admin_list_users',{p_token:token()});
+      state.users=Array.isArray(data)?data:(data&&data.users)||[];notice('Načítané z DB: '+state.users.length);render();
+      if(state.selected){const found=state.users.find(u=>String(u.id)===String(state.selected.id));if(found)selectUser(found.id);else{state.selected=null;$('detailsWrap').style.display='none';$('detailsEmpty').style.display='block';}}
+    }catch(err){console.error(err);notice('DB error: '+(err.message||err));}
+  };
+  const saveToDb=async u=>{
+    notice('Ukladám do DB...');
+    const data=await rpc('habits_legacy_admin_update_user',{p_token:token(),p_user_id:u.id,p_role:u.role||'user',p_approved:!!u.approved,p_allowed_pages:u.allowed_pages||[]});
+    if(!data||data.ok!==true)throw new Error(data&&data.message?data.message:'Uloženie sa nepodarilo.');
+    notice('Uložené do DB pre '+u.username);await loadDb();
+  };
+  const logout=async()=>{try{if(token())await state.client.rpc('habits_legacy_logout',{p_token:token()});}catch(e){console.warn(e);}localStorage.removeItem('session_user');localStorage.removeItem('profiles_cache');localStorage.removeItem('profiles_cache_updated_at');location.replace('index.html');};
   const init=async()=>{
     try{
-      const cfg=window.APP_CONFIG||{};
-      if(!cfg.SUPABASE_URL || !cfg.SUPABASE_ANON_KEY) throw new Error('Chýba config.js alebo Supabase kľúč');
-      window.supabaseClient = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
-      const me=JSON.parse(localStorage.getItem('session_user')||'null');
-      if(!me) return location.replace('index.html');
-      if((me.username||'')!==ADMIN_USERNAME && me.role!=='admin') return location.replace('0.html');
-      $('meBadge').textContent=`${me.username} • ${me.role||'user'}`;
-      state.users=mergeById(loadCache());
-      render();
-      notice('Pripravené');
-    }catch(e){ console.error(e); notice('Init error: '+(e?.message||e)); }
+      const cfg=window.APP_CONFIG||{};if(!cfg.SUPABASE_URL||!cfg.SUPABASE_ANON_KEY)throw new Error('Chýba config.js alebo Supabase kľúč');
+      state.client=window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY);
+      state.session=JSON.parse(localStorage.getItem('session_user')||'null');
+      if(!state.session)return location.replace('index.html');
+      const t=token();if(!t)return location.replace('index.html');
+      const valid=await rpc('habits_legacy_validate_session',{p_token:t});
+      if(!valid||valid.ok!==true||!valid.is_admin)return location.replace('0.html');
+      $('meBadge').textContent=`${valid.username} • ${valid.role||'user'}`;
+      if(!state.session.habits_token&&state.session.token){state.session.habits_token=state.session.token;localStorage.setItem('session_user',JSON.stringify(state.session));}
+      await loadDb();
+    }catch(e){console.error(e);notice('Init error: '+(e.message||e));}
   };
-  $('searchInput').addEventListener('input', render);
-  $('showPendingBtn').addEventListener('click', ()=>{ state.view='pending'; render(); });
-  $('showAllBtn').addEventListener('click', ()=>{ state.view='all'; render(); });
-  $('loadDbBtn').addEventListener('click', loadDb);
-  $('refreshBtn').addEventListener('click', async()=>{ await loadDb(); notice('Obnovené z DB'); });
-  $('backBtn').addEventListener('click', ()=>location.href='0.html');
-  $('logoutBtn').addEventListener('click', ()=>{ localStorage.removeItem('session_user'); location.replace('index.html'); });
-  $('saveBtn').addEventListener('click', async e=>{ e.preventDefault(); if(!state.selected) return; state.selected.role=$('detailRole').value; state.users=state.users.map(u=>String(u.id)===String(state.selected.id)?{...state.selected}:u); persistLocal(); try{ await saveToDb(state.selected); alert('Uložené'); }catch(err){ console.error(err); notice('DB update error: '+(err?.message||err)); } });
-  $('approveBtn').addEventListener('click', async e=>{ e.preventDefault(); if(!state.selected) return; state.selected.approved=true; state.users=state.users.map(u=>String(u.id)===String(state.selected.id)?{...state.selected}:u); persistLocal(); try{ await saveToDb(state.selected); selectUser(state.selected.id); alert('Schválené'); }catch(err){ console.error(err); notice('DB update error: '+(err?.message||err)); } });
-  $('resetBtn').addEventListener('click', e=>{ e.preventDefault(); if(state.original){ state.selected=JSON.parse(JSON.stringify(state.original)); state.users=state.users.map(u=>String(u.id)===String(state.selected.id)?{...state.selected}:u); selectUser(state.selected.id); notice('Zmeny zrušené'); } });
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+  $('searchInput').addEventListener('input',render);
+  $('showPendingBtn').addEventListener('click',()=>{state.view='pending';render();});
+  $('showAllBtn').addEventListener('click',()=>{state.view='all';render();});
+  $('loadDbBtn').addEventListener('click',loadDb);
+  $('refreshBtn').addEventListener('click',loadDb);
+  $('backBtn').addEventListener('click',()=>location.href='0.html');
+  $('logoutBtn').addEventListener('click',logout);
+  $('saveBtn').addEventListener('click',async e=>{e.preventDefault();if(!state.selected)return;state.selected.role=$('detailRole').value;try{await saveToDb(state.selected);alert('Uložené');}catch(err){console.error(err);notice('DB update error: '+(err.message||err));}});
+  $('approveBtn').addEventListener('click',async e=>{e.preventDefault();if(!state.selected)return;state.selected.approved=true;try{await saveToDb(state.selected);alert('Schválené');}catch(err){console.error(err);notice('DB update error: '+(err.message||err));}});
+  $('resetBtn').addEventListener('click',e=>{e.preventDefault();if(state.original)selectUser(state.original.id);});
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
 </script>
 </body>
