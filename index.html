@@ -39,7 +39,7 @@
     </div>
     <div class="panel" id="signupPanel">
       <div class="field"><input id="signupUsername" autocomplete="username" placeholder="Meno (3–24 znakov)"></div>
-      <div class="field"><input id="signupPassword" type="password" autocomplete="new-password" placeholder="Heslo (min. 8 znakov)"></div>
+      <div class="field"><input id="signupPassword" type="password" autocomplete="new-password" placeholder="Heslo"></div>
       <button class="submit" id="signupBtn" type="button">Registrovať</button>
     </div>
     <div class="msg" id="msg" role="status" aria-live="polite"></div>
@@ -66,7 +66,7 @@
       const {data:userData,error:userError}=await client.auth.getUser();
       if(userError)throw userError;
       if(!userData.user)throw new Error("Prihlásenie sa nepodarilo.");
-      const {data:profile,error}=await client.from("profiles").select("username,approved").eq("id",userData.user.id).single();
+      const {data:profile,error}=await client.from("habits_profiles").select("username,approved").eq("id",userData.user.id).single();
       if(error)throw error;
       if(!profile.approved){
         await client.auth.signOut();
@@ -79,7 +79,7 @@
       const username=document.getElementById("signupUsername").value.trim();
       const password=document.getElementById("signupPassword").value;
       if(!validUsername(username)){msg.textContent="Meno musí mať 3–24 znakov: písmená bez diakritiky, čísla, bodku, _ alebo -.";return}
-      if(password.length<8){msg.textContent="Heslo musí mať aspoň 8 znakov.";return}
+      if(!password){msg.textContent="Zadaj heslo.";return}
       busy(true);
       try{
         const {data,error}=await client.auth.signUp({email:emailFor(username),password,options:{data:{username:username.toLowerCase()}}});
@@ -90,7 +90,12 @@
         }else{
           msg.textContent="Registrácia prijatá. V Supabase vypni potvrdzovanie e-mailu (používa sa interný prihlasovací alias), potom sa prihlás.";
         }
-      }catch(e){msg.textContent=e.message||"Registrácia zlyhala."}
+      }catch(e){
+        const m=String(e.message||"");
+        msg.textContent=/password.*(characters|length|weak)|weak.*password/i.test(m)
+          ? "Supabase Auth vyžaduje minimálne 6 znakov. Aplikácia už nemá vlastný limit, ale kratšie heslo odmietne samotný Supabase."
+          : (m||"Registrácia zlyhala.");
+      }
       finally{busy(false)}
     }
     async function login(){
@@ -103,7 +108,12 @@
         const {error}=await client.auth.signInWithPassword({email:emailFor(username),password});
         if(error)throw error;
         await approvedAndGo(username);
-      }catch(e){msg.textContent=e.message||"Prihlásenie zlyhalo."}
+      }catch(e){
+        const m=String(e.message||"");
+        msg.textContent=/invalid login credentials/i.test(m)
+          ? "Supabase Auth tento účet nepozná alebo heslo nesedí. Ak si používal staré prihlasovanie, prejdi na Registrácia a vytvor účet znova s rovnakým menom. Starý záznam v tabuľke profiles nie je automaticky účtom Supabase Auth."
+          : (m||"Prihlásenie zlyhalo.");
+      }
       finally{busy(false)}
     }
     loginTab.addEventListener("click",()=>mode("login"));
