@@ -1,101 +1,118 @@
 <!DOCTYPE html>
 <html lang="sk">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Účet</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0a0a0a">
+  <title>Účet – Habits</title>
   <style>
-    :root{--bg:#0a0a0a;--card:#111;--line:#2d2d2d;--line2:#444;--text:#f2f2f2;--muted:#a6a6a6;--accent:#8b8b8b;--accent2:#b5b5b5;--input:#0d0d0d}
+    :root{--bg:#0a0a0a;--card:#111;--line:#2d2d2d;--line2:#444;--text:#f2f2f2;--muted:#a6a6a6;--input:#0d0d0d}
     *{box-sizing:border-box}
     body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;font-family:Inter,Segoe UI,Arial,sans-serif;background:radial-gradient(circle at top,#141414 0%,#0a0a0a 58%);color:var(--text)}
     .wrap{width:100%;max-width:420px}
     .card{background:rgba(17,17,17,.92);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:0 18px 50px rgba(0,0,0,.45);backdrop-filter:blur(8px)}
     .brand{font-size:22px;font-weight:800;letter-spacing:.2px;color:#fff;margin-bottom:16px;text-align:center}
     .tabs{display:flex;gap:8px;margin-bottom:16px;padding:4px;background:#0d0d0d;border:1px solid var(--line);border-radius:14px}
-    .tab{flex:1;border:1px solid transparent;background:transparent;color:var(--muted);border-radius:10px;padding:11px 12px;cursor:pointer;font-weight:700;transition:.18s ease}
-    .tab:hover{color:#fff;background:#151515}
+    .tab{flex:1;border:1px solid transparent;background:transparent;color:var(--muted);border-radius:10px;padding:11px 12px;cursor:pointer;font-weight:700}
     .tab.active{background:#f2f2f2;color:#111;border-color:#f2f2f2}
     .panel{display:none}.panel.active{display:block}
     .field{margin-bottom:12px}
-    input{width:100%;padding:13px 14px;border-radius:12px;border:1px solid var(--line);background:var(--input);color:var(--text);outline:none;transition:.15s ease;font-size:15px}
-    input::placeholder{color:#7f7f7f}
-    input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(139,139,139,.12)}
-    button.submit{width:100%;padding:13px 14px;border:1px solid var(--line2);border-radius:12px;background:#e5e5e5;color:#111;font-weight:800;cursor:pointer;transition:.15s ease;font-size:15px}
-    button.submit:hover{background:var(--accent2)}
+    input{width:100%;padding:13px 14px;border-radius:12px;border:1px solid var(--line);background:var(--input);color:var(--text);outline:none;font-size:15px}
+    input:focus{border-color:#999;box-shadow:0 0 0 3px rgba(139,139,139,.12)}
+    button.submit{width:100%;padding:13px 14px;border:1px solid var(--line2);border-radius:12px;background:#e5e5e5;color:#111;font-weight:800;cursor:pointer;font-size:15px}
+    button.submit:disabled{opacity:.55;cursor:wait}
     .msg{margin-top:14px;min-height:22px;white-space:pre-wrap;font-size:14px;color:var(--muted);line-height:1.4;text-align:center}
-    .hint{margin-top:10px;text-align:center;color:#7f7f7f;font-size:12px}
+    .hint{margin-top:10px;text-align:center;color:#7f7f7f;font-size:12px;line-height:1.5}
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="card">
-      <div class="brand">Účet</div>
-      <div class="tabs">
-        <button class="tab active" id="loginTab" type="button">Prihlásenie</button>
-        <button class="tab" id="signupTab" type="button">Registrácia</button>
-      </div>
-      <div class="panel active" id="loginPanel">
-        <div class="field"><input id="loginUsername" placeholder="Meno"></div>
-        <div class="field"><input id="loginPassword" type="password" placeholder="Heslo"></div>
-        <button class="submit" id="loginBtn" type="button">Prihlásiť sa</button>
-      </div>
-      <div class="panel" id="signupPanel">
-        <div class="field"><input id="signupUsername" placeholder="Meno"></div>
-        <div class="field"><input id="signupPassword" type="password" placeholder="Heslo"></div>
-        <button class="submit" id="signupBtn" type="button">Registrovať</button>
-      </div>
-      <div class="msg" id="msg"></div>
-      <div class="hint">Minimalistický prístup. Tmavý režim. Bez zbytočností.</div>
+  <div class="wrap"><div class="card">
+    <div class="brand">Účet</div>
+    <div class="tabs">
+      <button class="tab active" id="loginTab" type="button">Prihlásenie</button>
+      <button class="tab" id="signupTab" type="button">Registrácia</button>
     </div>
-  </div>
-  <script src="config.js"></script>
+    <div class="panel active" id="loginPanel">
+      <div class="field"><input id="loginUsername" autocomplete="username" placeholder="Meno"></div>
+      <div class="field"><input id="loginPassword" type="password" autocomplete="current-password" placeholder="Heslo"></div>
+      <button class="submit" id="loginBtn" type="button">Prihlásiť sa</button>
+    </div>
+    <div class="panel" id="signupPanel">
+      <div class="field"><input id="signupUsername" autocomplete="username" placeholder="Meno (3–24 znakov)"></div>
+      <div class="field"><input id="signupPassword" type="password" autocomplete="new-password" placeholder="Heslo (min. 8 znakov)"></div>
+      <button class="submit" id="signupBtn" type="button">Registrovať</button>
+    </div>
+    <div class="msg" id="msg" role="status" aria-live="polite"></div>
+    <div class="hint">Účty sa schvaľujú administrátorom. Heslá spravuje Supabase Auth.</div>
+  </div></div>
+  <script src="./config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script>
-    window.addEventListener('load', () => {
-      const { SUPABASE_URL, SUPABASE_ANON_KEY } = window.APP_CONFIG;
-      const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      const msg=document.getElementById('msg')
-      const loginTab=document.getElementById('loginTab'), signupTab=document.getElementById('signupTab')
-      const loginPanel=document.getElementById('loginPanel'), signupPanel=document.getElementById('signupPanel')
-      const loginUsername=document.getElementById('loginUsername'), loginPassword=document.getElementById('loginPassword')
-      const signupUsername=document.getElementById('signupUsername'), signupPassword=document.getElementById('signupPassword')
-      const loginBtn=document.getElementById('loginBtn'), signupBtn=document.getElementById('signupBtn')
-      function setMode(m){ loginTab.classList.toggle('active',m==='login'); signupTab.classList.toggle('active',m==='signup'); loginPanel.classList.toggle('active',m==='login'); signupPanel.classList.toggle('active',m==='signup'); msg.textContent='' }
-      loginTab.addEventListener('click',()=>setMode('login'))
-      signupTab.addEventListener('click',()=>setMode('signup'))
-      async function loadUser(u){ const {data,error}=await supabase.from('profiles').select('*').eq('username',u).maybeSingle(); if(error) throw error; return data }
-      async function doSignup(){
-        try{
-          const u=signupUsername.value.trim()
-          const p=signupPassword.value
-          if(!u||!p){ msg.textContent='Vyplň meno a heslo.'; return }
-          const existing=await loadUser(u)
-          if(existing){ msg.textContent='Toto meno už existuje.'; return }
-          const { error } = await supabase.from('profiles').insert({ username:u, email:'', password_hash:p, role:'user', approved:false, allowed_pages:[] }).select()
-          if(error) throw error
-          msg.textContent='Registrácia úspešná. Počkaj na schválenie adminom.'
-        }catch(e){ msg.textContent='ERR '+(e.message||e) }
+  (function(){
+    const msg=document.getElementById("msg");
+    const loginTab=document.getElementById("loginTab"),signupTab=document.getElementById("signupTab");
+    const loginPanel=document.getElementById("loginPanel"),signupPanel=document.getElementById("signupPanel");
+    const loginBtn=document.getElementById("loginBtn"),signupBtn=document.getElementById("signupBtn");
+    const client=window.supabase.createClient(APP_CONFIG.SUPABASE_URL,APP_CONFIG.SUPABASE_ANON_KEY);
+    const emailFor=username=>username.toLowerCase()+"@habits.invalid";
+    const validUsername=value=>/^[a-zA-Z0-9._-]{3,24}$/.test(value);
+    function mode(name){
+      const login=name==="login";
+      loginTab.classList.toggle("active",login);signupTab.classList.toggle("active",!login);
+      loginPanel.classList.toggle("active",login);signupPanel.classList.toggle("active",!login);msg.textContent="";
+    }
+    function busy(value){loginBtn.disabled=value;signupBtn.disabled=value}
+    async function approvedAndGo(username){
+      const {data:userData,error:userError}=await client.auth.getUser();
+      if(userError)throw userError;
+      if(!userData.user)throw new Error("Prihlásenie sa nepodarilo.");
+      const {data:profile,error}=await client.from("profiles").select("username,approved").eq("id",userData.user.id).single();
+      if(error)throw error;
+      if(!profile.approved){
+        await client.auth.signOut();
+        msg.textContent="Účet čaká na schválenie administrátorom.";
+        return;
       }
-      async function doLogin(){
-        try{
-          const u=loginUsername.value.trim()
-          const p=loginPassword.value
-          if(!u||!p){ msg.textContent='Vyplň meno a heslo.'; return }
-          const user=await loadUser(u)
-          if(!user){ msg.textContent='Používateľ neexistuje.'; return }
-          if(!user.approved){ msg.textContent='Účet čaká na schválenie administrátorom.'; return }
-          if(user.password_hash !== p){ msg.textContent='Neplatné prihlasovacie údaje.'; return }
-          const session = { id:user.id, username:user.username, email:user.email, role:user.role||'user', approved: !!user.approved, allowed_pages:user.allowed_pages||[] }
-          localStorage.setItem('session_user', JSON.stringify(session))
-          msg.textContent='Prihlásenie úspešné.'
-          location.assign('./0.html')
-        }catch(e){ msg.textContent='ERR '+(e.message||e) }
-      }
-      loginBtn.addEventListener('click', doLogin)
-      signupBtn.addEventListener('click', doSignup)
-      loginPassword.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin() })
-      signupPassword.addEventListener('keydown', e => { if (e.key === 'Enter') doSignup() })
-    })
+      location.assign("./0.html");
+    }
+    async function signup(){
+      const username=document.getElementById("signupUsername").value.trim();
+      const password=document.getElementById("signupPassword").value;
+      if(!validUsername(username)){msg.textContent="Meno musí mať 3–24 znakov: písmená bez diakritiky, čísla, bodku, _ alebo -.";return}
+      if(password.length<8){msg.textContent="Heslo musí mať aspoň 8 znakov.";return}
+      busy(true);
+      try{
+        const {data,error}=await client.auth.signUp({email:emailFor(username),password,options:{data:{username:username.toLowerCase()}}});
+        if(error)throw error;
+        if(data.session){
+          await client.auth.signOut();
+          msg.textContent="Registrácia úspešná. Počkaj na schválenie administrátorom.";
+        }else{
+          msg.textContent="Registrácia prijatá. V Supabase vypni potvrdzovanie e-mailu (používa sa interný prihlasovací alias), potom sa prihlás.";
+        }
+      }catch(e){msg.textContent=e.message||"Registrácia zlyhala."}
+      finally{busy(false)}
+    }
+    async function login(){
+      const username=document.getElementById("loginUsername").value.trim();
+      const password=document.getElementById("loginPassword").value;
+      if(!validUsername(username)){msg.textContent="Zadaj platné meno.";return}
+      if(!password){msg.textContent="Zadaj heslo.";return}
+      busy(true);
+      try{
+        const {error}=await client.auth.signInWithPassword({email:emailFor(username),password});
+        if(error)throw error;
+        await approvedAndGo(username);
+      }catch(e){msg.textContent=e.message||"Prihlásenie zlyhalo."}
+      finally{busy(false)}
+    }
+    loginTab.addEventListener("click",()=>mode("login"));
+    signupTab.addEventListener("click",()=>mode("signup"));
+    loginBtn.addEventListener("click",login);signupBtn.addEventListener("click",signup);
+    document.getElementById("loginPassword").addEventListener("keydown",e=>{if(e.key==="Enter")login()});
+    document.getElementById("signupPassword").addEventListener("keydown",e=>{if(e.key==="Enter")signup()});
+    client.auth.getSession().then(async({data})=>{if(data.session){try{await approvedAndGo()}catch(e){msg.textContent=e.message||"Chyba účtu."}}});
+  })();
   </script>
 </body>
 </html>
