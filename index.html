@@ -40,12 +40,12 @@ window.addEventListener("load",()=>{
  const signupUsername=document.getElementById("signupUsername"),signupPassword=document.getElementById("signupPassword");
  function setMode(m){loginTab.classList.toggle("active",m==="login");signupTab.classList.toggle("active",m==="signup");loginPanel.classList.toggle("active",m==="login");signupPanel.classList.toggle("active",m==="signup");msg.textContent=""}
  loginTab.addEventListener("click",()=>setMode("login"));signupTab.addEventListener("click",()=>setMode("signup"));
- async function loadUser(u){const {data,error}=await supabase.from("profiles").select("*").eq("username",u).maybeSingle();if(error)throw error;return data}
  async function doSignup(){
   try{const u=signupUsername.value.trim(),p=signupPassword.value;if(!u||!p){msg.textContent="Vyplň meno a heslo.";return}
-   const existing=await loadUser(u);if(existing){msg.textContent="Toto meno už existuje.";return}
-   const {error}=await supabase.from("profiles").insert({username:u,email:"",password_hash:p,role:"user",approved:false,allowed_pages:[]});
-   if(error)throw error;msg.textContent="Registrácia úspešná. Počkaj na schválenie adminom.";
+   const {data,error}=await supabase.rpc("habits_legacy_signup",{p_username:u,p_password:p});
+   if(error)throw error;
+   if(!data||data.ok!==true)throw new Error(data&&data.message?data.message:"Registrácia sa nepodarila.");
+   msg.textContent="Registrácia úspešná. Počkaj na schválenie adminom.";
   }catch(e){msg.textContent="ERR "+(e.message||e)}
  }
  async function doLogin(){
