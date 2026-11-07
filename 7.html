@@ -580,7 +580,7 @@ function scheduleRemoteSave(){
       });
     });
     REMOTE_CHAIN=REMOTE_CHAIN.then(async function(){
-      var result=await DB.rpc("save_habits_workspace",{
+      var result=await DB.rpc("habits_save_habits_workspace",{
         p_activities:snapshot.activities,
         p_activity_days:snapshot.activity_days,
         p_activity_history:snapshot.activity_history,
@@ -592,10 +592,10 @@ function scheduleRemoteSave(){
 }
 async function loadRemoteWorkspace(){
   var results=await Promise.all([
-    DB.from("activities").select("*").order("created_at",{ascending:true}),
-    DB.from("activity_days").select("*"),
-    DB.from("activity_history").select("*").order("position",{ascending:true}),
-    DB.from("wishlist_items").select("*").order("created_at",{ascending:true})
+    DB.from("habits_activities").select("*").order("created_at",{ascending:true}),
+    DB.from("habits_activity_days").select("*"),
+    DB.from("habits_activity_history").select("*").order("position",{ascending:true}),
+    DB.from("habits_wishlist_items").select("*").order("created_at",{ascending:true})
   ]);
   results.forEach(function(r){if(r.error)throw r.error});
   var aRows=results[0].data||[],dRows=results[1].data||[],hRows=results[2].data||[],wRows=results[3].data||[];
@@ -618,7 +618,7 @@ async function boot(){
     var sr=await DB.auth.getSession();if(sr.error)throw sr.error;
     var session=sr.data.session;if(!session){location.replace("./index.html");return}
     CURRENT_USER=session.user;
-    var pr=await DB.from("profiles").select("username,role,approved,workspace_initialized").eq("id",CURRENT_USER.id).single();
+    var pr=await DB.from("habits_profiles").select("username,role,approved,workspace_initialized").eq("id",CURRENT_USER.id).single();
     if(pr.error)throw pr.error;
     if(!pr.data.approved){await DB.auth.signOut();document.body.innerHTML='<main><div class="card"><h2>Účet čaká na schválenie</h2><p>Administrátor ešte nepovolil prístup. Po schválení sa môžeš prihlásiť.</p><p><a href="./index.html" style="color:#fff">Späť na prihlásenie</a></p></div></main>';return}
     document.getElementById("accountName").textContent=pr.data.username||"";
@@ -631,7 +631,7 @@ async function boot(){
         DB_READY=true;
         if(items.length||WL.length)scheduleRemoteSave();
       }else{DB_READY=true}
-      var mr=await DB.rpc("mark_habits_initialized");if(mr.error)throw mr.error;
+      var mr=await DB.rpc("habits_mark_habits_initialized");if(mr.error)throw mr.error;
     }else{DB_READY=true}
     render();setTab("ov");
   }catch(e){
