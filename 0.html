@@ -8,17 +8,29 @@
 .empty{margin-top:18px;padding:16px;border:1px solid #333;border-radius:12px;background:#111;color:#cbd5e1}
 @media(max-width:800px){.buttons{grid-template-columns:repeat(2,1fr)}}@media(max-width:480px){.buttons{grid-template-columns:1fr}.nav-btn{min-height:58px}}
 </style></head><body><main class="container"><div class="userinfo" id="userInfo"></div><div id="menu"></div><button class="logout" id="logoutBtn" type="button">Odhlásiť sa</button></main>
+<script src="./config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
-(function(){
+(async function(){
  let session=null;try{session=JSON.parse(localStorage.getItem("session_user")||"null")}catch(e){}
- if(!session||!session.approved){location.replace("./index.html");return}
- document.getElementById("userInfo").textContent="Prihlásený: "+(session.username||"Používateľ")+" | Rola: "+(session.role||"user");
- const all=["1.html","2.html","3.html","4.html","5.html","6.html","7.html"];
- const allowed=session.role==="admin"?all:(session.allowed_pages||[]);
- const visible=all.filter(p=>allowed.includes(p));if(session.role==="admin")visible.push("admin.html");
- const menu=document.getElementById("menu");
- if(visible.length){const grid=document.createElement("div");grid.className="buttons";visible.forEach(page=>{const a=document.createElement("a");a.className="nav-btn";a.href=page;a.textContent=page==="admin.html"?"Admin portal":page.replace(".html","");grid.appendChild(a)});menu.appendChild(grid)}
- else{const empty=document.createElement("div");empty.className="empty";empty.textContent="Nemáš pridelený žiadny prístup k stránkam.";menu.appendChild(empty)}
- document.getElementById("logoutBtn").addEventListener("click",()=>{localStorage.removeItem("session_user");location.replace("./index.html")});
+ const cfg=window.APP_CONFIG||{};
+ if(!session||!cfg.SUPABASE_URL||!cfg.SUPABASE_ANON_KEY){location.replace("./index.html");return;}
+ const token=session.habits_token||session.token;
+ if(!token){localStorage.removeItem("session_user");location.replace("./index.html");return;}
+ const db=window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY);
+ try{
+   const {data,error}=await db.rpc("habits_legacy_validate_session",{p_token:token});
+   if(error||!data||data.ok!==true){localStorage.removeItem("session_user");location.replace("./index.html");return;}
+   session={...session,...data,token:token,habits_token:token};
+   localStorage.setItem("session_user",JSON.stringify(session));
+   document.getElementById("userInfo").textContent="Prihlásený: "+(session.username||"Používateľ")+" | Rola: "+(session.role||"user");
+   const all=["1.html","2.html","3.html","4.html","5.html","6.html","7.html"];
+   const allowed=session.is_admin?all:(session.allowed_pages||[]);
+   const visible=all.filter(p=>allowed.includes(p));if(session.is_admin)visible.push("admin.html");
+   const menu=document.getElementById("menu");
+   if(visible.length){const grid=document.createElement("div");grid.className="buttons";visible.forEach(page=>{const a=document.createElement("a");a.className="nav-btn";a.href=page;a.textContent=page==="admin.html"?"Admin portal":page.replace(".html","");grid.appendChild(a)});menu.appendChild(grid);}
+   else{const empty=document.createElement("div");empty.className="empty";empty.textContent="Nemáš pridelený žiadny prístup k stránkam.";menu.appendChild(empty);}
+   document.getElementById("logoutBtn").addEventListener("click",async()=>{try{await db.rpc("habits_legacy_logout",{p_token:token});}catch(e){console.warn(e);}localStorage.removeItem("session_user");location.replace("./index.html");});
+ }catch(e){console.error(e);localStorage.removeItem("session_user");location.replace("./index.html");}
 })();
 </script></body></html>
