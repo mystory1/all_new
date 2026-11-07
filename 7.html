@@ -580,7 +580,8 @@ function scheduleRemoteSave(){
       });
     });
     REMOTE_CHAIN=REMOTE_CHAIN.then(async function(){
-      var result=await DB.rpc("habits_save_habits_workspace",{
+      var result=await DB.rpc("habits_legacy_save_workspace",{
+        p_token:CURRENT_USER.habits_token,
         p_activities:snapshot.activities,
         p_activity_days:snapshot.activity_days,
         p_activity_history:snapshot.activity_history,
@@ -591,14 +592,10 @@ function scheduleRemoteSave(){
   },450);
 }
 async function loadRemoteWorkspace(){
-  var results=await Promise.all([
-    DB.from("habits_activities").select("*").order("created_at",{ascending:true}),
-    DB.from("habits_activity_days").select("*"),
-    DB.from("habits_activity_history").select("*").order("position",{ascending:true}),
-    DB.from("habits_wishlist_items").select("*").order("created_at",{ascending:true})
-  ]);
-  results.forEach(function(r){if(r.error)throw r.error});
-  var aRows=results[0].data||[],dRows=results[1].data||[],hRows=results[2].data||[],wRows=results[3].data||[];
+  var result=await DB.rpc("habits_legacy_load_workspace",{p_token:CURRENT_USER.habits_token});
+  if(result.error)throw result.error;
+  var payload=result.data||{};
+  var aRows=payload.activities||[],dRows=payload.activity_days||[],hRows=payload.activity_history||[],wRows=payload.wishlist_items||[];
   var byId={};
   items=aRows.map(function(r){
     var a=norm({id:r.id,name:r.name,cat:r.category||"",color:r.color||COLORS[0],start:r.start_date,end:r.end_date||null,goal:r.goal_days||0,auto:r.auto_count,base:r.base_count||0,ended:!!r.ended,done:{},notes:{},history:[]});
@@ -623,12 +620,23 @@ async function boot(){
       location.replace("./index.html");
     });
 
-    // Legacy login uses profiles.password_hash + localStorage session_user,
-    // not Supabase Auth. Keep the existing Habits workspace in this browser.
-    // Cloud writes via auth.uid() RPC are intentionally disabled in this mode.
-    DB_READY=false;
+    if(!session.habits_token){
+      document.body.innerHTML='<main><div class="card"><h2>Vyžaduje sa nové prihlásenie</h2><p>Odhlás sa a znova prihlás. Potrebujeme vytvoriť bezpečnú reláciu pre synchronizáciu.</p><button class="primary" onclick="localStorage.removeItem(\'session_user\');location.replace(\'./index.html\')">Prejsť na prihlásenie</button></div></main>';return;
+    }
+    DB=window.supabase.createClient(APP_CONFIG.SUPABASE_URL,APP_CONFIG.SUPABASE_ANON_KEY);
+    CURRENT_USER=session;
     wLoad();
     load();
+    var localItems=items.slice();
+    var localWishlist=WL.slice();
+    var remote=await loadRemoteWorkspace();
+    if(!remote.hasRemoteData){
+      // Preserve this browser's existing workspace and import it once.
+      items=localItems;
+      WL=localWishlist;
+    }
+    DB_READY=true;
+    if(!remote.hasRemoteData && (items.length||WL.length)) scheduleRemoteSave();
     render();
     setTab("ov");
   }catch(e){
