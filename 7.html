@@ -620,6 +620,13 @@ async function boot(){
       location.replace("./index.html");
     });
 
+    // The login RPC returns the session token as `token`.
+    // The workspace RPC expects the same value under `habits_token`.
+    // Normalize the property name and persist it so navigation through 0.html keeps it.
+    if(!session.habits_token && session.token){
+      session.habits_token=session.token;
+      localStorage.setItem("session_user",JSON.stringify(session));
+    }
     if(!session.habits_token){
       document.body.innerHTML='<main><div class="card"><h2>Vyžaduje sa nové prihlásenie</h2><p>Odhlás sa a znova prihlás. Potrebujeme vytvoriť bezpečnú reláciu pre synchronizáciu.</p><button class="primary" onclick="localStorage.removeItem(\'session_user\');location.replace(\'./index.html\')">Prejsť na prihlásenie</button></div></main>';return;
     }
