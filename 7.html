@@ -248,7 +248,7 @@ if(!a.done||typeof a.done!=="object")a.done={};if(!a.notes||typeof a.notes!=="ob
 if(!Array.isArray(a.history))a.history=[];a.cat=a.cat||"";a.base=Math.max(0,parseInt(a.base,10)||0);return a}
 function load(){try{var r=localStorage.getItem(KEY);items=r?JSON.parse(r):[]}catch(x){items=[]}
 if(!Array.isArray(items))items=[];items=items.filter(function(a){return a&&a.id&&a.name&&a.start}).map(norm)}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(items.map(function(a){var c={};for(var k in a)c[k]=a[k];c.done=pack(a.done);return c})));}catch(x){}scheduleRemoteSave()}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(items.map(function(a){var c={};for(var k in a)c[k]=a[k];c.done=pack(a.done);return c}))) }catch(x){}scheduleRemoteSave()}
 function pad(n){return String(n).padStart(2,"0")}
 function todayStr(){var d=new Date();return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())}
 function pd(s){var a=s.split("-").map(Number);return Date.UTC(a[0],a[1]-1,a[2])}
