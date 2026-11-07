@@ -610,16 +610,7 @@ async function boot(){
   try{
     var session=null;
     try{session=JSON.parse(localStorage.getItem("session_user")||"null")}catch(e){}
-    if(!session||!session.approved){location.replace("./index.html");return}
-    if(session.role!=="admin" && !(session.allowed_pages||[]).includes("7.html")){
-      document.body.innerHTML='<main><div class="card"><h2>Nemáš prístup</h2><p>Administrátor ti zatiaľ nepovolil túto stránku.</p><p><a href="./0.html" style="color:#fff">Späť do menu</a></p></div></main>';return;
-    }
-    document.getElementById("accountName").textContent=session.username||"";
-    document.getElementById("logoutBtn").addEventListener("click",function(){
-      localStorage.removeItem("session_user");
-      location.replace("./index.html");
-    });
-
+    if(!session){location.replace("./index.html");return}
     // The login RPC returns the session token as `token`.
     // The workspace RPC expects the same value under `habits_token`.
     // Normalize the property name and persist it so navigation through 0.html keeps it.
@@ -631,6 +622,19 @@ async function boot(){
       document.body.innerHTML='<main><div class="card"><h2>Vyžaduje sa nové prihlásenie</h2><p>Odhlás sa a znova prihlás. Potrebujeme vytvoriť bezpečnú reláciu pre synchronizáciu.</p><button class="primary" onclick="localStorage.removeItem(\'session_user\');location.replace(\'./index.html\')">Prejsť na prihlásenie</button></div></main>';return;
     }
     DB=window.supabase.createClient(APP_CONFIG.SUPABASE_URL,APP_CONFIG.SUPABASE_ANON_KEY);
+    var auth=await DB.rpc("habits_legacy_validate_session",{p_token:session.habits_token});
+    if(auth.error||!auth.data||auth.data.ok!==true){localStorage.removeItem("session_user");location.replace("./index.html");return;}
+    session=Object.assign({},session,auth.data,{token:session.habits_token,habits_token:session.habits_token});
+    localStorage.setItem("session_user",JSON.stringify(session));
+    if(!session.is_admin && !(session.allowed_pages||[]).includes("7.html")){
+      document.body.innerHTML='<main><div class="card"><h2>Nemáš prístup</h2><p>Administrátor ti zatiaľ nepovolil túto stránku.</p><p><a href="./0.html" style="color:#fff">Späť do menu</a></p></div></main>';return;
+    }
+    document.getElementById("accountName").textContent=session.username||"";
+    document.getElementById("logoutBtn").addEventListener("click",async function(){
+      try{await DB.rpc("habits_legacy_logout",{p_token:session.habits_token});}catch(e){console.warn(e);}
+      localStorage.removeItem("session_user");
+      location.replace("./index.html");
+    });
     CURRENT_USER=session;
     wLoad();
     load();
