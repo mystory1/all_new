@@ -50,10 +50,9 @@ window.addEventListener("load",()=>{
  }
  async function doLogin(){
   try{const u=loginUsername.value.trim(),p=loginPassword.value;if(!u||!p){msg.textContent="Vyplň meno a heslo.";return}
-   const user=await loadUser(u);if(!user){msg.textContent="Používateľ neexistuje.";return}
-   if(!user.approved){msg.textContent="Účet čaká na schválenie administrátorom.";return}
-   if(user.password_hash!==p){msg.textContent="Neplatné prihlasovacie údaje.";return}
-   const session={id:user.id,username:user.username,email:user.email,role:user.role||"user",approved:!!user.approved,allowed_pages:user.allowed_pages||[]};
+   const {data:session,error}=await supabase.rpc("habits_legacy_login",{p_username:u,p_password:p});
+   if(error)throw error;
+   if(!session||!session.token)throw new Error("Nepodarilo sa vytvoriť prihlasovaciu reláciu.");
    localStorage.setItem("session_user",JSON.stringify(session));msg.textContent="Prihlásenie úspešné.";location.assign("./0.html");
   }catch(e){msg.textContent="ERR "+(e.message||e)}
  }
