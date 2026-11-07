@@ -635,6 +635,12 @@ async function boot(){
       localStorage.removeItem("session_user");
       location.replace("./index.html");
     });
+    // Browser-local workspace must be isolated per account.
+    // Never reuse the old shared keys across different signed-in users.
+    var accountStorageSuffix=String(session.id||'').replace(/[^a-zA-Z0-9_-]/g,'');
+    if(!accountStorageSuffix) throw new Error('Nepodarilo sa identifikovať používateľský účet.');
+    KEY='aktivity_v1_'+accountStorageSuffix;
+    WLK='aktivity_wish_v1_'+accountStorageSuffix;
     CURRENT_USER=session;
     wLoad();
     load();
