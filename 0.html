@@ -42,7 +42,7 @@
       const {data:{user},error:userError}=await supabase.auth.getUser();
       if(userError) throw userError;
       if(!user){location.replace("./index.html");return;}
-      const {data:profile,error:profileError}=await supabase.from("profiles")
+      const {data:profile,error:profileError}=await supabase.from("habits_profiles")
         .select("username,role,approved,allowed_pages").eq("id",user.id).single();
       if(profileError) throw profileError;
       if(!profile.approved){
