@@ -1,96 +1,24 @@
 <!DOCTYPE html>
-<html lang="sk">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Menu</title>
-  <style>
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{min-height:100vh;background:#000;color:#fff;font-family:Arial,sans-serif;display:flex;align-items:center;justify-content:center;padding:20px}
-    .container{width:100%;max-width:700px;text-align:center}
-    .userinfo{margin-bottom:16px;padding:14px 16px;border:1px solid #333;border-radius:12px;background:#111;color:#e5e7eb;font-size:14px;line-height:1.45}
-    .userinfo strong{color:#fff}
-    .buttons{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
-    .nav-btn{display:flex;align-items:center;justify-content:center;min-height:64px;text-decoration:none;color:#fff;background:#1a1a1a;border:1px solid #333;border-radius:12px;font-size:1.1rem;font-weight:600;transition:transform .2s,background .2s,border-color .2s;user-select:none}
-    .nav-btn:hover{background:#2a2a2a;border-color:#555;transform:translateY(-2px)}
-    .logout{margin-top:18px;display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:0 18px;color:#fff;background:#ef4444;border:1px solid #b91c1c;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer}
-    .empty{margin-top:18px;padding:16px;border:1px solid #333;border-radius:12px;background:#111;color:#cbd5e1}
-    .error{margin-top:18px;color:#fca5a5;line-height:1.5}
-    @media(max-width:800px){.buttons{grid-template-columns:repeat(2,1fr)}}
-    @media(max-width:480px){.buttons{grid-template-columns:1fr}.nav-btn{min-height:58px}}
-  </style>
-</head>
-<body>
-  <main class="container">
-    <div class="userinfo" id="userInfo">Overujem prihlásenie…</div>
-    <div id="menu"></div>
-    <button class="logout" id="logoutBtn" type="button" hidden>Odhlásiť sa</button>
-  </main>
-  <script src="./config.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <script>
-  (async function(){
-    const userInfo=document.getElementById("userInfo");
-    const menu=document.getElementById("menu");
-    const logoutBtn=document.getElementById("logoutBtn");
-    try{
-      if(!window.APP_CONFIG || !APP_CONFIG.SUPABASE_URL || !APP_CONFIG.SUPABASE_ANON_KEY) throw new Error("Chýba konfigurácia Supabase v config.js.");
-      const supabase=window.supabase.createClient(APP_CONFIG.SUPABASE_URL,APP_CONFIG.SUPABASE_ANON_KEY);
-      const {data:{session},error:sessionError}=await supabase.auth.getSession();
-      if(sessionError) throw sessionError;
-      if(!session){location.replace("./index.html");return;}
-      const {data:{user},error:userError}=await supabase.auth.getUser();
-      if(userError) throw userError;
-      if(!user){location.replace("./index.html");return;}
-      const {data:profile,error:profileError}=await supabase.from("habits_profiles")
-        .select("username,role,approved,allowed_pages").eq("id",user.id).single();
-      if(profileError) throw profileError;
-      if(!profile.approved){
-        await supabase.auth.signOut();
-        userInfo.textContent="Účet čaká na schválenie administrátorom.";
-        menu.textContent="";
-        return;
-      }
-      userInfo.replaceChildren();
-      const line1=document.createElement("div");
-      const b1=document.createElement("strong"); b1.textContent="Prihlásený: ";
-      line1.append(b1,document.createTextNode(profile.username||"Používateľ"));
-      const line2=document.createElement("div");
-      const b2=document.createElement("strong"); b2.textContent="Rola: ";
-      line2.append(b2,document.createTextNode(profile.role||"user"));
-      userInfo.append(line1,line2);
-
-      const allPages=["1.html","2.html","3.html","4.html","5.html","6.html","7.html"];
-      const allowed=profile.role==="admin" ? allPages : (profile.allowed_pages||[]);
-      const visible=allPages.filter(p=>allowed.includes(p));
-      if(profile.role==="admin") visible.push("admin.html");
-
-      if(visible.length){
-        const buttons=document.createElement("div"); buttons.className="buttons";
-        visible.forEach(page=>{
-          const a=document.createElement("a");
-          a.className="nav-btn"; a.href=page;
-          a.textContent=page==="admin.html"?"Admin portal":page.replace(".html","");
-          buttons.appendChild(a);
-        });
-        menu.appendChild(buttons);
-      }else{
-        const empty=document.createElement("div"); empty.className="empty";
-        empty.textContent="Nemáš pridelený žiadny prístup k stránkam.";
-        menu.appendChild(empty);
-      }
-      logoutBtn.hidden=false;
-      logoutBtn.addEventListener("click",async()=>{
-        const {error}=await supabase.auth.signOut();
-        if(error){alert("Odhlásenie sa nepodarilo: "+error.message);return;}
-        location.replace("./index.html");
-      });
-    }catch(e){
-      console.error(e);
-      userInfo.textContent="Nepodarilo sa načítať menu: "+(e.message||e);
-      menu.innerHTML='<div class="error">Skontroluj Supabase konfiguráciu, databázovú schému a prístupové pravidlá.</div>';
-    }
-  })();
-  </script>
-</body>
-</html>
+<html lang="sk"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Menu</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}body{min-height:100vh;background:#000;color:#fff;font-family:Arial,sans-serif;display:flex;align-items:center;justify-content:center;padding:20px}
+.container{width:100%;max-width:700px;text-align:center}.userinfo{margin-bottom:16px;padding:14px 16px;border:1px solid #333;border-radius:12px;background:#111;color:#e5e7eb;font-size:14px;line-height:1.45}
+.buttons{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}.nav-btn{display:flex;align-items:center;justify-content:center;min-height:64px;text-decoration:none;color:#fff;background:#1a1a1a;border:1px solid #333;border-radius:12px;font-size:1.1rem;font-weight:600}
+.nav-btn:hover{background:#2a2a2a}.logout{margin-top:18px;min-height:52px;padding:0 18px;color:#fff;background:#ef4444;border:1px solid #b91c1c;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer}
+.empty{margin-top:18px;padding:16px;border:1px solid #333;border-radius:12px;background:#111;color:#cbd5e1}
+@media(max-width:800px){.buttons{grid-template-columns:repeat(2,1fr)}}@media(max-width:480px){.buttons{grid-template-columns:1fr}.nav-btn{min-height:58px}}
+</style></head><body><main class="container"><div class="userinfo" id="userInfo"></div><div id="menu"></div><button class="logout" id="logoutBtn" type="button">Odhlásiť sa</button></main>
+<script>
+(function(){
+ let session=null;try{session=JSON.parse(localStorage.getItem("session_user")||"null")}catch(e){}
+ if(!session||!session.approved){location.replace("./index.html");return}
+ document.getElementById("userInfo").textContent="Prihlásený: "+(session.username||"Používateľ")+" | Rola: "+(session.role||"user");
+ const all=["1.html","2.html","3.html","4.html","5.html","6.html","7.html"];
+ const allowed=session.role==="admin"?all:(session.allowed_pages||[]);
+ const visible=all.filter(p=>allowed.includes(p));if(session.role==="admin")visible.push("admin.html");
+ const menu=document.getElementById("menu");
+ if(visible.length){const grid=document.createElement("div");grid.className="buttons";visible.forEach(page=>{const a=document.createElement("a");a.className="nav-btn";a.href=page;a.textContent=page==="admin.html"?"Admin portal":page.replace(".html","");grid.appendChild(a)});menu.appendChild(grid)}
+ else{const empty=document.createElement("div");empty.className="empty";empty.textContent="Nemáš pridelený žiadny prístup k stránkam.";menu.appendChild(empty)}
+ document.getElementById("logoutBtn").addEventListener("click",()=>{localStorage.removeItem("session_user");location.replace("./index.html")});
+})();
+</script></body></html>
