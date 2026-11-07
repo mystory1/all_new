@@ -611,32 +611,29 @@ async function loadRemoteWorkspace(){
 }
 async function boot(){
   try{
-    if(!window.APP_CONFIG||!APP_CONFIG.SUPABASE_URL||!APP_CONFIG.SUPABASE_ANON_KEY||APP_CONFIG.SUPABASE_URL.indexOf("YOUR_PROJECT")>=0||APP_CONFIG.SUPABASE_ANON_KEY.indexOf("YOUR_SUPABASE")>=0){
-      document.body.innerHTML='<main><div class="card"><h2>Chýba konfigurácia Supabase</h2><p>Vyplň SUPABASE_URL a SUPABASE_ANON_KEY v súbore config.js a obnov stránku.</p></div></main>';return;
+    var session=null;
+    try{session=JSON.parse(localStorage.getItem("session_user")||"null")}catch(e){}
+    if(!session||!session.approved){location.replace("./index.html");return}
+    if(session.role!=="admin" && !(session.allowed_pages||[]).includes("7.html")){
+      document.body.innerHTML='<main><div class="card"><h2>Nemáš prístup</h2><p>Administrátor ti zatiaľ nepovolil túto stránku.</p><p><a href="./0.html" style="color:#fff">Späť do menu</a></p></div></main>';return;
     }
-    DB=window.supabase.createClient(APP_CONFIG.SUPABASE_URL,APP_CONFIG.SUPABASE_ANON_KEY);
-    var sr=await DB.auth.getSession();if(sr.error)throw sr.error;
-    var session=sr.data.session;if(!session){location.replace("./index.html");return}
-    CURRENT_USER=session.user;
-    var pr=await DB.from("habits_profiles").select("username,role,approved,workspace_initialized").eq("id",CURRENT_USER.id).single();
-    if(pr.error)throw pr.error;
-    if(!pr.data.approved){await DB.auth.signOut();document.body.innerHTML='<main><div class="card"><h2>Účet čaká na schválenie</h2><p>Administrátor ešte nepovolil prístup. Po schválení sa môžeš prihlásiť.</p><p><a href="./index.html" style="color:#fff">Späť na prihlásenie</a></p></div></main>';return}
-    document.getElementById("accountName").textContent=pr.data.username||"";
-    document.getElementById("logoutBtn").addEventListener("click",async function(){await DB.auth.signOut();location.replace("./index.html")});
-    var loaded=await loadRemoteWorkspace();
-    if(!pr.data.workspace_initialized){
-      if(!loaded.hasRemoteData){
-        // One-time import of this browser's existing localStorage data.
-        wLoad();load();
-        DB_READY=true;
-        if(items.length||WL.length)scheduleRemoteSave();
-      }else{DB_READY=true}
-      var mr=await DB.rpc("habits_mark_habits_initialized");if(mr.error)throw mr.error;
-    }else{DB_READY=true}
-    render();setTab("ov");
+    document.getElementById("accountName").textContent=session.username||"";
+    document.getElementById("logoutBtn").addEventListener("click",function(){
+      localStorage.removeItem("session_user");
+      location.replace("./index.html");
+    });
+
+    // Legacy login uses profiles.password_hash + localStorage session_user,
+    // not Supabase Auth. Keep the existing Habits workspace in this browser.
+    // Cloud writes via auth.uid() RPC are intentionally disabled in this mode.
+    DB_READY=false;
+    wLoad();
+    load();
+    render();
+    setTab("ov");
   }catch(e){
     console.error(e);
-    document.body.innerHTML='<main><div class="card"><h2>Nepodarilo sa načítať aplikáciu</h2><p style="color:#aaa;line-height:1.6">'+esc(e&&e.message?e.message:"Neznáma chyba")+'</p><p>Skontroluj Supabase SQL, konfiguráciu a pravidlá prístupu.</p><button class="primary" onclick="location.reload()">Skúsiť znova</button></div></main>';
+    document.body.innerHTML='<main><div class="card"><h2>Nepodarilo sa načítať aplikáciu</h2><p style="color:#aaa;line-height:1.6">'+esc(e&&e.message?e.message:"Neznáma chyba")+'</p><button class="primary" onclick="location.reload()">Skúsiť znova</button></div></main>';
   }
 }
 boot();
