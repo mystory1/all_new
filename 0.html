@@ -20,7 +20,7 @@
 
     document.getElementById('userInfo').innerHTML = `<strong>Prihlásený:</strong> ${me.name || me.username || 'Neznámy používateľ'}<br><strong>Rola:</strong> ${me.role || '—'}`
 
-    const allPages = ['1.html','2.html','3.html','4.html','5.html', '6.html']
+    const allPages = ['1.html','2.html','3.html','4.html','5.html', '6.html', '7.html']
     const allowed = me.role === 'admin' ? ['0.html', ...allPages, 'admin.html'] : (me.allowed_pages || [])
     const menu = document.getElementById('menu')
 
