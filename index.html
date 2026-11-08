@@ -1,62 +1,118 @@
 <!DOCTYPE html>
 <html lang="sk">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Účet</title>
+<meta charset="UTF-8">
+<meta name="theme-color" content="#000000">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Účet – Habits</title>
 <style>
-:root{--bg:#0a0a0a;--card:#111;--line:#2d2d2d;--line2:#444;--text:#f2f2f2;--muted:#a6a6a6;--input:#0d0d0d}
-*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;font-family:Inter,Segoe UI,Arial,sans-serif;background:radial-gradient(circle at top,#141414 0%,#0a0a0a 58%);color:var(--text)}
-.wrap{width:100%;max-width:420px}.card{background:rgba(17,17,17,.92);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:0 18px 50px rgba(0,0,0,.45)}
-.brand{font-size:22px;font-weight:800;color:#fff;margin-bottom:16px;text-align:center}.tabs{display:flex;gap:8px;margin-bottom:16px;padding:4px;background:#0d0d0d;border:1px solid var(--line);border-radius:14px}
-.tab{flex:1;border:1px solid transparent;background:transparent;color:var(--muted);border-radius:10px;padding:11px 12px;cursor:pointer;font-weight:700}.tab.active{background:#f2f2f2;color:#111;border-color:#f2f2f2}
-.panel{display:none}.panel.active{display:block}.field{margin-bottom:12px}input{width:100%;padding:13px 14px;border-radius:12px;border:1px solid var(--line);background:var(--input);color:var(--text);outline:none;font-size:15px}
-button.submit{width:100%;padding:13px 14px;border:1px solid var(--line2);border-radius:12px;background:#e5e5e5;color:#111;font-weight:800;cursor:pointer;font-size:15px}
-.msg{margin-top:14px;min-height:22px;white-space:pre-wrap;font-size:14px;color:var(--muted);line-height:1.4;text-align:center}.hint{margin-top:10px;text-align:center;color:#7f7f7f;font-size:12px}
-</style></head>
-<body><div class="wrap"><div class="card">
-<div class="brand">Účet</div>
-<div class="tabs"><button class="tab active" id="loginTab" type="button">Prihlásenie</button><button class="tab" id="signupTab" type="button">Registrácia</button></div>
-<div class="panel active" id="loginPanel">
-<div class="field"><input id="loginUsername" autocomplete="username" placeholder="Meno"></div>
-<div class="field"><input id="loginPassword" type="password" autocomplete="current-password" placeholder="Heslo"></div>
-<button class="submit" id="loginBtn" type="button">Prihlásiť sa</button>
-</div>
-<div class="panel" id="signupPanel">
-<div class="field"><input id="signupUsername" autocomplete="username" placeholder="Meno"></div>
-<div class="field"><input id="signupPassword" type="password" autocomplete="new-password" placeholder="Heslo"></div>
-<button class="submit" id="signupBtn" type="button">Registrovať</button>
-</div>
-<div class="msg" id="msg" role="status" aria-live="polite"></div>
-<div class="hint">Minimalistický prístup. Tmavý režim. Bez zbytočností.</div>
-</div></div>
+:root{color-scheme:dark;--card:#0e0e0e;--line:#222;--txt:#f2f2f2;--mut:#8a8a8a;--input:#000}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{min-height:100%;margin:0;background:#000;color:var(--txt)}
+body{min-height:100vh;display:grid;place-items:center;padding:calc(18px + env(safe-area-inset-top,0px)) 14px calc(18px + env(safe-area-inset-bottom,0px));font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.4}
+.wrap{width:100%;max-width:420px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 16px;box-shadow:0 18px 50px rgba(0,0,0,.35)}
+.brand{text-align:center;font-size:1.5rem;font-weight:700;letter-spacing:-.02em;margin:2px 0 18px}
+.tabs{display:flex;background:#101010;border:1px solid #1d1d1d;border-radius:12px;padding:3px;gap:3px;margin-bottom:14px}
+.tab{flex:1;min-width:0;background:none;color:var(--mut);padding:10px 6px;font:inherit;font-size:.88rem;border:0;border-radius:9px;font-weight:600;cursor:pointer}
+.tab.active{background:#fff;color:#000}
+.panel{display:none}.panel.active{display:block}
+form{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+.field{display:grid;gap:5px;min-width:0}
+label{font-size:.75rem;color:var(--mut)}
+.fld{display:block;position:relative;width:100%;height:42px;background:var(--input);border:1px solid #2a2a2a;border-radius:10px;overflow:hidden}
+.fld:focus-within{border-color:#fff}
+.fld input{display:block;width:100%;height:100%;min-width:0;margin:0;border:0;border-radius:0;background:transparent;color:var(--txt);padding:0 12px;font:inherit;font-size:16px;outline:none}
+.fld input:focus{outline:none}
+button{font:inherit;cursor:pointer;touch-action:manipulation}
+.submit{width:100%;min-height:44px;background:#fff;color:#000;padding:11px 14px;border:1px solid #fff;border-radius:11px;font-weight:700;font-size:.95rem}
+.submit:disabled{opacity:.55;cursor:wait}
+.msg{margin-top:13px;min-height:20px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:.84rem;color:var(--mut);line-height:1.45;text-align:center}
+.msg.error{color:#ff7777}
+.hint{margin-top:12px;text-align:center;color:#777;font-size:.72rem}
+@media(max-width:360px){.card{padding:16px 13px}.brand{font-size:1.35rem}.tab{font-size:.82rem}}
+@media(prefers-reduced-motion:no-preference){.card{animation:appear .28s ease-out}@keyframes appear{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<section class="card" aria-label="Používateľský účet">
+  <h1 class="brand">Účet</h1>
+  <div class="tabs" role="tablist" aria-label="Typ účtu">
+    <button class="tab active" id="loginTab" type="button" role="tab" aria-selected="true">Prihlásenie</button>
+    <button class="tab" id="signupTab" type="button" role="tab" aria-selected="false">Registrácia</button>
+  </div>
+  <section class="panel active" id="loginPanel" role="tabpanel">
+    <form id="loginForm" novalidate>
+      <label class="field">Meno<span class="fld"><input id="loginUsername" autocomplete="username" placeholder="Zadaj meno" autocapitalize="none"></span></label>
+      <label class="field">Heslo<span class="fld"><input id="loginPassword" type="password" autocomplete="current-password" placeholder="Zadaj heslo"></span></label>
+      <button class="submit" id="loginBtn" type="submit">Prihlásiť sa</button>
+    </form>
+  </section>
+  <section class="panel" id="signupPanel" role="tabpanel">
+    <form id="signupForm" novalidate>
+      <label class="field">Meno<span class="fld"><input id="signupUsername" autocomplete="username" placeholder="Zvoľ si meno" autocapitalize="none"></span></label>
+      <label class="field">Heslo<span class="fld"><input id="signupPassword" type="password" autocomplete="new-password" placeholder="Zvoľ si heslo"></span></label>
+      <button class="submit" id="signupBtn" type="submit">Registrovať</button>
+    </form>
+  </section>
+  <div class="msg" id="msg" role="status" aria-live="polite"></div>
+  <div class="hint">Habits · Jednoduché sledovanie každodenných aktivít</div>
+</section>
+</main>
 <script src="./config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
 window.addEventListener("load",()=>{
- const {SUPABASE_URL,SUPABASE_ANON_KEY}=window.APP_CONFIG||{};
- const supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
- const msg=document.getElementById("msg"),loginTab=document.getElementById("loginTab"),signupTab=document.getElementById("signupTab");
+ const cfg=window.APP_CONFIG||{};
+ const msg=document.getElementById("msg");
+ const loginTab=document.getElementById("loginTab"),signupTab=document.getElementById("signupTab");
  const loginPanel=document.getElementById("loginPanel"),signupPanel=document.getElementById("signupPanel");
  const loginUsername=document.getElementById("loginUsername"),loginPassword=document.getElementById("loginPassword");
  const signupUsername=document.getElementById("signupUsername"),signupPassword=document.getElementById("signupPassword");
- function setMode(m){loginTab.classList.toggle("active",m==="login");signupTab.classList.toggle("active",m==="signup");loginPanel.classList.toggle("active",m==="login");signupPanel.classList.toggle("active",m==="signup");msg.textContent=""}
- loginTab.addEventListener("click",()=>setMode("login"));signupTab.addEventListener("click",()=>setMode("signup"));
+ if(!cfg.SUPABASE_URL||!cfg.SUPABASE_ANON_KEY||!window.supabase){msg.textContent="Aplikáciu sa nepodarilo pripojiť k databáze.";msg.classList.add("error");return}
+ const db=window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY);
+ function setMode(mode){
+  const login=mode==="login";
+  loginTab.classList.toggle("active",login);signupTab.classList.toggle("active",!login);
+  loginTab.setAttribute("aria-selected",String(login));signupTab.setAttribute("aria-selected",String(!login));
+  loginPanel.classList.toggle("active",login);signupPanel.classList.toggle("active",!login);
+  msg.textContent="";msg.classList.remove("error");
+ }
+ function showError(e){msg.textContent="ERR "+(e&&e.message?e.message:String(e));msg.classList.add("error")}
+ loginTab.addEventListener("click",()=>setMode("login"));
+ signupTab.addEventListener("click",()=>setMode("signup"));
  async function doSignup(){
-  try{const u=signupUsername.value.trim(),p=signupPassword.value;if(!u||!p){msg.textContent="Vyplň meno a heslo.";return}
-   const {data,error}=await supabase.rpc("habits_legacy_signup",{p_username:u,p_password:p});
+  const btn=document.getElementById("signupBtn");
+  try{
+   const u=signupUsername.value.trim(),p=signupPassword.value;
+   if(!u||!p){msg.textContent="Vyplň meno a heslo.";return}
+   btn.disabled=true;msg.classList.remove("error");msg.textContent="Registrujem…";
+   const {data,error}=await db.rpc("habits_legacy_signup",{p_username:u,p_password:p});
    if(error)throw error;
    if(!data||data.ok!==true)throw new Error(data&&data.message?data.message:"Registrácia sa nepodarila.");
    msg.textContent="Registrácia úspešná. Počkaj na schválenie adminom.";
-  }catch(e){msg.textContent="ERR "+(e.message||e)}
+   signupPassword.value="";
+  }catch(e){showError(e)}finally{btn.disabled=false}
  }
  async function doLogin(){
-  try{const u=loginUsername.value.trim(),p=loginPassword.value;if(!u||!p){msg.textContent="Vyplň meno a heslo.";return}
-   const {data:session,error}=await supabase.rpc("habits_legacy_login",{p_username:u,p_password:p});
+  const btn=document.getElementById("loginBtn");
+  try{
+   const u=loginUsername.value.trim(),p=loginPassword.value;
+   if(!u||!p){msg.textContent="Vyplň meno a heslo.";return}
+   btn.disabled=true;msg.classList.remove("error");msg.textContent="Prihlasujem…";
+   const {data:session,error}=await db.rpc("habits_legacy_login",{p_username:u,p_password:p});
    if(error)throw error;
    if(!session||!session.token)throw new Error("Nepodarilo sa vytvoriť prihlasovaciu reláciu.");
-   localStorage.setItem("session_user",JSON.stringify(session));msg.textContent="Prihlásenie úspešné.";location.assign("./0.html");
-  }catch(e){msg.textContent="ERR "+(e.message||e)}
+   localStorage.setItem("session_user",JSON.stringify(session));
+   msg.textContent="Prihlásenie úspešné.";
+   location.assign("./0.html");
+  }catch(e){showError(e)}finally{btn.disabled=false}
  }
- document.getElementById("loginBtn").addEventListener("click",doLogin);document.getElementById("signupBtn").addEventListener("click",doSignup);
- loginPassword.addEventListener("keydown",e=>{if(e.key==="Enter")doLogin()});signupPassword.addEventListener("keydown",e=>{if(e.key==="Enter")doSignup()});
+ document.getElementById("loginForm").addEventListener("submit",e=>{e.preventDefault();doLogin()});
+ document.getElementById("signupForm").addEventListener("submit",e=>{e.preventDefault();doSignup()});
 });
-</script></body></html>
+</script>
+</body>
+</html>
