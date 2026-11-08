@@ -207,11 +207,13 @@ body{overflow-anchor:none}
 .ck svg{width:16px;height:16px}
 .done-spacer{display:block;flex:none;width:30px;height:30px}
 .w-sw{position:relative;margin-bottom:10px;border-radius:16px;overflow:hidden;background:#0e0e0e;--p:0}
-.w-del{position:absolute;right:0;top:0;bottom:0;width:132px;display:flex;align-items:stretch;justify-content:stretch;color:#fff;font-weight:700;background:linear-gradient(90deg,#b91c1c,#ef4444);opacity:0;pointer-events:none}
+.w-del{position:absolute;right:0;top:0;bottom:0;width:76px;display:flex;align-items:stretch;justify-content:stretch;color:#fff;font-weight:700;background:linear-gradient(90deg,#b91c1c,#ef4444);opacity:0;pointer-events:none}
 .w-del button{flex:1 1 50%;min-width:0;height:100%;padding:0 4px;background:transparent;color:#fff;font-weight:700;font-size:.9rem;white-space:nowrap}
 .w-del button+button{background:rgba(0,0,0,.28);border-left:1px solid rgba(255,255,255,.22)}
 .wc{position:relative;z-index:1;margin:0;transition:transform .28s cubic-bezier(.22,1,.36,1);touch-action:pan-y}
-.w-sw.open .wc{transform:translateX(-132px)}
+.w-sw.open .wc{transform:translateX(-76px)}
+.w-sw.pd .w-del{width:160px;opacity:1;pointer-events:auto}
+.w-sw.pd .wc{transform:translateX(-160px)}
 .wc{will-change:transform;transition:transform .28s cubic-bezier(.22,1,.36,1)}
 .w-sw.open .w-del{opacity:1;pointer-events:auto}
 .w-sw .wc{z-index:1}
@@ -445,7 +447,7 @@ function renderOv(){var now=todayStr(),box=document.getElementById("v-ov");
 var seg='<div class="seg">'+[["day","Deň"],["week","Týždeň"],["month","Mesiac"],["year","Rok"]].map(function(m){return '<button data-m="'+m[0]+'" class="'+(OV.m===m[0]?"on":"")+'">'+m[1]+'</button>'}).join("")+'</div>';
 if(!items.length){box.innerHTML=seg+'<div class="empty">Zatiaľ žiadne aktivity.<br>Pridaj ich v záložke Aktivity.</div>';return}
 box.innerHTML=seg+(OV.m==="day"?ovDay(now):OV.m==="week"?ovWeek(now):OV.m==="month"?ovMonth(now):ovYear(now))}
-function setTab(x){closeAll();T=x;document.querySelector(".hd h1").textContent=x==="wl"?"Wishlist":"Habits";["ov","act","wl"].forEach(function(k){document.getElementById("v-"+k).hidden=x!==k});
+function setTab(x){closeAll();S.cat="";catOpen=false;var cpReset=document.getElementById("catp");if(cpReset)cpReset.hidden=true;T=x;document.querySelector(".hd h1").textContent=x==="wl"?"Wishlist":"Habits";["ov","act","wl"].forEach(function(k){document.getElementById("v-"+k).hidden=x!==k});
 document.querySelectorAll(".tabs button").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-t")===x)});
 document.getElementById("addb").style.visibility="visible";
 addEl.hidden=true;wEl.hidden=true;addBtn();
@@ -454,7 +456,7 @@ document.querySelector(".tabs").addEventListener("click",function(ev){var b=ev.t
 document.getElementById("v-ov").addEventListener("click",function(ev){
 var m=ev.target.closest("[data-m]");if(m){OV.m=m.getAttribute("data-m");OV.o=0;OV.day=null;renderOv();return}
 var n=ev.target.closest("[data-n]");if(n&&!n.disabled){OV.o=Math.min(0,OV.o+ +n.getAttribute("data-n"));OV.day=null;renderOv();return}
-var day=ev.target.closest("[data-day]");if(day&&!day.disabled){OV.day=day.getAttribute("data-day");renderOv();return}
+var day=ev.target.closest("[data-day]");if(day&&!day.disabled){var picked=day.getAttribute("data-day");OV.day=OV.day===picked?null:picked;renderOv();return}
 });
 function toast(m){var t=document.getElementById("toast");t.textContent=m;t.className="show";clearTimeout(toast.t);toast.t=setTimeout(function(){t.className=""},2200)}
 var addEl=document.getElementById("add");
@@ -572,17 +574,17 @@ else{renderOne(id);if(pp&&pp.id!==id&&pend!==pp)renderOne(pp.id)}});
 list.addEventListener("toggle",function(ev){var d=ev.target,k=d.getAttribute&&d.getAttribute("data-k");if(k)openIds[k]=d.open},true);
 var W=76,sw=null;
 function closeSw(except){list.querySelectorAll(".sw.open,.sw.pd").forEach(function(w){if(w===except)return;if(w.classList.contains("pd")){pend=null;w.querySelector(".del").innerHTML=TRASH}w.classList.remove("open","pd");w.style.removeProperty("--p");w.querySelector(".card").style.transform=""})}
-list.addEventListener("pointerdown",function(ev){var w=ev.target.closest(".sw");closeSw(w);
+list.addEventListener("pointerdown",function(ev){if(ev.pointerType==="touch")return;var w=ev.target.closest(".sw");closeSw(w);
 if(!w||w.classList.contains("pd")||ev.target.closest("input,button,summary,label,details"))return;
 sw={w:w,c:w.querySelector(".card"),x:ev.clientX,y:ev.clientY,sx:0,drag:false,was:w.classList.contains("open"),tx:0,lx:ev.clientX,lt:performance.now(),v:0,id:ev.pointerId}});
-list.addEventListener("pointermove",function(ev){if(!sw)return;
+list.addEventListener("pointermove",function(ev){if(ev.pointerType==="touch"||!sw)return;
 var dx=ev.clientX-sw.x,dy=ev.clientY-sw.y;
 if(!sw.drag){if(Math.abs(dx)>8&&Math.abs(dx)>Math.abs(dy)*1.2){sw.drag=true;sw.sx=sw.x+(dx>0?8:-8);sw.c.style.transition="none";try{sw.c.setPointerCapture(sw.id)}catch(e){}}else return}
 var t=performance.now(),dt=t-sw.lt;if(dt>0)sw.v=.7*sw.v+.3*((ev.clientX-sw.lx)/dt);sw.lx=ev.clientX;sw.lt=t;
 var raw=(sw.was?-W:0)+(ev.clientX-sw.sx);
 sw.tx=raw<-W?-W+(raw+W)*.25:(raw>0?raw*.2:raw);
 sw.c.style.transform="translateX("+sw.tx+"px)";sw.w.style.setProperty("--p",Math.min(1,Math.max(0,-sw.tx/W)))});
-function endSw(){if(!sw)return;var s=sw;sw=null;s.c.style.transition="";
+function endSw(ev){if(ev&&ev.pointerType==="touch")return;if(!sw)return;var s=sw;sw=null;s.c.style.transition="";
 if(s.drag){supClick=Date.now();try{s.c.releasePointerCapture(s.id)}catch(e){}
 var o=(s.v<-.4&&s.tx<-14)?true:s.v>.4?false:s.tx<-W*.4;
 s.w.classList.toggle("open",o);s.c.style.transform=o?"translateX("+(-W)+"px)":"";s.w.style.setProperty("--p",o?1:0)}
@@ -606,7 +608,7 @@ var dragHandle=!w.done?'<button type="button" class="drag-handle" data-drag="wis
 var detail='';
 if(!w.done){detail='<details class="d" data-wk="'+id+'"'+(wOpen[id]?" open":"")+'><summary>⚙</summary><div class="dc"><div class="col"><label>Prianie<span class="fld"><input type="text" class="wt" maxlength="80" value="'+esc(w.text)+'"></span></label><label>Do kedy (nepovinné)<span class="fld"><input type="date" class="wdd" value="'+(w.due||"")+'"></span></label>'+(w.due?'':'<div class="meta">Bez termínu</div>')+'<label>Poznámka (nepovinné)<span class="fld note-fld"><textarea class="wnote" maxlength="1000" placeholder="Doplň poznámku...">'+esc(w.note||"")+'</textarea></span></label><div class="meta">Pridané '+fmt(w.created)+'</div><button class="ghost danger" data-w-a="del">Odstrániť</button></div></div></details>'}
 else{detail='<details class="d" data-wk="'+id+'"'+(wOpen[id]?" open":"")+'><summary>⚙ Detail priania</summary><div class="dc"><div class="col"><div class="meta">Splnené '+fmt(w.done)+'</div>'+(!w.due?'<div class="meta">Bez termínu</div>':'<div class="meta">Termín: '+fmt(w.due)+'</div>')+(w.note?'<div class="sm">'+esc(w.note)+'</div>':'')+'<div class="w-done-actions"><button class="ghost" data-w-a="undone">Vrátiť medzi nesplnené</button><button class="ghost danger" data-w-a="del">Odstrániť</button></div></div></div></details>'}
-return '<div class="w-sw'+(wPend===id?' open':'')+(w.done?' is-done':'')+'" data-wsw="'+id+'"><div class="w-del">'+del+'</div><div class="card wc" data-w="'+id+'" style="--c:'+col+'"><div class="top">'+dragHandle+'<div style="flex:1;min-width:0"><div class="name">'+esc(w.text)+'</div><div class="meta">'+meta+'</div></div><div class="r day-count">'+big+ck+'</div></div>'+bar+detail+'</div></div>'}
+return '<div class="w-sw'+(wPend===id?' open pd':'')+(w.done?' is-done':'')+'" data-wsw="'+id+'"><div class="w-del">'+del+'</div><div class="card wc" data-w="'+id+'" style="--c:'+col+'"><div class="top">'+dragHandle+'<div style="flex:1;min-width:0"><div class="name">'+esc(w.text)+'</div><div class="meta">'+meta+'</div></div><div class="r day-count">'+big+ck+'</div></div>'+bar+detail+'</div></div>'}
 
 function renderWl(){var now=todayStr(),box=document.getElementById("wlist");
 box.querySelectorAll("details[data-wk]").forEach(function(d){wOpen[d.getAttribute("data-wk")]=d.open});
@@ -687,21 +689,21 @@ function beginOrderDrag(data){data.active=true;orderDrag=data;document.body.clas
 // switches that same gesture into reorder mode without requiring a second touch.
 document.addEventListener("touchstart",function(ev){if(ev.touches.length!==1)return;var found=dragTypeCard(ev.target);if(!found)return;
  if(scrollInertiaFrame){cancelAnimationFrame(scrollInertiaFrame);scrollInertiaFrame=0;}cancelOrderPress();if(orderDrag)finishOrderDrag();var t=ev.touches[0],wishDone=found.type==="wishlist"?getWishDone(found.id):false,blocked=!!ev.target.closest("button,input,textarea,select,summary,details,label,a");
- var data={type:found.type,card:found.card,id:found.id,doneState:wishDone,blocked:blocked,dragAllowed:!blocked&&!wishDone,pointerId:"touch",x:t.clientX,y:t.clientY,lastY:t.clientY,lastX:t.clientX,lastTime:performance.now(),velocity:0,moved:false,scrollMode:false,swipeMode:false,swipeTx:0,swipeVelocity:0,active:false,target:null,after:false,scrollStart:window.scrollY,wasOpen:!!(found.type==="wishlist"&&found.card.closest(".w-sw").classList.contains("open"))};orderPressData=data;
+ var data={type:found.type,card:found.card,id:found.id,doneState:wishDone,blocked:blocked,dragAllowed:!blocked&&!wishDone,pointerId:"touch",x:t.clientX,y:t.clientY,lastY:t.clientY,lastX:t.clientX,lastTime:performance.now(),velocity:0,moved:false,scrollMode:false,swipeMode:false,swipeTx:0,swipeVelocity:0,active:false,target:null,after:false,scrollStart:window.scrollY,wasOpen:!!(found.type==="wishlist"?found.card.closest(".w-sw").classList.contains("open"):found.card.classList.contains("open")),swipeCard:found.type==="wishlist"?found.card:found.card.querySelector(":scope>.card")};orderPressData=data;
  if(data.dragAllowed)orderPress=setTimeout(function(){orderPress=null;if(orderPressData===data&&!data.moved){beginOrderDrag(data);}},360);
 },{passive:true});
 document.addEventListener("touchmove",function(ev){if(ev.touches.length!==1)return;var t=ev.touches[0],now=performance.now();
  if(orderDrag&&orderDrag.active){ev.preventDefault();updateOrderTarget(t.clientX,t.clientY);return;}
  var data=orderPressData;if(!data)return;var dx=t.clientX-data.x,dy=t.clientY-data.y;
  if(!data.moved&&Math.hypot(dx,dy)>9){data.moved=true;if(orderPress){clearTimeout(orderPress);orderPress=null;}
-   if(data.type==="wishlist"&&!data.blocked&&Math.abs(dx)>Math.abs(dy)*1.2){data.swipeMode=true;data.card.style.transition="none";wlEl.querySelectorAll(".w-sw.open").forEach(function(x){if(x!==data.card.closest(".w-sw"))x.classList.remove("open")});}
+   if(!data.blocked&&Math.abs(dx)>Math.abs(dy)*1.2){data.swipeMode=true;data.swipeCard.style.transition="none";var selector=data.type==="wishlist"?".w-sw.open":".sw.open",wrapNow=data.type==="wishlist"?data.card.closest(".w-sw"):data.card;document.querySelectorAll(selector).forEach(function(x){if(x!==wrapNow){x.classList.remove("open");var xc=x.querySelector(".card");if(xc)xc.style.removeProperty("transform")}});}
    else data.scrollMode=Math.abs(dy)>Math.abs(dx);
  }
- if(data.swipeMode){ev.preventDefault();var raw=(data.wasOpen?-76:0)+dx;data.swipeTx=raw<-76?-76+(raw+76)*.25:(raw>0?raw*.2:raw);data.card.style.transform="translateX("+data.swipeTx+"px)";var dtS=Math.max(1,now-data.lastTime);data.swipeVelocity=(t.clientX-data.lastX)/dtS;}
+ if(data.swipeMode){ev.preventDefault();var raw=(data.wasOpen?-76:0)+dx;data.swipeTx=raw<-76?-76+(raw+76)*.25:(raw>0?raw*.2:raw);data.swipeCard.style.transform="translateX("+data.swipeTx+"px)";var dtS=Math.max(1,now-data.lastTime);data.swipeVelocity=(t.clientX-data.lastX)/dtS;}
  else if(data.scrollMode){ev.preventDefault();var dt=Math.max(1,now-data.lastTime);var delta=data.lastY-t.clientY;window.scrollBy(0,delta);data.velocity=delta/dt;}
  data.lastX=t.clientX;data.lastY=t.clientY;data.lastTime=now;
 },{passive:false});
-document.addEventListener("touchend",function(){if(orderDrag){finishOrderDrag();orderPressData=null;return;}var data=orderPressData;cancelOrderPress();if(data&&data.swipeMode){var wrap=data.card.closest(".w-sw"),open=(data.swipeVelocity<-.35&&data.swipeTx<-12)?true:(data.swipeVelocity>.35?false:data.swipeTx<-30);data.card.style.transition="transform .24s cubic-bezier(.22,1,.36,1)";wrap.classList.toggle("open",open);data.card.style.removeProperty("transform");setTimeout(function(){if(data.card.isConnected)data.card.style.transition=""},260);supClick=Date.now();}else if(data&&data.scrollMode)startScrollInertia(data.velocity);},{passive:true});
+document.addEventListener("touchend",function(){if(orderDrag){finishOrderDrag();orderPressData=null;return;}var data=orderPressData;cancelOrderPress();if(data&&data.swipeMode){var wrap=data.type==="wishlist"?data.card.closest(".w-sw"):data.card,card=data.swipeCard,open=(data.swipeVelocity<-.35&&data.swipeTx<-12)?true:(data.swipeVelocity>.35?false:data.swipeTx<-30);card.style.transition="transform .24s cubic-bezier(.22,1,.36,1)";wrap.classList.toggle("open",open);if(data.type==="wishlist")card.style.removeProperty("transform");else card.style.transform=open?"translateX(-76px)":"";setTimeout(function(){if(card.isConnected)card.style.transition=""},260);supClick=Date.now();}else if(data&&data.scrollMode)startScrollInertia(data.velocity);},{passive:true});
 document.addEventListener("touchcancel",function(){cancelOrderPress();orderDrag=null;clearDropMarks();clearDragState();},{passive:true});
 // Desktop mouse/pen uses the same insertion algorithm.
 document.addEventListener("pointerdown",function(ev){if(ev.pointerType==="touch")return;var found=dragTypeCard(ev.target);if(!found||ev.target.closest("button,input,textarea,select,summary,details,label,a"))return;
@@ -716,7 +718,7 @@ document.addEventListener("click",function(ev){if(Date.now()-supClick<550&&ev.ta
 document.addEventListener("contextmenu",function(ev){if(ev.target.closest(".sw .card,.wc"))ev.preventDefault()});
 
 // Wishlist swipe-to-delete, matching the activity cards' right-to-left gesture.
-var wSwipe=null,WW=132;
+var wSwipe=null,WW=76;
 wlEl.addEventListener("pointerdown",function(ev){if(ev.pointerType==="touch")return;var wrap=ev.target.closest(".w-sw");if(!wrap||ev.target.closest("button,input,textarea,summary,details,label"))return;
   wlEl.querySelectorAll(".w-sw.open").forEach(function(x){if(x!==wrap)x.classList.remove("open")});
   wSwipe={wrap:wrap,card:wrap.querySelector(".wc"),x:ev.clientX,y:ev.clientY,drag:false,was:wrap.classList.contains("open"),id:ev.pointerId};
