@@ -218,6 +218,14 @@ body{overflow-anchor:none}
 .form-closing{overflow:hidden;transition:height .24s ease,opacity .2s ease}
 
 #v-wl .seg{margin-bottom:10px}
+
+/* Keep primary navigation and relevant filters visible while scrolling. */
+.tabs{position:sticky;top:0;z-index:50;background:#101010;box-shadow:0 8px 14px rgba(0,0,0,.55)}
+#chips{position:sticky;top:47px;z-index:49;background:#000;padding:6px 0 5px;margin:0;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;}
+#chips::-webkit-scrollbar{display:none}
+#catp{position:sticky;top:88px;z-index:48;box-shadow:0 8px 12px rgba(0,0,0,.45)}
+#v-wl .seg{position:sticky;top:47px;z-index:49;background:#101010;}
+
 </style>
 </head>
 <body>
@@ -302,7 +310,8 @@ for(var d=1;d<=len;d++){var ds=yy+"-"+pad(mm+1)+"-"+pad(d),on=isDone(a,ds,now),o
 h+='<span class="'+(on?"on ":"")+(ds===now?"t ":"")+(ok?"":"x ")+(a.notes[ds]?"hn ":"")+(ds===selD?"sel":"")+'"'+(ok?' data-a="sel" data-d="'+ds+'"':'')+'>'+d+'</span>'}
 var dn=isDone(a,selD,now),wk=["Ne","Po","Ut","St","Št","Pi","So"][new Date(pd(selD)).getUTCDay()];
 var XI='<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>';
-var panel=!(sel[a.id]&&sel[a.id]<=now)?'':'<div class="dp"><div class="r" style="justify-content:space-between"><b class="sm">'+wk+' '+fmt(selD)+'</b><div class="r"><button class="ib yes'+(dn?' on':'')+'" data-a="dyes" data-d="'+selD+'" aria-label="Doplniť">'+CHK+'</button><button class="ib no'+(dn?'':' on')+'" data-a="dno" data-d="'+selD+'" aria-label="Zrušiť">'+XI+'</button></div></div><span class="fld"><input type="text" class="nt" data-d="'+selD+'" maxlength="140" placeholder="Poznámka ku dňu" value="'+esc(a.notes[selD]||"")+'"></span></div>';
+var action=dn?'<button class="ib no on" data-a="dno" data-d="'+selD+'" aria-label="Označiť ako nesplnené">'+XI+'</button>':'<button class="ib yes" data-a="dyes" data-d="'+selD+'" aria-label="Označiť ako splnené">'+CHK+'</button>';
+var panel=!(sel[a.id]&&sel[a.id]<=now)?'':'<div class="dp"><div class="r" style="justify-content:space-between"><b class="sm">'+wk+' '+fmt(selD)+'</b><div class="r">'+action+'</div></div><span class="fld"><input type="text" class="nt" data-d="'+selD+'" maxlength="140" placeholder="Poznámka ku dňu" value="'+esc(a.notes[selD]||"")+'"></span></div>';
 return '<div class="cn"><button data-a="pm">‹</button><span>'+MN[mm]+" "+yy+'</span><button data-a="nm">›</button></div>'+h+'</div>'+panel}
 var IC=function(p){return '<svg class="ic" viewBox="0 0 24 24">'+p+'</svg>'};
 var ICN={u:IC('<path d="M4 20h4L19 9a2.1 2.1 0 0 0-3-3L5 17v3z"/><path d="M13.5 7.5l3 3"/>'),c:IC('<rect x="3.5" y="5" width="17" height="15.5" rx="3.5"/><path d="M8 3v4M16 3v4M3.5 10.5h17M9 15.3l2.1 2.1 3.9-4"/>'),z:IC('<path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2.2"/><circle cx="9" cy="17" r="2.2"/>')};
@@ -603,38 +612,43 @@ if(first){try{first.closest(".fld").scrollIntoView({block:"center",behavior:"smo
 WL.unshift({sort_order:0,id:"w"+Date.now()+Math.floor(Math.random()*1e3),text:v,due:dv||null,note:"",created:now,done:null});wSave();this.reset();wEl.hidden=true;addBtn();WF="act";renderWl();toast("Pridané do wishlistu")});
 
 
-// Long-press a card to start reordering. The grip appears only while dragging.
+// Reliable long-press reordering: Touch Events on mobile (preventDefault only
+// after the long-press threshold), Pointer Events for mouse/pen.
 var orderDrag=null,orderPress=null,orderPressData=null;
-function visibleOrderCards(type){return type==="activity"?Array.prototype.slice.call(list.querySelectorAll(".sw[data-id]")):Array.prototype.slice.call(wlEl.querySelectorAll(".wc[data-w]"))}
 function clearDropMarks(){document.querySelectorAll(".drop-before,.drop-after,.dragging-order").forEach(function(el){el.classList.remove("drop-before","drop-after","dragging-order")})}
 function dragTypeCard(el){var a=el&&el.closest&&el.closest(".sw[data-id]"),w=el&&el.closest&&el.closest(".wc[data-w]");return a?{type:"activity",card:a,id:a.getAttribute("data-id")}:w?{type:"wishlist",card:w,id:w.getAttribute("data-w")}:null}
-document.addEventListener("pointerdown",function(ev){
-  var found=dragTypeCard(ev.target);if(!found||ev.target.closest("button,input,textarea,select,summary,details,label,a"))return;
-  clearTimeout(orderPress);orderDrag=null;
-  var data={type:found.type,card:found.card,id:found.id,pointerId:ev.pointerId,x:ev.clientX,y:ev.clientY,active:false,target:null,after:false};
-  orderPressData=data;
-  orderPress=setTimeout(function(){orderPress=null;orderDrag=data;data.active=true;data.card.classList.add("dragging-order");try{data.card.setPointerCapture(data.pointerId)}catch(x){}if(typeof sw!=="undefined")sw=null;if(typeof wSwipe!=="undefined")wSwipe=null;},260);
+function orderTargetAt(x,y,type){var el=document.elementFromPoint(x,y);return el&&el.closest(type==="activity"?".sw[data-id]":".wc[data-w]")}
+function updateOrderTarget(x,y){if(!orderDrag)return;clearDropMarks();orderDrag.card.classList.add("dragging-order");var target=orderTargetAt(x,y,orderDrag.type);if(target&&target!==orderDrag.card){var r=target.getBoundingClientRect();orderDrag.target=target;orderDrag.after=y>r.top+r.height/2;target.classList.add(orderDrag.after?"drop-after":"drop-before")}else orderDrag.target=null}
+function finishOrderDrag(){if(!orderDrag)return;var d=orderDrag;orderDrag=null;clearDropMarks();if(!d.active||!d.target||d.target===d.card)return;supClick=Date.now();
+ if(d.type==="activity"){
+  var targetId=d.target.getAttribute("data-id"),from=items.findIndex(function(x){return String(x.id)===String(d.id)}),to=items.findIndex(function(x){return String(x.id)===String(targetId)});if(from<0||to<0)return;
+  var moved=items.splice(from,1)[0];to=items.findIndex(function(x){return String(x.id)===String(targetId)});items.splice(to+(d.after?1:0),0,moved);items.forEach(function(a,i){a.sort_order=i});persistSavedOrder(items,KEY+"_order");save();render();
+ }else{
+  var targetId2=d.target.getAttribute("data-w"),group=WL.filter(function(w){return WF==="done"?!!w.done:!w.done}),from2=group.findIndex(function(w){return String(w.id)===String(d.id)});if(from2<0)return;
+  var moved2=group.splice(from2,1)[0],to2=group.findIndex(function(w){return String(w.id)===String(targetId2)});if(to2<0)return;group.splice(to2+(d.after?1:0),0,moved2);var idx=0;WL=WL.map(function(w){return (WF==="done"?!!w.done:!w.done)?group[idx++]:w});WL.forEach(function(w,i){w.sort_order=i});persistSavedOrder(WL,WLK+"_order");wSave();renderWl();
+ }toast("Poradie uložené");
+}
+// Mobile: a long press arms dragging; the first subsequent move is cancelled
+// from native scrolling and used to position the dragged card.
+document.addEventListener("touchstart",function(ev){if(ev.touches.length!==1)return;var found=dragTypeCard(ev.target);if(!found||ev.target.closest("button,input,textarea,select,summary,details,label,a"))return;
+ clearTimeout(orderPress);orderDrag=null;var t=ev.touches[0],data={type:found.type,card:found.card,id:found.id,pointerId:"touch",x:t.clientX,y:t.clientY,active:false,target:null,after:false};orderPressData=data;
+ orderPress=setTimeout(function(){orderPress=null;orderDrag=data;data.active=true;data.card.classList.add("dragging-order");if(typeof sw!=="undefined")sw=null;if(typeof wSwipe!=="undefined")wSwipe=null;},320);
+},{passive:true});
+document.addEventListener("touchmove",function(ev){if(ev.touches.length!==1)return;var t=ev.touches[0];
+ if(orderPress&&orderPressData&&!orderPressData.active&&Math.hypot(t.clientX-orderPressData.x,t.clientY-orderPressData.y)>10){clearTimeout(orderPress);orderPress=null;orderPressData=null;return}
+ if(!orderDrag||!orderDrag.active)return;ev.preventDefault();updateOrderTarget(t.clientX,t.clientY);},{passive:false});
+document.addEventListener("touchend",function(ev){if(orderPress){clearTimeout(orderPress);orderPress=null;orderPressData=null}if(orderDrag){finishOrderDrag()}},{passive:true});
+document.addEventListener("touchcancel",function(){clearTimeout(orderPress);orderPress=null;orderPressData=null;orderDrag=null;clearDropMarks()},{passive:true});
+// Desktop mouse/pen implementation.
+document.addEventListener("pointerdown",function(ev){if(ev.pointerType==="touch")return;var found=dragTypeCard(ev.target);if(!found||ev.target.closest("button,input,textarea,select,summary,details,label,a"))return;
+ clearTimeout(orderPress);orderDrag=null;var data={type:found.type,card:found.card,id:found.id,pointerId:ev.pointerId,x:ev.clientX,y:ev.clientY,active:false,target:null,after:false};orderPressData=data;
+ orderPress=setTimeout(function(){orderPress=null;orderDrag=data;data.active=true;data.card.classList.add("dragging-order");try{data.card.setPointerCapture(ev.pointerId)}catch(x){}},320);
 });
-document.addEventListener("pointermove",function(ev){
-  if(orderPress&&orderPressData&&ev.pointerId===orderPressData.pointerId&&Math.hypot(ev.clientX-orderPressData.x,ev.clientY-orderPressData.y)>10){clearTimeout(orderPress);orderPress=null;orderPressData=null}
-  if(!orderDrag||ev.pointerId!==orderDrag.pointerId)return;
-  clearDropMarks();orderDrag.card.classList.add("dragging-order");
-  var el=document.elementFromPoint(ev.clientX,ev.clientY),target=el&&el.closest(orderDrag.type==="activity"?".sw[data-id]":".wc[data-w]");
-  if(target&&target!==orderDrag.card){var r=target.getBoundingClientRect(),after=ev.clientY>r.top+r.height/2;target.classList.add(after?"drop-after":"drop-before");orderDrag.target=target;orderDrag.after=after}else orderDrag.target=null;
-  ev.preventDefault();
-},{passive:false});
-document.addEventListener("pointerup",function(ev){
-  clearTimeout(orderPress);orderPress=null;orderPressData=null;if(!orderDrag||ev.pointerId!==orderDrag.pointerId)return;
-  var d=orderDrag;orderDrag=null;clearDropMarks();if(!d.active||!d.target||d.target===d.card)return;
-  if(d.type==="activity"){
-    var targetId=d.target.getAttribute("data-id"),from=items.findIndex(function(x){return String(x.id)===String(d.id)}),to=items.findIndex(function(x){return String(x.id)===String(targetId)});if(from<0||to<0)return;
-    var moved=items.splice(from,1)[0];to=items.findIndex(function(x){return String(x.id)===String(targetId)});items.splice(to+(d.after?1:0),0,moved);items.forEach(function(a,i){a.sort_order=i});persistSavedOrder(items,KEY+"_order");save();render();
-  }else{
-    var targetId2=d.target.getAttribute("data-w"),group=WL.filter(function(w){return WF==="done"?!!w.done:!w.done}),from2=group.findIndex(function(w){return String(w.id)===String(d.id)});if(from2<0)return;
-    var moved2=group.splice(from2,1)[0],to2=group.findIndex(function(w){return String(w.id)===String(targetId2)});if(to2<0)return;group.splice(to2+(d.after?1:0),0,moved2);var idx=0;WL=WL.map(function(w){return (WF==="done"?!!w.done:!w.done)?group[idx++]:w});WL.forEach(function(w,i){w.sort_order=i});persistSavedOrder(WL,WLK+"_order");wSave();renderWl();
-  }toast("Poradie uložené");
-});
-document.addEventListener("pointercancel",function(){clearTimeout(orderPress);orderPress=null;orderPressData=null;orderDrag=null;clearDropMarks()});
+document.addEventListener("pointermove",function(ev){if(ev.pointerType==="touch")return;if(orderPress&&orderPressData&&ev.pointerId===orderPressData.pointerId&&Math.hypot(ev.clientX-orderPressData.x,ev.clientY-orderPressData.y)>8){clearTimeout(orderPress);orderPress=null;orderPressData=null}
+ if(!orderDrag||ev.pointerId!==orderDrag.pointerId)return;updateOrderTarget(ev.clientX,ev.clientY);ev.preventDefault();},{passive:false});
+document.addEventListener("pointerup",function(ev){if(ev.pointerType==="touch")return;clearTimeout(orderPress);orderPress=null;orderPressData=null;if(orderDrag&&ev.pointerId===orderDrag.pointerId)finishOrderDrag()});
+document.addEventListener("pointercancel",function(ev){if(ev.pointerType==="touch")return;clearTimeout(orderPress);orderPress=null;orderPressData=null;orderDrag=null;clearDropMarks()});
+document.addEventListener("click",function(ev){if(Date.now()-supClick<500&&ev.target.closest(".sw .card,.wc")){ev.preventDefault();ev.stopPropagation();} },true);
 document.addEventListener("contextmenu",function(ev){if(ev.target.closest(".sw .card,.wc"))ev.preventDefault()});
 document.addEventListener("contextmenu",function(ev){if(ev.target.closest(".sw .card,.wc"))ev.preventDefault()});
 
