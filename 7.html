@@ -139,7 +139,7 @@ button,.cal span,.hm span{touch-action:manipulation}
 .sh{font-size:.72rem;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;font-weight:600;margin-bottom:4px}
 .orow{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid #161616}
 .orow:last-child,.arow:last-child,.am:last-child{border:0}
-.orow .nm{min-width:0;font-size:.95rem;word-break:break-word}
+.orow .nm{flex:1;min-width:0;font-size:.95rem;word-break:break-word}
 .orow small{display:block;color:var(--mut);font-size:.74rem}
 .bars{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:6px}
 .bc{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:.7rem;color:var(--mut)}
@@ -219,12 +219,21 @@ body{overflow-anchor:none}
 
 #v-wl .seg{margin-bottom:10px}
 
-/* Keep primary navigation and relevant filters visible while scrolling. */
-.tabs{position:sticky;top:0;z-index:50;background:#101010;box-shadow:0 8px 14px rgba(0,0,0,.55)}
-#chips{position:sticky;top:47px;z-index:49;background:#000;padding:6px 0 5px;margin:0;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;}
+/* Keep the complete page header and primary navigation visible. */
+.hd{position:sticky;top:env(safe-area-inset-top,0px);z-index:60;height:56px;margin:0 0 10px;padding:6px 0 4px;background:#000;}
+.tabs{position:sticky;top:calc(56px + env(safe-area-inset-top,0px));z-index:59;background:#101010;box-shadow:0 8px 14px rgba(0,0,0,.55)}
+/* Filters and secondary controls scroll with their content. */
+#chips,#catp,#v-wl .seg{position:static;box-shadow:none}
+#chips{padding:0;margin:0 0 8px;flex-wrap:wrap;overflow:visible;}
 #chips::-webkit-scrollbar{display:none}
-#catp{position:sticky;top:88px;z-index:48;box-shadow:0 8px 12px rgba(0,0,0,.45)}
-#v-wl .seg{position:sticky;top:47px;z-index:49;background:#101010;}
+.orow .nm{flex:1;min-width:0}
+.orow .ck{margin-left:auto;flex:none}
+.ovsum-copy{flex:1;min-width:0}.ovs .ot{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ovs .meta,.ovs .cm{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;min-height:1.2em}
+.ovs .cm{line-height:1.2;margin-top:3px}
+/* The dragged item must not intercept hit-testing; this exposes the cards beneath it. */
+.sw.dragging-order,.w-sw.dragging-order,.wc.dragging-order{pointer-events:none}
+.dragging-order{will-change:opacity;transition:opacity .12s ease,outline-color .12s ease}
+.drop-before,.drop-after{transition:box-shadow .1s ease;}
 
 </style>
 </head>
@@ -377,7 +386,7 @@ function pc(p){return p<34?"#ef4444":p<67?"#f59e0b":"#22c55e"}
 function ring(n,e,z){var r=z*.42,c=2*Math.PI*r,p=e?n/e:0,m=z/2,col=e?pc(p*100):"#444";return '<svg class="rg" width="'+z+'" height="'+z+'" viewBox="0 0 '+z+' '+z+'"><circle cx="'+m+'" cy="'+m+'" r="'+r+'" fill="none" stroke="#1c1c1c" stroke-width="'+z*.09+'"/><circle cx="'+m+'" cy="'+m+'" r="'+r+'" fill="none" stroke="'+col+'" stroke-width="'+z*.09+'" stroke-linecap="round" stroke-dasharray="'+(c*p)+' '+c+'" transform="rotate(-90 '+m+' '+m+')"/><text x="50%" y="50%" dy=".35em" text-anchor="middle" fill="#fff" font-size="'+z*.22+'" font-weight="700">'+n+'/'+e+'</text></svg>'}
 var CHK='<svg viewBox="0 0 24 24"><path d="M5.5 12.5l4.2 4.2L18.5 7.5"/></svg>';
 function nav(l,next){return '<div class="onav"><button data-n="-1" aria-label="Späť">‹</button><b>'+l+'</b><button data-n="1"'+(next?'':' disabled')+' aria-label="Ďalej">›</button></div>'}
-function sumCard(R,title,suffix,cm){var p=R.e?Math.round(R.n/R.e*100):null;return '<div class="card ovs">'+ring(R.n,R.e,84)+'<div><div class="ot">'+title+'</div><div class="meta">'+(p===null?suffix:'<b style="color:'+pc(p)+'">'+p+' %</b> '+suffix)+'</div>'+(cm||'')+'</div></div>'}
+function sumCard(R,title,suffix,cm){var p=R.e?Math.round(R.n/R.e*100):null;return '<div class="card ovs">'+ring(R.n,R.e,84)+'<div class="ovsum-copy"><div class="ot">'+title+'</div><div class="meta">'+(p===null?suffix:'<b style="color:'+pc(p)+'">'+p+' %</b> '+suffix)+'</div>'+(cm||'')+'</div></div>'}
 function cmp(cur,prev,label){if(!cur.e)return"";if(!prev.e)return '<div class="cm">Bez porovnania, chýbajú údaje za '+label+'</div>';
 var d=Math.round(cur.n/cur.e*100)-Math.round(prev.n/prev.e*100),cl=d>0?"up":d<0?"dn":"eq";return '<div class="cm '+cl+'">'+(d>0?"▲ +":d<0?"▼ −":"● ±")+Math.abs(d)+' % oproti '+label+'</div>'}
 function iso(t){return t.getUTCFullYear()+"-"+pad(t.getUTCMonth()+1)+"-"+pad(t.getUTCDate())}
@@ -420,7 +429,7 @@ if(!items.length){box.innerHTML=seg+'<div class="empty">Zatiaľ žiadne aktivity
 box.innerHTML=seg+(OV.m==="day"?ovDay(now):OV.m==="week"?ovWeek(now):OV.m==="month"?ovMonth(now):ovYear(now))}
 function setTab(x){closeAll();T=x;document.querySelector(".hd h1").textContent=x==="wl"?"Wishlist":"Habits";["ov","act","wl"].forEach(function(k){document.getElementById("v-"+k).hidden=x!==k});
 document.querySelectorAll(".tabs button").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-t")===x)});
-document.getElementById("addb").style.visibility=x==="ov"?"hidden":"visible";
+document.getElementById("addb").style.visibility="visible";
 addEl.hidden=true;wEl.hidden=true;addBtn();
 if(x==="ov"){OV={m:"day",o:0};renderOv()}else if(x==="act")render();else renderWl()}
 document.querySelector(".tabs").addEventListener("click",function(ev){var b=ev.target.closest("[data-t]");if(b)setTab(b.getAttribute("data-t"))});
@@ -445,6 +454,7 @@ function openAddForm(el,focusId){
   if(focusId)setTimeout(function(){document.getElementById(focusId).focus()},50);
 }
 document.getElementById("addb").addEventListener("click",function(){
+  if(T==="ov"){setTab("act");openAddForm(addEl,"n");return;}
   origY={};prevY={};
   document.querySelectorAll("#list details[data-k]:not([data-k=ended])").forEach(function(o){o.open=false});
   var f=T==="wl"?wEl:addEl;
@@ -617,8 +627,25 @@ WL.unshift({sort_order:0,id:"w"+Date.now()+Math.floor(Math.random()*1e3),text:v,
 var orderDrag=null,orderPress=null,orderPressData=null;
 function clearDropMarks(){document.querySelectorAll(".drop-before,.drop-after,.dragging-order").forEach(function(el){el.classList.remove("drop-before","drop-after","dragging-order")})}
 function dragTypeCard(el){var a=el&&el.closest&&el.closest(".sw[data-id]"),w=el&&el.closest&&el.closest(".wc[data-w]");return a?{type:"activity",card:a,id:a.getAttribute("data-id")}:w?{type:"wishlist",card:w,id:w.getAttribute("data-w")}:null}
-function orderTargetAt(x,y,type){var el=document.elementFromPoint(x,y);return el&&el.closest(type==="activity"?".sw[data-id]":".wc[data-w]")}
-function updateOrderTarget(x,y){if(!orderDrag)return;clearDropMarks();orderDrag.card.classList.add("dragging-order");var target=orderTargetAt(x,y,orderDrag.type);if(target&&target!==orderDrag.card){var r=target.getBoundingClientRect();orderDrag.target=target;orderDrag.after=y>r.top+r.height/2;target.classList.add(orderDrag.after?"drop-after":"drop-before")}else orderDrag.target=null}
+function orderTargetAt(x,y,type){
+ var selector=type==="activity"?"#list .sw[data-id]":"#wlist .wc[data-w]";
+ var nodes=Array.prototype.slice.call(document.querySelectorAll(selector)).filter(function(el){return el!==orderDrag.card&&el.getBoundingClientRect().height>0;});
+ if(!nodes.length)return null;
+ // Select the nearest insertion boundary, including the very first and last positions.
+ var first=nodes[0],last=nodes[nodes.length-1],fr=first.getBoundingClientRect(),lr=last.getBoundingClientRect();
+ if(y<fr.top+fr.height/2)return {element:first,after:false};
+ for(var i=0;i<nodes.length;i++){var r=nodes[i].getBoundingClientRect();if(y<=r.bottom){return {element:nodes[i],after:y>r.top+r.height/2};}}
+ return {element:last,after:true};
+}
+function updateOrderTarget(x,y){if(!orderDrag)return;clearDropMarks();orderDrag.card.classList.add("dragging-order");
+ var wrapper=orderDrag.type==="activity"?orderDrag.card:orderDrag.card.closest(".w-sw");
+ if(wrapper)wrapper.classList.add("dragging-order");
+ // Auto-scroll near viewport edges so long lists remain reorderable without lifting the finger.
+ var edge=82,step=0;if(y<edge)step=-Math.max(5,Math.round((edge-y)*.22));else if(y>window.innerHeight-edge)step=Math.max(5,Math.round((y-(window.innerHeight-edge))*.22));
+ if(step)window.scrollBy(0,step);
+ var hit=orderTargetAt(x,y,orderDrag.type),target=hit&&hit.element;
+ if(target){orderDrag.target=target;orderDrag.after=hit.after;target.classList.add(hit.after?"drop-after":"drop-before");}else{orderDrag.target=null;orderDrag.after=false;}
+}
 function finishOrderDrag(){if(!orderDrag)return;var d=orderDrag;orderDrag=null;clearDropMarks();if(!d.active||!d.target||d.target===d.card)return;supClick=Date.now();
  if(d.type==="activity"){
   var targetId=d.target.getAttribute("data-id"),from=items.findIndex(function(x){return String(x.id)===String(d.id)}),to=items.findIndex(function(x){return String(x.id)===String(targetId)});if(from<0||to<0)return;
@@ -632,7 +659,7 @@ function finishOrderDrag(){if(!orderDrag)return;var d=orderDrag;orderDrag=null;c
 // from native scrolling and used to position the dragged card.
 document.addEventListener("touchstart",function(ev){if(ev.touches.length!==1)return;var found=dragTypeCard(ev.target);if(!found||ev.target.closest("button,input,textarea,select,summary,details,label,a"))return;
  clearTimeout(orderPress);orderDrag=null;var t=ev.touches[0],data={type:found.type,card:found.card,id:found.id,pointerId:"touch",x:t.clientX,y:t.clientY,active:false,target:null,after:false};orderPressData=data;
- orderPress=setTimeout(function(){orderPress=null;orderDrag=data;data.active=true;data.card.classList.add("dragging-order");if(typeof sw!=="undefined")sw=null;if(typeof wSwipe!=="undefined")wSwipe=null;},320);
+ orderPress=setTimeout(function(){orderPress=null;orderDrag=data;data.active=true;data.card.classList.add("dragging-order");var wrap=data.type==="activity"?data.card:data.card.closest(".w-sw");if(wrap)wrap.classList.add("dragging-order");if(typeof sw!=="undefined")sw=null;if(typeof wSwipe!=="undefined")wSwipe=null;},280);
 },{passive:true});
 document.addEventListener("touchmove",function(ev){if(ev.touches.length!==1)return;var t=ev.touches[0];
  if(orderPress&&orderPressData&&!orderPressData.active&&Math.hypot(t.clientX-orderPressData.x,t.clientY-orderPressData.y)>10){clearTimeout(orderPress);orderPress=null;orderPressData=null;return}
@@ -642,7 +669,7 @@ document.addEventListener("touchcancel",function(){clearTimeout(orderPress);orde
 // Desktop mouse/pen implementation.
 document.addEventListener("pointerdown",function(ev){if(ev.pointerType==="touch")return;var found=dragTypeCard(ev.target);if(!found||ev.target.closest("button,input,textarea,select,summary,details,label,a"))return;
  clearTimeout(orderPress);orderDrag=null;var data={type:found.type,card:found.card,id:found.id,pointerId:ev.pointerId,x:ev.clientX,y:ev.clientY,active:false,target:null,after:false};orderPressData=data;
- orderPress=setTimeout(function(){orderPress=null;orderDrag=data;data.active=true;data.card.classList.add("dragging-order");try{data.card.setPointerCapture(ev.pointerId)}catch(x){}},320);
+ orderPress=setTimeout(function(){orderPress=null;orderDrag=data;data.active=true;data.card.classList.add("dragging-order");var wrap=data.type==="activity"?data.card:data.card.closest(".w-sw");if(wrap)wrap.classList.add("dragging-order");try{data.card.setPointerCapture(ev.pointerId)}catch(x){}},280);
 });
 document.addEventListener("pointermove",function(ev){if(ev.pointerType==="touch")return;if(orderPress&&orderPressData&&ev.pointerId===orderPressData.pointerId&&Math.hypot(ev.clientX-orderPressData.x,ev.clientY-orderPressData.y)>8){clearTimeout(orderPress);orderPress=null;orderPressData=null}
  if(!orderDrag||ev.pointerId!==orderDrag.pointerId)return;updateOrderTarget(ev.clientX,ev.clientY);ev.preventDefault();},{passive:false});
