@@ -209,6 +209,10 @@ body{overflow-anchor:none}
 .w-del button{width:100%;height:100%;background:transparent;color:#fff;font-weight:700}
 .wc{position:relative;z-index:1;margin:0;transition:transform .28s cubic-bezier(.22,1,.36,1);touch-action:pan-y}
 .w-sw.open .wc{transform:translateX(-76px)}
+.w-del{background:linear-gradient(90deg,#b91c1c,#ef4444);width:76px;right:0;}
+.w-del button{display:flex;align-items:center;justify-content:center;gap:5px;}
+.w-done-actions{display:flex;justify-content:flex-end;margin-top:10px;padding-top:9px;border-top:1px solid #1d1d1d;}
+.w-sw.is-done .wc{touch-action:pan-y;}
 .wc .note-fld{height:auto;min-height:76px;overflow:hidden;display:block;width:100%;max-width:100%;padding:0}
 .wc textarea{display:block;box-sizing:border-box;width:100%;max-width:100%;min-width:0;min-height:76px;resize:vertical;background:transparent;color:var(--txt);border:0;border-radius:10px;padding:10px;font:inherit;font-size:16px;outline:none}
 .wc textarea:focus{outline:2px solid #777;outline-offset:-2px}
@@ -220,8 +224,8 @@ body{overflow-anchor:none}
 #v-wl .seg{margin-bottom:10px}
 
 /* Keep the complete page header and primary navigation visible. */
-.hd{position:sticky;top:0;z-index:100;height:calc(56px + env(safe-area-inset-top,0px));margin:0 0 10px;padding:calc(6px + env(safe-area-inset-top,0px)) 0 4px;background:#000!important;opacity:1;isolation:isolate;transform:translate3d(0,0,0);backface-visibility:hidden;contain:paint;}
-.tabs{position:sticky;top:calc(56px + env(safe-area-inset-top,0px));z-index:99;background:#101010!important;opacity:1;isolation:isolate;transform:translate3d(0,0,0);backface-visibility:hidden;box-shadow:0 8px 14px rgba(0,0,0,.8);}
+.hd{position:sticky;top:0;z-index:1000;height:calc(56px + env(safe-area-inset-top,0px));margin:0 0 10px;padding:calc(6px + env(safe-area-inset-top,0px)) 0 4px;background:#000;opacity:1;isolation:isolate;transform:none;backface-visibility:visible;contain:none;will-change:auto;}
+.tabs{position:sticky;top:calc(56px + env(safe-area-inset-top,0px));z-index:999;background:#101010;opacity:1;isolation:isolate;transform:none;backface-visibility:visible;box-shadow:0 8px 14px rgba(0,0,0,.95);will-change:auto;}
 /* Filters and secondary controls scroll with their content. */
 #chips,#catp,#v-wl .seg{position:static;box-shadow:none}
 #chips{padding:0;margin:0 0 8px;flex-wrap:wrap;overflow:visible;}
@@ -233,7 +237,7 @@ body{overflow-anchor:none}
 /* Keep sticky layers opaque and dragged cards out of hit-testing. */
 .sw.dragging-order,.w-sw.dragging-order,.wc.dragging-order{pointer-events:none}
 .dragging-order{will-change:transform,opacity;transition:opacity .12s ease,outline-color .12s ease}
-.drag-ghost{position:fixed!important;z-index:9999!important;pointer-events:none!important;opacity:.96!important;box-shadow:0 18px 42px rgba(0,0,0,.72)!important;border:1px solid #777!important;transition:none!important;will-change:transform;max-height:150px;overflow:hidden}
+.drag-ghost{position:fixed!important;left:0!important;top:0!important;z-index:9999!important;pointer-events:none!important;opacity:.96!important;box-shadow:0 18px 42px rgba(0,0,0,.72)!important;border:1px solid #777!important;transition:none!important;will-change:transform;max-height:150px;overflow:hidden}
 .order-drag-active{overscroll-behavior:none}
 .orow{min-height:42px}
 .drop-before,.drop-after{transition:box-shadow .1s ease;}
@@ -497,6 +501,7 @@ else{var h2=c.offsetHeight;c._a=c.animate(kf(h2+"px","0px"),{duration:230,easing
 function RM(){return !!(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)}
 function sTo(y){y=Math.max(0,y);try{window.scrollTo({top:y,behavior:RM()?"auto":"smooth"})}catch(e){window.scrollTo(0,y)}}
 function topOf(el){return el.getBoundingClientRect().top+window.scrollY}
+function stickyTopOffset(){var h=document.querySelector(".hd"),t=document.querySelector(".tabs");return (h?h.getBoundingClientRect().height:0)+(t?t.getBoundingClientRect().height:0)+10}
 var supClick=0,dirty={};
 function editField(ev){var el=ev.target;if(!el.matches||!el.matches(".en,.es,.ee,.eg,.eb,.ec,.nt"))return;
 var c=el.closest("[data-id]"),id=c&&c.getAttribute("data-id"),a=items.filter(function(x){return x.id===id})[0];if(!a)return;
@@ -518,13 +523,13 @@ if(cd&&!ev.target.closest("button,input,label,details,select,textarea")){
 if(Date.now()-supClick<350)return;
 var dd=cd.querySelector("details.d");
 if(dd){var cid=cd.closest("[data-id]").getAttribute("data-id");
-if(!dd.open){var y0=window.scrollY;closeAddForm(addEl);[].forEach.call(list.querySelectorAll("details[data-k]:not([data-k=ended])"),function(o){if(o!==dd&&!dd.contains(o))o.open=false});origY={};prevY={};origY[cid]=y0;anim(dd,true);sTo(topOf(cd)-12)}
+if(!dd.open){var y0=window.scrollY;closeAddForm(addEl);[].forEach.call(list.querySelectorAll("details[data-k]:not([data-k=ended])"),function(o){if(o!==dd&&!dd.contains(o))o.open=false});origY={};prevY={};origY[cid]=y0;anim(dd,true);sTo(topOf(cd)-stickyTopOffset()-8)}
 else{anim(dd,false);if(origY[cid]!==undefined){sTo(origY[cid]);delete origY[cid]}delete prevY[cid]}}
 return}
 var sm=ev.target.closest("summary");
 if(sm){var dt=sm.parentElement;
 if(dt.classList.contains("n")&&dt.getAttribute("data-k")!=="ended"){ev.preventDefault();var cid2=dt.closest("[data-id]").getAttribute("data-id"),sib=dt.parentElement.querySelectorAll("details.n"),any=[].some.call(sib,function(o){return o!==dt&&o.open});
-if(!dt.open){if(!any)prevY[cid2]=window.scrollY;[].forEach.call(sib,function(o){if(o!==dt)o.open=false});anim(dt,true);setTimeout(function(){sTo(topOf(dt)-60)},30)}
+if(!dt.open){if(!any)prevY[cid2]=window.scrollY;[].forEach.call(sib,function(o){if(o!==dt)o.open=false});anim(dt,true);setTimeout(function(){sTo(topOf(dt)-stickyTopOffset()-8)},30)}
 else{anim(dt,false);if(!any&&prevY[cid2]!==undefined){var py=prevY[cid2];delete prevY[cid2];sTo(py)}}}
 else if(!dt.open&&dt.getAttribute("data-k")!=="ended"){[].forEach.call(list.querySelectorAll("details[data-k]:not([data-k=ended])"),function(o){if(o!==dt)o.open=false})}
 return}
@@ -577,17 +582,20 @@ function wLoad(){try{var r=localStorage.getItem(WLK);WL=r?JSON.parse(r):[]}catch
 function wSave(){try{localStorage.setItem(WLK,JSON.stringify(WL))}catch(x){}scheduleRemoteSave()}
 function sortWishlistByStatus(){var active=WL.filter(function(w){return !w.done}),done=WL.filter(function(w){return !!w.done});WL=active.concat(done);WL.forEach(function(w,i){w.sort_order=i});persistSavedOrder(WL,WLK+"_order")}
 function wCard(w,now){var left=w.due?diff(now,w.due):null,id=w.id,col,meta,big="",bar="";
-if(w.done){col="#22c55e";var dd=w.due?diff(w.done,w.due):null;
-meta="Splnené "+fmt(w.done)+(dd===null?"":dd>0?" · "+dd+" "+dni(dd)+" pred termínom":dd===0?" · v deň termínu":" · po termíne o "+(-dd)+" "+dni(-dd));}
+if(w.done){col="#22c55e";meta="Splnené "+fmt(w.done);}
 else if(w.due){col=left<=3?"#ef4444":left<=14?"#f59e0b":"#22c55e";var ab=Math.abs(left);
 meta="do "+fmt(w.due)+" · "+(left>0?"zostáva "+left+" "+dni(left):left===0?"dnes je termín":"po termíne o "+ab+" "+dni(ab));
 big='<div class="big">'+(left<0?"−":"")+ab+'<small>'+dni(ab)+'</small></div>';
 var tot=Math.max(1,diff(w.created,w.due)),p=Math.max(0,Math.min(100,Math.round(diff(w.created,now)/tot*100)));bar='<div class="bar"><i style="width:'+p+'%"></i></div>'}
 else{col="#3b82f6";meta="bez termínu"}
 var ck=w.done?'<span class="ck on" role="img" aria-label="Splnené">'+CHK+'</span>':'<button class="ck" data-w-a="done" aria-label="Označiť ako splnené">'+CHK+'</button>';
-var cf=wPend===id?'<div class="r"><span class="cf">Odstrániť prianie?</span><button class="ghost danger" data-w-a="yes">Áno</button><button class="ghost" data-w-a="no">Zrušiť</button></div>':'<button class="ghost danger" data-w-a="del">Odstrániť</button>';
-return '<div class="w-sw'+(wPend===id?' open':'')+'" data-wsw="'+id+'"><div class="w-del">'+(wPend===id?'<button type="button" data-w-a="yes">Áno</button><button type="button" data-w-a="no">Nie</button>':'<button type="button" data-w-a="del">Odstrániť</button>')+'</div><div class="card wc" data-w="'+id+'" style="--c:'+col+'"><div class="top"><button type="button" class="drag-handle" data-drag="wishlist" aria-label="Zmeniť poradie priania">⠿</button><div style="flex:1;min-width:0"><div class="name">'+esc(w.text)+'</div><div class="meta">'+meta+'</div></div><div class="r day-count">'+big+ck+'</div></div>'+bar
-+'<details class="d" data-wk="'+id+'"'+(wOpen[id]?" open":"")+'><summary>⚙</summary><div class="dc"><div class="col"><label>Prianie<span class="fld"><input type="text" class="wt" maxlength="80" value="'+esc(w.text)+'"></span></label><label>Do kedy (nepovinné)<span class="fld"><input type="date" class="wdd" value="'+(w.due||"")+'"></span></label><label>Poznámka (nepovinné)<span class="fld note-fld"><textarea class="wnote" maxlength="1000" placeholder="Doplň poznámku...">'+esc(w.note||"")+'</textarea></span></label><div class="meta">Pridané '+fmt(w.created)+'</div>'+(w.done?'<button class="ghost" data-w-a="undone">Vrátiť medzi aktívne</button>':'')+cf+'</div></div></details></div></div>'}
+var del=wPend===id?'<button type="button" data-w-a="yes">Áno</button><button type="button" data-w-a="no">Nie</button>':'<button type="button" data-w-a="del" aria-label="Odstrániť prianie"><svg viewBox="0 0 24 24" width="27" height="27" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5h6v2m-8 0 1 13h8l1-13M10 11v5m4-5v5"/></svg></button>';
+var dragHandle=!w.done?'<button type="button" class="drag-handle" data-drag="wishlist" aria-label="Zmeniť poradie priania">⠿</button>':'';
+var detail='';
+if(!w.done){detail='<details class="d" data-wk="'+id+'"'+(wOpen[id]?" open":"")+'><summary>⚙</summary><div class="dc"><div class="col"><label>Prianie<span class="fld"><input type="text" class="wt" maxlength="80" value="'+esc(w.text)+'"></span></label><label>Do kedy (nepovinné)<span class="fld"><input type="date" class="wdd" value="'+(w.due||"")+'"></span></label><label>Poznámka (nepovinné)<span class="fld note-fld"><textarea class="wnote" maxlength="1000" placeholder="Doplň poznámku...">'+esc(w.note||"")+'</textarea></span></label><div class="meta">Pridané '+fmt(w.created)+'</div><button class="ghost danger" data-w-a="del">Odstrániť</button></div></div></details>'}
+else{detail='<div class="w-done-actions"><button class="ghost" data-w-a="undone">Vrátiť medzi nesplnené</button></div>'}
+return '<div class="w-sw'+(wPend===id?' open':'')+(w.done?' is-done':'')+'" data-wsw="'+id+'"><div class="w-del">'+del+'</div><div class="card wc" data-w="'+id+'" style="--c:'+col+'"><div class="top">'+dragHandle+'<div style="flex:1;min-width:0"><div class="name">'+esc(w.text)+'</div><div class="meta">'+meta+'</div></div><div class="r day-count">'+big+ck+'</div></div>'+bar+detail+'</div></div>'}
+
 function renderWl(){var now=todayStr(),box=document.getElementById("wlist");
 box.querySelectorAll("details[data-wk]").forEach(function(d){wOpen[d.getAttribute("data-wk")]=d.open});
 sortWishlistByStatus();
@@ -595,12 +603,13 @@ var dn=WL.filter(function(w){return !!w.done});var l=WF==="done"?dn:WL;
 box.innerHTML='<div class="seg"><button data-wf="all" class="'+(WF==="all"?"on":"")+'">Všetky ('+WL.length+')</button><button data-wf="done" class="'+(WF==="done"?"on":"")+'">Done ('+dn.length+')</button></div>'
 +(l.length?l.map(function(w){return wCard(w,now)}).join(""):'<div class="empty">'+(WF==="all"?"Zatiaľ žiadne priania.<br>Pridaj prvé tlačidlom ＋.":"Zatiaľ nič v Done.")+'</div>')}
 wlEl.addEventListener("click",function(ev){
+if(Date.now()-supClick<550&&ev.target.closest(".wc")){ev.preventDefault();ev.stopPropagation();return}
 var sg=ev.target.closest("[data-wf]");if(sg){WF=sg.getAttribute("data-wf");renderWl();return}
 var cd=ev.target.closest(".wc"),wrap=ev.target.closest(".w-sw");if(!cd&&wrap)cd=wrap.querySelector(".wc");if(!cd)return;var id=cd.getAttribute("data-w"),w=WL.filter(function(x){return x.id===id})[0];if(!w)return;
 var t=ev.target.closest("[data-w-a]");
-if(!t){if(!ev.target.closest("button,input,label,details")){var dd=cd.querySelector("details.d");
-if(!dd.open){var y0=window.scrollY;closeAddForm(wEl);[].forEach.call(wlEl.querySelectorAll("details.d[open]"),function(o){if(o!==dd)o.open=false});origY={};origY[id]=y0;anim(dd,true);sTo(topOf(cd)-12)}
-else{anim(dd,false);if(origY[id]!==undefined){sTo(origY[id]);delete origY[id]}}}return}
+if(!t){if(w.done)return;if(!ev.target.closest("button,input,label,details")){var dd=cd.querySelector("details.d");
+if(dd&&!dd.open){var y0=window.scrollY;closeAddForm(wEl);[].forEach.call(wlEl.querySelectorAll("details.d[open]"),function(o){if(o!==dd)o.open=false});origY={};origY[id]=y0;anim(dd,true);sTo(topOf(cd)-stickyTopOffset()-8)}
+else if(dd&&dd.open){anim(dd,false);if(origY[id]!==undefined){sTo(origY[id]);delete origY[id]}}}return}
 var a=t.getAttribute("data-w-a"),now=todayStr();
 if(a==="done"){w.done=now;sortWishlistByStatus();WF="all";wSave();toast("🎉 Presunuté na koniec zoznamu")}
 else if(a==="undone"){w.done=null;sortWishlistByStatus();WF="all";wSave()}
@@ -609,11 +618,11 @@ else if(a==="no")wPend=null;
 else if(a==="yes"&&wPend===id){var oldY=window.scrollY;WL=WL.filter(function(x){return x!==w});wPend=null;wSave();renderWl();requestAnimationFrame(function(){var max=Math.max(0,document.documentElement.scrollHeight-window.innerHeight);window.scrollTo(0,Math.min(oldY,max))});return}
 renderWl()});
 wlEl.addEventListener("input",function(ev){var el=ev.target;if(!el.matches||!el.matches(".wt,.wdd,.wnote"))return;
-var cd=el.closest(".wc"),w=WL.filter(function(x){return x.id===cd.getAttribute("data-w")})[0];if(!w)return;okF(el);
+var cd=el.closest(".wc"),w=WL.filter(function(x){return x.id===cd.getAttribute("data-w")})[0];if(!w||w.done)return;okF(el);
 if(el.classList.contains("wt")){var v=el.value.trim();if(!v){badF(el,"Napíš, čo si praješ.");return}w.text=v;cd.querySelector(".name").textContent=v}
 else if(el.classList.contains("wdd"))w.due=el.value||null;else w.note=el.value;
 wDirty[w.id]=true;wSave()});
-wlEl.addEventListener("focusout",function(ev){var cd=ev.target.closest&&ev.target.closest(".wc");if(!cd)return;var id=cd.getAttribute("data-w");if(!wDirty[id])return;
+wlEl.addEventListener("focusout",function(ev){var cd=ev.target.closest&&ev.target.closest(".wc");if(!cd)return;var id=cd.getAttribute("data-w"),ww=WL.filter(function(x){return String(x.id)===String(id)})[0];if(!ww||ww.done||!wDirty[id])return;
 setTimeout(function(){var c=wlEl.querySelector('[data-w="'+id+'"]');if(!c||!wDirty[id]||c.contains(document.activeElement))return;delete wDirty[id];renderWl();toast("Uložené")},150)});
 var wf=document.getElementById("wf");
 wf.addEventListener("input",function(ev){okF(ev.target)});wf.addEventListener("change",function(ev){okF(ev.target)});
@@ -644,7 +653,7 @@ function orderTargetAt(x,y,type){var nodes=orderNodes(type,orderDrag.doneState).
  return{element:last,after:true};}
 function updateOrderTarget(x,y){if(!orderDrag)return;clearDropMarks();
  var wrap=orderDrag.type==="activity"?orderDrag.card:orderDrag.card.closest(".w-sw");orderDrag.card.classList.add("dragging-order");if(wrap)wrap.classList.add("dragging-order");
- if(orderDrag.ghost){orderDrag.ghost.style.transform="translate3d("+(x-orderDrag.x-orderDrag.offsetX)+"px,"+(y-orderDrag.y-orderDrag.offsetY)+"px,0)";}
+ if(orderDrag.ghost){orderDrag.ghost.style.transform="translate3d("+(x-orderDrag.offsetX)+"px,"+(y-orderDrag.offsetY)+"px,0)";}
  var edge=76,step=0;if(y<edge)step=-Math.max(4,Math.round((edge-y)*.20));else if(y>window.innerHeight-edge)step=Math.max(4,Math.round((y-(window.innerHeight-edge))*.20));if(step)window.scrollBy(0,step);
  var hit=orderTargetAt(x,y,orderDrag.type),target=hit&&hit.element;if(target){orderDrag.target=target;orderDrag.after=hit.after;target.classList.add(hit.after?"drop-after":"drop-before")}else{orderDrag.target=null;orderDrag.after=false;}}
 function finishOrderDrag(){if(!orderDrag)return;var d=orderDrag;orderDrag=null;clearDropMarks();clearDragState();
@@ -660,23 +669,27 @@ function finishOrderDrag(){if(!orderDrag)return;var d=orderDrag;orderDrag=null;c
 function cancelOrderPress(){if(orderPress){clearTimeout(orderPress);orderPress=null;}orderPressData=null;}
 function startScrollInertia(v){if(scrollInertiaFrame)cancelAnimationFrame(scrollInertiaFrame);if(Math.abs(v)<.15)return;var last=performance.now();function tick(now){var dt=Math.min(32,now-last);last=now;window.scrollBy(0,v*dt);v*=Math.pow(.91,dt/16);if(Math.abs(v)>.12)scrollInertiaFrame=requestAnimationFrame(tick);else scrollInertiaFrame=0;}scrollInertiaFrame=requestAnimationFrame(tick);}
 function beginOrderDrag(data){data.active=true;orderDrag=data;document.body.classList.add("order-drag-active");var wrap=data.type==="activity"?data.card:data.card.closest(".w-sw");data.card.classList.add("dragging-order");if(wrap)wrap.classList.add("dragging-order");
- var rect=data.card.getBoundingClientRect(),ghost=data.card.cloneNode(true);ghost.classList.add("drag-ghost","dragging-order");ghost.querySelectorAll("details").forEach(function(d){d.remove()});ghost.querySelectorAll("button").forEach(function(b){b.disabled=true});ghost.style.left=rect.left+"px";ghost.style.top=rect.top+"px";ghost.style.width=rect.width+"px";ghost.style.transform="translate3d(0,0,0)";document.body.appendChild(ghost);data.ghost=ghost;data.offsetX=data.x-rect.left;data.offsetY=data.y-rect.top;
+ var source=data.type==="activity"?data.card.querySelector(":scope>.card"):data.card;source.style.removeProperty("transform");var rect=source.getBoundingClientRect(),ghost=source.cloneNode(true);ghost.classList.add("drag-ghost","dragging-order");ghost.querySelectorAll("details").forEach(function(d){d.remove()});ghost.querySelectorAll("button").forEach(function(b){b.disabled=true});ghost.style.left="0px";ghost.style.top="0px";ghost.style.width=rect.width+"px";ghost.style.transform="translate3d("+rect.left+"px,"+rect.top+"px,0)";document.body.appendChild(ghost);data.ghost=ghost;data.offsetX=data.x-rect.left;data.offsetY=data.y-rect.top;
  if(typeof sw!=="undefined")sw=null;if(typeof wSwipe!=="undefined")wSwipe=null;if(navigator.vibrate)try{navigator.vibrate(12)}catch(e){}}
 // Mobile: normal vertical movement scrolls the page; a stationary long press
 // switches that same gesture into reorder mode without requiring a second touch.
 document.addEventListener("touchstart",function(ev){if(ev.touches.length!==1)return;var found=dragTypeCard(ev.target);if(!found)return;
  if(scrollInertiaFrame){cancelAnimationFrame(scrollInertiaFrame);scrollInertiaFrame=0;}cancelOrderPress();if(orderDrag)finishOrderDrag();var t=ev.touches[0],wishDone=found.type==="wishlist"?getWishDone(found.id):false,blocked=!!ev.target.closest("button,input,textarea,select,summary,details,label,a");
- var data={type:found.type,card:found.card,id:found.id,doneState:wishDone,dragAllowed:!blocked,pointerId:"touch",x:t.clientX,y:t.clientY,lastY:t.clientY,lastTime:performance.now(),velocity:0,moved:false,scrollMode:false,active:false,target:null,after:false,scrollStart:window.scrollY};orderPressData=data;
+ var data={type:found.type,card:found.card,id:found.id,doneState:wishDone,dragAllowed:!blocked&&!wishDone,pointerId:"touch",x:t.clientX,y:t.clientY,lastY:t.clientY,lastX:t.clientX,lastTime:performance.now(),velocity:0,moved:false,scrollMode:false,swipeMode:false,swipeTx:0,swipeVelocity:0,active:false,target:null,after:false,scrollStart:window.scrollY,wasOpen:!!(found.type==="wishlist"&&found.card.closest(".w-sw").classList.contains("open"))};orderPressData=data;
  if(data.dragAllowed)orderPress=setTimeout(function(){orderPress=null;if(orderPressData===data&&!data.moved){beginOrderDrag(data);}},360);
 },{passive:true});
 document.addEventListener("touchmove",function(ev){if(ev.touches.length!==1)return;var t=ev.touches[0],now=performance.now();
  if(orderDrag&&orderDrag.active){ev.preventDefault();updateOrderTarget(t.clientX,t.clientY);return;}
  var data=orderPressData;if(!data)return;var dx=t.clientX-data.x,dy=t.clientY-data.y;
- if(!data.moved&&Math.hypot(dx,dy)>9){data.moved=true;if(orderPress){clearTimeout(orderPress);orderPress=null;}data.scrollMode=Math.abs(dy)>Math.abs(dx);}
- if(data.scrollMode){ev.preventDefault();var dt=Math.max(1,now-data.lastTime);var delta=data.lastY-t.clientY;window.scrollBy(0,delta);data.velocity=delta/dt;}
- data.lastY=t.clientY;data.lastTime=now;
+ if(!data.moved&&Math.hypot(dx,dy)>9){data.moved=true;if(orderPress){clearTimeout(orderPress);orderPress=null;}
+   if(data.type==="wishlist"&&!blocked&&Math.abs(dx)>Math.abs(dy)*1.2){data.swipeMode=true;data.card.style.transition="none";wlEl.querySelectorAll(".w-sw.open").forEach(function(x){if(x!==data.card.closest(".w-sw"))x.classList.remove("open")});}
+   else data.scrollMode=Math.abs(dy)>Math.abs(dx);
+ }
+ if(data.swipeMode){ev.preventDefault();var raw=(data.wasOpen?-76:0)+dx;data.swipeTx=raw<-76?-76+(raw+76)*.25:(raw>0?raw*.2:raw);data.card.style.transform="translateX("+data.swipeTx+"px)";var dtS=Math.max(1,now-data.lastTime);data.swipeVelocity=(t.clientX-data.lastX)/dtS;}
+ else if(data.scrollMode){ev.preventDefault();var dt=Math.max(1,now-data.lastTime);var delta=data.lastY-t.clientY;window.scrollBy(0,delta);data.velocity=delta/dt;}
+ data.lastX=t.clientX;data.lastY=t.clientY;data.lastTime=now;
 },{passive:false});
-document.addEventListener("touchend",function(){if(orderDrag){finishOrderDrag();orderPressData=null;return;}var data=orderPressData;cancelOrderPress();if(data&&data.scrollMode)startScrollInertia(data.velocity);},{passive:true});
+document.addEventListener("touchend",function(){if(orderDrag){finishOrderDrag();orderPressData=null;return;}var data=orderPressData;cancelOrderPress();if(data&&data.swipeMode){var wrap=data.card.closest(".w-sw"),open=(data.swipeVelocity<-.35&&data.swipeTx<-12)?true:(data.swipeVelocity>.35?false:data.swipeTx<-30);data.card.style.transition="transform .24s cubic-bezier(.22,1,.36,1)";wrap.classList.toggle("open",open);data.card.style.transform=open?"translateX(-76px)":"";if(!open)data.card.style.removeProperty("transform");setTimeout(function(){if(data.card.isConnected)data.card.style.transition=""},260);supClick=Date.now();}else if(data&&data.scrollMode)startScrollInertia(data.velocity);},{passive:true});
 document.addEventListener("touchcancel",function(){cancelOrderPress();orderDrag=null;clearDropMarks();clearDragState();},{passive:true});
 // Desktop mouse/pen uses the same insertion algorithm.
 document.addEventListener("pointerdown",function(ev){if(ev.pointerType==="touch")return;var found=dragTypeCard(ev.target);if(!found||ev.target.closest("button,input,textarea,select,summary,details,label,a"))return;
@@ -692,7 +705,7 @@ document.addEventListener("contextmenu",function(ev){if(ev.target.closest(".sw .
 
 // Wishlist swipe-to-delete, matching the activity cards' right-to-left gesture.
 var wSwipe=null,WW=76;
-wlEl.addEventListener("pointerdown",function(ev){var wrap=ev.target.closest(".w-sw");if(!wrap||ev.target.closest("button,input,textarea,summary,details,label"))return;
+wlEl.addEventListener("pointerdown",function(ev){if(ev.pointerType==="touch")return;var wrap=ev.target.closest(".w-sw");if(!wrap||ev.target.closest("button,input,textarea,summary,details,label"))return;
   wlEl.querySelectorAll(".w-sw.open").forEach(function(x){if(x!==wrap)x.classList.remove("open")});
   wSwipe={wrap:wrap,card:wrap.querySelector(".wc"),x:ev.clientX,y:ev.clientY,drag:false,was:wrap.classList.contains("open"),id:ev.pointerId};
 });
@@ -700,7 +713,7 @@ wlEl.addEventListener("pointermove",function(ev){if(!wSwipe||ev.pointerId!==wSwi
   if(!wSwipe.drag){if(Math.abs(dx)>8&&Math.abs(dx)>Math.abs(dy)*1.2){wSwipe.drag=true;wSwipe.card.style.transition="none";try{wSwipe.card.setPointerCapture(wSwipe.id)}catch(e){}}else return}
   var x=(wSwipe.was?-WW:0)+dx;wSwipe.card.style.transform="translateX("+(x<-WW?-WW+(x+WW)*.25:x>0?x*.2:x)+"px)";ev.preventDefault();
 },{passive:false});
-function endWishlistSwipe(ev){if(!wSwipe||ev&&ev.pointerId!==wSwipe.id)return;var s=wSwipe;wSwipe=null;s.card.style.transition="";if(!s.drag){if(s.was)s.wrap.classList.remove("open");return}var x=parseFloat((s.card.style.transform.match(/-?[0-9.]+/)||[0])[0]);var open=x<-WW*.4;s.wrap.classList.toggle("open",open);s.card.style.transform="";}
+function endWishlistSwipe(ev){if(!wSwipe||ev&&ev.pointerId!==wSwipe.id)return;var s=wSwipe;wSwipe=null;s.card.style.transition="";if(!s.drag){if(s.was)s.wrap.classList.remove("open");return}var x=parseFloat((s.card.style.transform.match(/-?[0-9.]+/)||[0])[0]);var open=x<-WW*.4;s.wrap.classList.toggle("open",open);s.card.style.transform="";supClick=Date.now();}
 wlEl.addEventListener("pointerup",endWishlistSwipe);wlEl.addEventListener("pointercancel",endWishlistSwipe);
 
 var DB=null,DB_READY=false,REMOTE_TIMER=null,REMOTE_CHAIN=Promise.resolve(),CURRENT_USER=null;
