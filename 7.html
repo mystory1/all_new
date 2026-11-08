@@ -204,13 +204,17 @@ body{overflow-anchor:none}
 .ck{width:30px;height:30px;border-radius:9px}
 .ck svg{width:16px;height:16px}
 .done-spacer{display:block;flex:none;width:30px;height:30px}
-.w-sw{position:relative;margin-bottom:10px;border-radius:16px;overflow:hidden;background:linear-gradient(90deg,#b91c1c,#ef4444)}
+.w-sw{position:relative;margin-bottom:10px;border-radius:16px;overflow:hidden;background:linear-gradient(90deg,#b91c1c,#ef4444);--p:0}
 .w-del{position:absolute;right:0;top:0;bottom:0;width:76px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700}
 .w-del button{width:100%;height:100%;background:transparent;color:#fff;font-weight:700}
 .wc{position:relative;z-index:1;margin:0;transition:transform .28s cubic-bezier(.22,1,.36,1);touch-action:pan-y}
 .w-sw.open .wc{transform:translateX(-76px)}
+.wc{will-change:transform;transition:transform .28s cubic-bezier(.22,1,.36,1)}
+.w-sw .w-del{opacity:1;pointer-events:auto}
+.w-sw.open .w-del{z-index:0}
+.w-sw .wc{z-index:1}
 .w-del{background:linear-gradient(90deg,#b91c1c,#ef4444);width:76px;right:0;}
-.w-del button{display:flex;align-items:center;justify-content:center;gap:5px;}
+.w-del button{display:flex;align-items:center;justify-content:center;gap:5px;min-width:76px;}
 .w-done-actions{display:flex;justify-content:flex-end;margin-top:10px;padding-top:9px;border-top:1px solid #1d1d1d;}
 .w-sw.is-done .wc{touch-action:pan-y;}
 .wc .note-fld{height:auto;min-height:76px;overflow:hidden;display:block;width:100%;max-width:100%;padding:0}
@@ -223,9 +227,13 @@ body{overflow-anchor:none}
 
 #v-wl .seg{margin-bottom:10px}
 
+/* Opaque viewport backing prevents scrolling cards from flashing through sticky chrome (especially iOS Safari). */
+body::before{content:"";position:fixed;inset:0 0 auto 0;height:calc(132px + env(safe-area-inset-top,0px));background:#000;z-index:998;pointer-events:none;transform:translateZ(0)}
+main{position:relative;isolation:isolate}
+.hd,.tabs{backface-visibility:hidden;-webkit-backface-visibility:hidden;background-clip:padding-box}
 /* Keep the complete page header and primary navigation visible. */
-.hd{position:sticky;top:0;z-index:1000;height:calc(56px + env(safe-area-inset-top,0px));margin:0 0 10px;padding:calc(6px + env(safe-area-inset-top,0px)) 0 4px;background:#000;opacity:1;isolation:isolate;transform:none;backface-visibility:visible;contain:none;will-change:auto;}
-.tabs{position:sticky;top:calc(56px + env(safe-area-inset-top,0px));z-index:999;background:#101010;opacity:1;isolation:isolate;transform:none;backface-visibility:visible;box-shadow:0 8px 14px rgba(0,0,0,.95);will-change:auto;}
+.hd{position:sticky;top:0;z-index:1001;height:calc(56px + env(safe-area-inset-top,0px));margin:0 0 10px;padding:calc(6px + env(safe-area-inset-top,0px)) 0 4px;background:#000;opacity:1;isolation:isolate;transform:none;backface-visibility:visible;contain:none;will-change:auto;}
+.tabs{position:sticky;top:calc(56px + env(safe-area-inset-top,0px));z-index:1000;background:#101010;opacity:1;isolation:isolate;transform:none;backface-visibility:visible;box-shadow:0 8px 14px rgba(0,0,0,.95);will-change:auto;}
 /* Filters and secondary controls scroll with their content. */
 #chips,#catp,#v-wl .seg{position:static;box-shadow:none}
 #chips{padding:0;margin:0 0 8px;flex-wrap:wrap;overflow:visible;}
@@ -587,13 +595,13 @@ else if(w.due){col=left<=3?"#ef4444":left<=14?"#f59e0b":"#22c55e";var ab=Math.ab
 meta="do "+fmt(w.due)+" · "+(left>0?"zostáva "+left+" "+dni(left):left===0?"dnes je termín":"po termíne o "+ab+" "+dni(ab));
 big='<div class="big">'+(left<0?"−":"")+ab+'<small>'+dni(ab)+'</small></div>';
 var tot=Math.max(1,diff(w.created,w.due)),p=Math.max(0,Math.min(100,Math.round(diff(w.created,now)/tot*100)));bar='<div class="bar"><i style="width:'+p+'%"></i></div>'}
-else{col="#3b82f6";meta="bez termínu"}
+else{col="#3b82f6";meta=""}
 var ck=w.done?'<span class="ck on" role="img" aria-label="Splnené">'+CHK+'</span>':'<button class="ck" data-w-a="done" aria-label="Označiť ako splnené">'+CHK+'</button>';
 var del=wPend===id?'<button type="button" data-w-a="yes">Áno</button><button type="button" data-w-a="no">Nie</button>':'<button type="button" data-w-a="del" aria-label="Odstrániť prianie"><svg viewBox="0 0 24 24" width="27" height="27" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5h6v2m-8 0 1 13h8l1-13M10 11v5m4-5v5"/></svg></button>';
 var dragHandle=!w.done?'<button type="button" class="drag-handle" data-drag="wishlist" aria-label="Zmeniť poradie priania">⠿</button>':'';
 var detail='';
-if(!w.done){detail='<details class="d" data-wk="'+id+'"'+(wOpen[id]?" open":"")+'><summary>⚙</summary><div class="dc"><div class="col"><label>Prianie<span class="fld"><input type="text" class="wt" maxlength="80" value="'+esc(w.text)+'"></span></label><label>Do kedy (nepovinné)<span class="fld"><input type="date" class="wdd" value="'+(w.due||"")+'"></span></label><label>Poznámka (nepovinné)<span class="fld note-fld"><textarea class="wnote" maxlength="1000" placeholder="Doplň poznámku...">'+esc(w.note||"")+'</textarea></span></label><div class="meta">Pridané '+fmt(w.created)+'</div><button class="ghost danger" data-w-a="del">Odstrániť</button></div></div></details>'}
-else{detail='<div class="w-done-actions"><button class="ghost" data-w-a="undone">Vrátiť medzi nesplnené</button></div>'}
+if(!w.done){detail='<details class="d" data-wk="'+id+'"'+(wOpen[id]?" open":"")+'><summary>⚙</summary><div class="dc"><div class="col"><label>Prianie<span class="fld"><input type="text" class="wt" maxlength="80" value="'+esc(w.text)+'"></span></label><label>Do kedy (nepovinné)<span class="fld"><input type="date" class="wdd" value="'+(w.due||"")+'"></span></label>'+(w.due?'':'<div class="meta">Bez termínu</div>')+'<label>Poznámka (nepovinné)<span class="fld note-fld"><textarea class="wnote" maxlength="1000" placeholder="Doplň poznámku...">'+esc(w.note||"")+'</textarea></span></label><div class="meta">Pridané '+fmt(w.created)+'</div><button class="ghost danger" data-w-a="del">Odstrániť</button></div></div></details>'}
+else{detail='<details class="d" data-wk="'+id+'"'+(wOpen[id]?" open":"")+'><summary>⚙ Detail priania</summary><div class="dc"><div class="col"><div class="meta">Splnené '+fmt(w.done)+'</div>'+(!w.due?'<div class="meta">Bez termínu</div>':'<div class="meta">Termín: '+fmt(w.due)+'</div>')+(w.note?'<div class="sm">'+esc(w.note)+'</div>':'')+'<div class="w-done-actions"><button class="ghost" data-w-a="undone">Vrátiť medzi nesplnené</button><button class="ghost danger" data-w-a="del">Odstrániť</button></div></div></div></details>'}
 return '<div class="w-sw'+(wPend===id?' open':'')+(w.done?' is-done':'')+'" data-wsw="'+id+'"><div class="w-del">'+del+'</div><div class="card wc" data-w="'+id+'" style="--c:'+col+'"><div class="top">'+dragHandle+'<div style="flex:1;min-width:0"><div class="name">'+esc(w.text)+'</div><div class="meta">'+meta+'</div></div><div class="r day-count">'+big+ck+'</div></div>'+bar+detail+'</div></div>'}
 
 function renderWl(){var now=todayStr(),box=document.getElementById("wlist");
@@ -607,7 +615,7 @@ if(Date.now()-supClick<550&&ev.target.closest(".wc")){ev.preventDefault();ev.sto
 var sg=ev.target.closest("[data-wf]");if(sg){WF=sg.getAttribute("data-wf");renderWl();return}
 var cd=ev.target.closest(".wc"),wrap=ev.target.closest(".w-sw");if(!cd&&wrap)cd=wrap.querySelector(".wc");if(!cd)return;var id=cd.getAttribute("data-w"),w=WL.filter(function(x){return x.id===id})[0];if(!w)return;
 var t=ev.target.closest("[data-w-a]");
-if(!t){if(w.done)return;if(!ev.target.closest("button,input,label,details")){var dd=cd.querySelector("details.d");
+if(!t){if(!ev.target.closest("button,input,label,details,summary")){var dd=cd.querySelector("details.d");
 if(dd&&!dd.open){var y0=window.scrollY;closeAddForm(wEl);[].forEach.call(wlEl.querySelectorAll("details.d[open]"),function(o){if(o!==dd)o.open=false});origY={};origY[id]=y0;anim(dd,true);sTo(topOf(cd)-stickyTopOffset()-8)}
 else if(dd&&dd.open){anim(dd,false);if(origY[id]!==undefined){sTo(origY[id]);delete origY[id]}}}return}
 var a=t.getAttribute("data-w-a"),now=todayStr();
@@ -675,21 +683,21 @@ function beginOrderDrag(data){data.active=true;orderDrag=data;document.body.clas
 // switches that same gesture into reorder mode without requiring a second touch.
 document.addEventListener("touchstart",function(ev){if(ev.touches.length!==1)return;var found=dragTypeCard(ev.target);if(!found)return;
  if(scrollInertiaFrame){cancelAnimationFrame(scrollInertiaFrame);scrollInertiaFrame=0;}cancelOrderPress();if(orderDrag)finishOrderDrag();var t=ev.touches[0],wishDone=found.type==="wishlist"?getWishDone(found.id):false,blocked=!!ev.target.closest("button,input,textarea,select,summary,details,label,a");
- var data={type:found.type,card:found.card,id:found.id,doneState:wishDone,dragAllowed:!blocked&&!wishDone,pointerId:"touch",x:t.clientX,y:t.clientY,lastY:t.clientY,lastX:t.clientX,lastTime:performance.now(),velocity:0,moved:false,scrollMode:false,swipeMode:false,swipeTx:0,swipeVelocity:0,active:false,target:null,after:false,scrollStart:window.scrollY,wasOpen:!!(found.type==="wishlist"&&found.card.closest(".w-sw").classList.contains("open"))};orderPressData=data;
+ var data={type:found.type,card:found.card,id:found.id,doneState:wishDone,blocked:blocked,dragAllowed:!blocked&&!wishDone,pointerId:"touch",x:t.clientX,y:t.clientY,lastY:t.clientY,lastX:t.clientX,lastTime:performance.now(),velocity:0,moved:false,scrollMode:false,swipeMode:false,swipeTx:0,swipeVelocity:0,active:false,target:null,after:false,scrollStart:window.scrollY,wasOpen:!!(found.type==="wishlist"&&found.card.closest(".w-sw").classList.contains("open"))};orderPressData=data;
  if(data.dragAllowed)orderPress=setTimeout(function(){orderPress=null;if(orderPressData===data&&!data.moved){beginOrderDrag(data);}},360);
 },{passive:true});
 document.addEventListener("touchmove",function(ev){if(ev.touches.length!==1)return;var t=ev.touches[0],now=performance.now();
  if(orderDrag&&orderDrag.active){ev.preventDefault();updateOrderTarget(t.clientX,t.clientY);return;}
  var data=orderPressData;if(!data)return;var dx=t.clientX-data.x,dy=t.clientY-data.y;
  if(!data.moved&&Math.hypot(dx,dy)>9){data.moved=true;if(orderPress){clearTimeout(orderPress);orderPress=null;}
-   if(data.type==="wishlist"&&!blocked&&Math.abs(dx)>Math.abs(dy)*1.2){data.swipeMode=true;data.card.style.transition="none";wlEl.querySelectorAll(".w-sw.open").forEach(function(x){if(x!==data.card.closest(".w-sw"))x.classList.remove("open")});}
+   if(data.type==="wishlist"&&!data.blocked&&Math.abs(dx)>Math.abs(dy)*1.2){data.swipeMode=true;data.card.style.transition="none";wlEl.querySelectorAll(".w-sw.open").forEach(function(x){if(x!==data.card.closest(".w-sw"))x.classList.remove("open")});}
    else data.scrollMode=Math.abs(dy)>Math.abs(dx);
  }
  if(data.swipeMode){ev.preventDefault();var raw=(data.wasOpen?-76:0)+dx;data.swipeTx=raw<-76?-76+(raw+76)*.25:(raw>0?raw*.2:raw);data.card.style.transform="translateX("+data.swipeTx+"px)";var dtS=Math.max(1,now-data.lastTime);data.swipeVelocity=(t.clientX-data.lastX)/dtS;}
  else if(data.scrollMode){ev.preventDefault();var dt=Math.max(1,now-data.lastTime);var delta=data.lastY-t.clientY;window.scrollBy(0,delta);data.velocity=delta/dt;}
  data.lastX=t.clientX;data.lastY=t.clientY;data.lastTime=now;
 },{passive:false});
-document.addEventListener("touchend",function(){if(orderDrag){finishOrderDrag();orderPressData=null;return;}var data=orderPressData;cancelOrderPress();if(data&&data.swipeMode){var wrap=data.card.closest(".w-sw"),open=(data.swipeVelocity<-.35&&data.swipeTx<-12)?true:(data.swipeVelocity>.35?false:data.swipeTx<-30);data.card.style.transition="transform .24s cubic-bezier(.22,1,.36,1)";wrap.classList.toggle("open",open);data.card.style.transform=open?"translateX(-76px)":"";if(!open)data.card.style.removeProperty("transform");setTimeout(function(){if(data.card.isConnected)data.card.style.transition=""},260);supClick=Date.now();}else if(data&&data.scrollMode)startScrollInertia(data.velocity);},{passive:true});
+document.addEventListener("touchend",function(){if(orderDrag){finishOrderDrag();orderPressData=null;return;}var data=orderPressData;cancelOrderPress();if(data&&data.swipeMode){var wrap=data.card.closest(".w-sw"),open=(data.swipeVelocity<-.35&&data.swipeTx<-12)?true:(data.swipeVelocity>.35?false:data.swipeTx<-30);data.card.style.transition="transform .24s cubic-bezier(.22,1,.36,1)";wrap.classList.toggle("open",open);data.card.style.removeProperty("transform");setTimeout(function(){if(data.card.isConnected)data.card.style.transition=""},260);supClick=Date.now();}else if(data&&data.scrollMode)startScrollInertia(data.velocity);},{passive:true});
 document.addEventListener("touchcancel",function(){cancelOrderPress();orderDrag=null;clearDropMarks();clearDragState();},{passive:true});
 // Desktop mouse/pen uses the same insertion algorithm.
 document.addEventListener("pointerdown",function(ev){if(ev.pointerType==="touch")return;var found=dragTypeCard(ev.target);if(!found||ev.target.closest("button,input,textarea,select,summary,details,label,a"))return;
@@ -713,7 +721,7 @@ wlEl.addEventListener("pointermove",function(ev){if(!wSwipe||ev.pointerId!==wSwi
   if(!wSwipe.drag){if(Math.abs(dx)>8&&Math.abs(dx)>Math.abs(dy)*1.2){wSwipe.drag=true;wSwipe.card.style.transition="none";try{wSwipe.card.setPointerCapture(wSwipe.id)}catch(e){}}else return}
   var x=(wSwipe.was?-WW:0)+dx;wSwipe.card.style.transform="translateX("+(x<-WW?-WW+(x+WW)*.25:x>0?x*.2:x)+"px)";ev.preventDefault();
 },{passive:false});
-function endWishlistSwipe(ev){if(!wSwipe||ev&&ev.pointerId!==wSwipe.id)return;var s=wSwipe;wSwipe=null;s.card.style.transition="";if(!s.drag){if(s.was)s.wrap.classList.remove("open");return}var x=parseFloat((s.card.style.transform.match(/-?[0-9.]+/)||[0])[0]);var open=x<-WW*.4;s.wrap.classList.toggle("open",open);s.card.style.transform="";supClick=Date.now();}
+function endWishlistSwipe(ev){if(!wSwipe||ev&&ev.pointerId!==wSwipe.id)return;var s=wSwipe;wSwipe=null;s.card.style.transition="";if(!s.drag){if(s.was)s.wrap.classList.remove("open");return}var x=parseFloat((s.card.style.transform.match(/-?[0-9.]+/)||[0])[0]);var open=x<-WW*.4;s.wrap.classList.toggle("open",open);s.card.style.removeProperty("transform");supClick=Date.now();}
 wlEl.addEventListener("pointerup",endWishlistSwipe);wlEl.addEventListener("pointercancel",endWishlistSwipe);
 
 var DB=null,DB_READY=false,REMOTE_TIMER=null,REMOTE_CHAIN=Promise.resolve(),CURRENT_USER=null;
