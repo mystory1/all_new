@@ -227,13 +227,14 @@ body{overflow-anchor:none}
 
 #v-wl .seg{margin-bottom:10px}
 
-/* Opaque viewport backing prevents scrolling cards from flashing through sticky chrome (especially iOS Safari). */
-body::before{content:"";position:fixed;inset:0 0 auto 0;height:calc(132px + env(safe-area-inset-top,0px));background:#000;z-index:998;pointer-events:none;transform:translateZ(0)}
-main{position:relative;isolation:isolate}
+/* iOS Safari: sticky header/nav must remain in the main page stacking context.
+   A fixed pseudo-element above main was covering the header and creating the
+   large black strip seen on mobile. */
+main{position:relative;isolation:auto}
 .hd,.tabs{backface-visibility:hidden;-webkit-backface-visibility:hidden;background-clip:padding-box}
-/* Keep the complete page header and primary navigation visible. */
-.hd{position:sticky;top:0;z-index:1001;height:calc(56px + env(safe-area-inset-top,0px));margin:0 0 10px;padding:calc(6px + env(safe-area-inset-top,0px)) 0 4px;background:#000;opacity:1;isolation:isolate;transform:none;backface-visibility:visible;contain:none;will-change:auto;}
-.tabs{position:sticky;top:calc(56px + env(safe-area-inset-top,0px));z-index:1000;background:#101010;opacity:1;isolation:isolate;transform:none;backface-visibility:visible;box-shadow:0 8px 14px rgba(0,0,0,.95);will-change:auto;}
+/* Keep the complete page header and primary navigation visible and opaque. */
+.hd{position:sticky;top:0;z-index:30;height:calc(56px + env(safe-area-inset-top,0px));margin:0 0 10px;padding:calc(6px + env(safe-area-inset-top,0px)) 0 4px;background:#000;opacity:1;isolation:isolate;transform:none;backface-visibility:visible;contain:none;will-change:auto;}
+.tabs{position:sticky;top:calc(56px + env(safe-area-inset-top,0px));z-index:29;background:#101010;opacity:1;isolation:isolate;transform:none;backface-visibility:visible;box-shadow:0 8px 14px rgba(0,0,0,.95);will-change:auto;}
 /* Filters and secondary controls scroll with their content. */
 #chips,#catp,#v-wl .seg{position:static;box-shadow:none}
 #chips{padding:0;margin:0 0 8px;flex-wrap:wrap;overflow:visible;}
@@ -292,6 +293,7 @@ main{position:relative;isolation:isolate}
 <script src="./config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
+try{if("scrollRestoration" in history)history.scrollRestoration="manual";}catch(e){}
 var COLORS=["#3b82f6","#22c55e","#f59e0b","#ef4444","#a855f7","#22d3ee","#f472b6"],KEY="aktivity_v1";
 var TRASH='<button data-a="trash" aria-label="Odstrániť"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9 7V5.2A1.2 1.2 0 0 1 10.2 4h3.6A1.2 1.2 0 0 1 15 5.2V7"/><path d="M6.2 7l.8 11.2A2 2 0 0 0 9 20h6a2 2 0 0 0 2-1.8L17.8 7"/><path d="M10 11v5M14 11v5"/></svg></button>';
 var catOpen=false,flash=null,sel={},S={cat:""},forced=[],items=[],openIds={},mon={},pend=null,pickC=COLORS[0];
@@ -835,8 +837,10 @@ async function boot(){
     }
     DB_READY=true;
     if(!remote.hasRemoteData && (items.length||WL.length)) scheduleRemoteSave();
+    window.scrollTo(0,0);
     render();
     setTab("ov");
+    requestAnimationFrame(function(){window.scrollTo(0,0)});
   }catch(e){
     console.error(e);
     document.body.innerHTML='<main><div class="card"><h2>Nepodarilo sa načítať aplikáciu</h2><p style="color:#aaa;line-height:1.6">'+esc(e&&e.message?e.message:"Neznáma chyba")+'</p><button class="primary" onclick="location.reload()">Skúsiť znova</button></div></main>';
