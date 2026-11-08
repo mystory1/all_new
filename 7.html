@@ -172,6 +172,8 @@ body{overflow-anchor:none}
 .chips button,.catp button{border-radius:10px;padding:6px 10px;font-size:.76rem}
 .chips{margin:0 0 10px}
 #v-ov .card{margin-bottom:10px}
+.ovfold{padding:0;overflow:hidden}.ovfold>summary{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 14px;cursor:pointer;list-style:none;font-size:.9rem;font-weight:600}.ovfold>summary::-webkit-details-marker{display:none}.ovfold>summary::after{content:"›";font-size:1.3rem;line-height:1;color:var(--mut);transition:transform .2s}.ovfold[open]>summary::after{transform:rotate(90deg)}.ovfold-body{padding:0 14px 12px}
+.hm button.hm-day{border:0;padding:0;min-width:0;width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:8px;font:inherit;font-size:.75rem;background:#141414;color:var(--mut);cursor:pointer}.hm button.hm-day:disabled{opacity:.25;cursor:default}.hm button.hm-day.selected{outline:2px solid #fff;outline-offset:1px;color:#fff}
 #v-ov .seg{margin-bottom:10px}
 .fld.bad{border-color:#ef4444;background:rgba(239,68,68,.07)}
 .fe{color:#ff6b6b;font-size:.76rem;line-height:1.3}
@@ -204,17 +206,15 @@ body{overflow-anchor:none}
 .ck{width:30px;height:30px;border-radius:9px}
 .ck svg{width:16px;height:16px}
 .done-spacer{display:block;flex:none;width:30px;height:30px}
-.w-sw{position:relative;margin-bottom:10px;border-radius:16px;overflow:hidden;background:linear-gradient(90deg,#b91c1c,#ef4444);--p:0}
-.w-del{position:absolute;right:0;top:0;bottom:0;width:76px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700}
-.w-del button{width:100%;height:100%;background:transparent;color:#fff;font-weight:700}
+.w-sw{position:relative;margin-bottom:10px;border-radius:16px;overflow:hidden;background:#0e0e0e;--p:0}
+.w-del{position:absolute;right:0;top:0;bottom:0;width:132px;display:flex;align-items:stretch;justify-content:stretch;color:#fff;font-weight:700;background:linear-gradient(90deg,#b91c1c,#ef4444);opacity:0;pointer-events:none}
+.w-del button{flex:1 1 50%;min-width:0;height:100%;padding:0 4px;background:transparent;color:#fff;font-weight:700;font-size:.9rem;white-space:nowrap}
+.w-del button+button{background:rgba(0,0,0,.28);border-left:1px solid rgba(255,255,255,.22)}
 .wc{position:relative;z-index:1;margin:0;transition:transform .28s cubic-bezier(.22,1,.36,1);touch-action:pan-y}
-.w-sw.open .wc{transform:translateX(-76px)}
+.w-sw.open .wc{transform:translateX(-132px)}
 .wc{will-change:transform;transition:transform .28s cubic-bezier(.22,1,.36,1)}
-.w-sw .w-del{opacity:1;pointer-events:auto}
-.w-sw.open .w-del{z-index:0}
+.w-sw.open .w-del{opacity:1;pointer-events:auto}
 .w-sw .wc{z-index:1}
-.w-del{background:linear-gradient(90deg,#b91c1c,#ef4444);width:76px;right:0;}
-.w-del button{display:flex;align-items:center;justify-content:center;gap:5px;min-width:76px;}
 .w-done-actions{display:flex;justify-content:flex-end;margin-top:10px;padding-top:9px;border-top:1px solid #1d1d1d;}
 .w-sw.is-done .wc{touch-action:pan-y;}
 .wc .note-fld{height:auto;min-height:76px;overflow:hidden;display:block;width:100%;max-width:100%;padding:0}
@@ -231,6 +231,7 @@ body{overflow-anchor:none}
    A fixed pseudo-element above main was covering the header and creating the
    large black strip seen on mobile. */
 main{position:relative;isolation:auto}
+body::before{content:"";position:fixed;inset:0 0 auto 0;height:calc(132px + env(safe-area-inset-top,0px));background:#000;z-index:10;pointer-events:none}
 .hd,.tabs{backface-visibility:hidden;-webkit-backface-visibility:hidden;background-clip:padding-box}
 /* Keep the complete page header and primary navigation visible and opaque. */
 .hd{position:sticky;top:0;z-index:30;height:calc(56px + env(safe-area-inset-top,0px));margin:0 0 10px;padding:calc(6px + env(safe-area-inset-top,0px)) 0 4px;background:#000;opacity:1;isolation:isolate;transform:none;backface-visibility:visible;contain:none;will-change:auto;}
@@ -356,11 +357,11 @@ var acts=isP("reset")?cfm("Resetovať? Aktuálny priebeh sa uloží do histórie
 var cd=COLORS.map(function(c){return '<button type="button" class="dot'+(c===a.color?" on":"")+'" style="--c:'+c+'" data-a="col" data-c="'+c+'" aria-label="farba"></button>'}).join("");
 var op=function(k){return openIds[k]?" open":""};
 var G=function(k,title,body){return '<details class="n" data-k="'+id+k+'"'+op(id+k)+'><summary>'+title+'</summary><div class="in">'+body+'</div></details>'};
-var set='<div class="sm">Splnených dní: <b>'+(conf(a,now)+a.base)+'</b> · Séria: <b>'+st+'</b></div>'
+var set='<div class="sm">Začiatok: <b>'+fmt(a.start)+'</b>'+(a.end?' · Koniec: <b>'+fmt(a.end)+'</b>':'')+'</div><div class="sm">Splnených dní: <b>'+(conf(a,now)+a.base)+'</b> · Séria: <b>'+st+'</b></div>'
 +G("u",'<span class="st">'+ICN.u+'Údaje aktivity</span>','<div class="col"><label>Názov<span class="fld"><input type="text" class="en" maxlength="60" value="'+esc(a.name)+'"></span></label><label>Začiatok<span class="fld"><input type="date" class="es" value="'+a.start+'"></span></label><label>Do kedy (nepovinné)<span class="fld"><input type="date" class="ee" value="'+(a.end||"")+'"></span></label><label>Kategória (nepovinné)<span class="fld"><input type="text" class="ec" maxlength="24" list="cats" value="'+esc(a.cat||"")+'"></span></label><label>Počet dní trvania (nepovinné)<span class="fld"><input type="number" class="eg" min="1" inputmode="numeric" value="'+(a.goal||"")+'"></span></label><label>Koľkokrát som už splnil/a (spätne)<span class="fld"><input type="number" class="eb" min="0" inputmode="numeric" value="'+a.base+'"></span></label><div><div class="cl">Farba</div><div class="dots">'+cd+'</div></div>'+'</div>')
 +G("c",'<span class="st">'+ICN.c+'Splnené dni</span>',cal(a,now))
 +G("z",'<span class="st">'+ICN.z+'Ďalšie nastavenia</span>',acts);
-return '<div class="sw'+(pd?' pd':'')+'" data-id="'+id+'"><div class="del">'+(pd?'<button data-a="yes">Áno</button><button data-a="no">Nie</button>':TRASH)+'</div><div class="card'+(flash===id?' flash':'')+'" style="--c:'+a.color+'"><div class="top"><button type="button" class="drag-handle" data-drag="activity" aria-label="Zmeniť poradie aktivity">⠿</button><div style="flex:1;min-width:0"><div class="name">'+esc(a.name)+'</div><div class="meta">'+(a.cat?esc(a.cat)+' · ':'')+'od '+fmt(a.start)+(now<a.start?' · ešte nezačala':'')+(st?' · 🔥 '+st:'')+'</div></div><div class="r day-count"><div class="big'+(isDone(a,now,now)?'':' muted')+'">'+d+'<small>'+dni(d)+'</small></div>'+CK(a,now)+'</div></div>'+bar+today
+return '<div class="sw'+(pd?' pd':'')+'" data-id="'+id+'"><div class="del">'+(pd?'<button data-a="yes">Áno</button><button data-a="no">Nie</button>':TRASH)+'</div><div class="card'+(flash===id?' flash':'')+'" style="--c:'+a.color+'"><div class="top"><button type="button" class="drag-handle" data-drag="activity" aria-label="Zmeniť poradie aktivity">⠿</button><div style="flex:1;min-width:0"><div class="name">'+esc(a.name)+'</div><div class="meta">'+(a.cat?esc(a.cat):'')+(now<a.start?' · ešte nezačala':'')+(st?' · 🔥 '+st:'')+'</div></div><div class="r day-count"><div class="big'+(isDone(a,now,now)?'':' muted')+'">'+d+'<small>'+dni(d)+'</small></div>'+CK(a,now)+'</div></div>'+bar+today
 +'<details class="d" data-k="'+id+'"'+op(id)+'><summary>⚙ Nastavenia</summary><div class="dc">'+set+'</div></details></div></div>'}
 function render(){
 var now=todayStr(),box=document.getElementById("list");
@@ -411,27 +412,30 @@ function catCard(f,t,now){var m={},has=false;
 items.forEach(function(a){if(!inP(a,f,t))return;var k=a.cat||"";if(k)has=true;var st=astat(a,f,t,now);if(!st.e)return;var o=m[k]||(m[k]={e:0,n:0});o.e+=st.e;o.n+=st.n});
 if(!has)return"";
 var ci=0;var rows=Object.keys(m).sort(function(x,y){return x===""?1:y===""?-1:x.localeCompare(y)}).map(function(k){var o=m[k],p=Math.round(o.n/o.e*100);return '<div class="am" style="--c:'+COLORS[ci++%COLORS.length]+'"><div class="t2"><span>'+(k?esc(k):"Bez kategórie")+'</span><b>'+o.n+'/'+o.e+'</b></div><div class="bar"><i style="width:'+p+'%"></i></div></div>'}).join("");
-return rows?'<div class="card"><div class="sh">Podľa kategórií</div>'+rows+'</div>':""}
+return rows?'<details class="card ovfold"><summary>Podľa kategórií</summary><div class="ovfold-body">'+rows+'</div></details>':""}
 function ovDay(now){var d=addDays(now,OV.o),s=dstat(d,now),cur=OV.o===0;
 var lab=cur?"Dnes":OV.o===-1?"Včera":DN[wd(d)]+" "+fmt(d);
 var dl=items.filter(function(a){return inP(a,d,d)&&isDone(a,d,now)}).map(function(a){return '<div class="orow" style="--c:'+a.color+'"><div class="nm">'+esc(a.name)+(a.cat?'<small>'+esc(a.cat)+'</small>':'')+'</div><span class="ck on">'+CHK+'</span></div>'}).join("");
 return nav(lab,OV.o<0)+sumCard(s,lab+" "+s.n+" z "+s.e,s.e?"splnených":"V tento deň žiadne aktivity",cmp(s,dstat(addDays(d,-1),now),"predošlému dňu"))
-+'<div class="card"><div class="sh">Splnené aktivity</div>'+(dl||'<div class="meta" style="padding:8px 0">'+(cur?"Dnes zatiaľ nič splnené.":"V tento deň nebolo nič splnené.")+'</div>')+'</div>'+catCard(d,d,now)}
++'<details class="card ovfold"><summary>Splnené aktivity</summary><div class="ovfold-body">'+(dl||'<div class="meta" style="padding:8px 0">'+(cur?"Dnes zatiaľ nič splnené.":"V tento deň nebolo nič splnené.")+'</div>')+'</div></details>'+catCard(d,d,now)}
 function ovWeek(now){var ws=addDays(addDays(now,-wd(now)),OV.o*7),we=addDays(ws,6),R=range(ws,we,now);
 var sh=function(x){return x.slice(8)+"."+x.slice(5,7)+"."};
 var bars=R.days.map(function(x,i){var p=x.e?Math.round(x.n/x.e*100):0;return '<div class="bc"><div class="bt"><div class="bb'+(x.e&&x.n?'':' z')+'" style="height:'+Math.max(4,p)+'%'+(x.e&&x.n?';background:'+pc(p):'')+'"></div></div><span>'+DN[i]+'</span><span>'+(x.e?x.n+"/"+x.e:"–")+'</span></div>'}).join("");
 var rows=items.filter(function(a){return inP(a,ws,we)}).map(function(a){var st=astat(a,ws,we,now);if(!st.e)return"";
 return '<div class="arow" style="--c:'+a.color+'"><div class="nm">'+esc(a.name)+'</div><div class="sq">'+R.days.map(function(x){return '<i class="'+(x.d<a.start||x.d>now||x.d>endOf(a)?"x":isDone(a,x.d,now)?"on":"")+'"></i>'}).join("")+'</div><b>'+st.n+'/'+st.e+'</b></div>'}).join("");
-return nav(OV.o===0?"Tento týždeň":sh(ws)+" – "+fmt(we),OV.o<0)+sumCard(R,"Splnené "+R.n+" z "+R.e,R.e?"splnení v týždni":"V týždni zatiaľ nič",cmp(R,range(addDays(ws,-7),addDays(ws,Math.min(6,Math.max(0,diff(ws,now)))-7),now),"rovnakému obdobiu minulého týždňa"))+'<div class="card"><div class="sh">Po dňoch</div><div class="bars">'+bars+'</div></div>'+catCard(ws,we,now)+(rows?'<div class="card"><div class="sh">Podľa aktivít</div><div class="arow hl"><div class="nm"></div><div class="sq l">'+["P","U","S","Š","P","S","N"].map(function(l){return '<span>'+l+'</span>'}).join("")+'</div><b style="visibility:hidden">0/0</b></div>'+rows+'</div>':'')}
+return nav(OV.o===0?"Tento týždeň":sh(ws)+" – "+fmt(we),OV.o<0)+sumCard(R,"Splnené "+R.n+" z "+R.e,R.e?"splnení v týždni":"V týždni zatiaľ nič",cmp(R,range(addDays(ws,-7),addDays(ws,Math.min(6,Math.max(0,diff(ws,now)))-7),now),"rovnakému obdobiu minulého týždňa"))+'<div class="card"><div class="sh">Po dňoch</div><div class="bars">'+bars+'</div></div>'+catCard(ws,we,now)+(rows?'<details class="card ovfold"><summary>Podľa aktivít</summary><div class="ovfold-body"><div class="arow hl"><div class="nm"></div><div class="sq l">'+["P","U","S","Š","P","S","N"].map(function(l){return '<span>'+l+'</span>'}).join("")+'</div><b style="visibility:hidden">0/0</b></div>'+rows+'</div></details>':'')}
 function ovMonth(now){var t=new Date(),f=new Date(Date.UTC(t.getFullYear(),t.getMonth()+OV.o,1)),yy=f.getUTCFullYear(),mm=f.getUTCMonth(),len=new Date(Date.UTC(yy,mm+1,0)).getUTCDate();
 var a1=yy+"-"+pad(mm+1)+"-01",a2=yy+"-"+pad(mm+1)+"-"+pad(len),R=range(a1,a2,now),off=(f.getUTCDay()+6)%7;
 var prevLen=new Date(Date.UTC(yy,mm,0)).getUTCDate(),cmpDays=OV.o===0?Math.min(prevLen,Math.max(1,+now.slice(8))):prevLen;
 var prevMonthStart=iso(new Date(Date.UTC(yy,mm-1,1))),prevMonthEnd=iso(new Date(Date.UTC(yy,mm-1,cmpDays)));
+var selected=OV.day&&OV.day.slice(0,7)===a1.slice(0,7)?OV.day:null;
 var hm=DN.map(function(w){return '<span class="w">'+w+'</span>'}).join("")+new Array(off+1).join('<span class="w"></span>');
-R.days.forEach(function(x,i){var st="";if(x.d<=now&&x.e){var pp=x.n/x.e*100;st=' style="background:hsla('+Math.round(pp*1.2)+',65%,42%,.9);color:#fff"'}hm+='<span'+st+'>'+(i+1)+'</span>'});
+R.days.forEach(function(x,i){var st="",clickable=x.d<=now;if(x.d<=now&&x.e){var pp=x.n/x.e*100;st=' style="background:hsla('+Math.round(pp*1.2)+',65%,42%,.9);color:#fff"'}hm+='<button type="button" class="hm-day'+(selected===x.d?' selected':'')+'" data-day="'+x.d+'"'+(clickable?'':' disabled')+st+'>'+(i+1)+'</button>'});
 var rows=items.filter(function(a){return inP(a,a1,a2)}).map(function(a){var st=astat(a,a1,a2,now);if(!st.e)return"";var p=Math.round(st.n/st.e*100);
 return '<div class="am" style="--c:'+a.color+'"><div class="t2"><span>'+esc(a.name)+'</span><b>'+st.n+'/'+st.e+' dní</b></div><div class="bar"><i style="width:'+p+'%"></i></div></div>'}).join("");
-return nav(MN[mm]+" "+yy,OV.o<0)+sumCard(R,"Splnené "+R.n+" z "+R.e,R.e?"splnení v mesiaci":"V mesiaci zatiaľ nič",cmp(R,range(prevMonthStart,prevMonthEnd,now),"rovnakému počtu dní minulého mesiaca"))+'<div class="card"><div class="sh">Mesiac po dňoch</div><div class="hm">'+hm+'</div></div>'+catCard(a1,a2,now)+(rows?'<div class="card"><div class="sh">Podľa aktivít</div>'+rows+'</div>':'')}
+var dayDetail="";
+if(selected){var completed=items.filter(function(a){return inP(a,selected,selected)&&isDone(a,selected,now)});dayDetail='<div class="card"><div class="sh">Splnené aktivity · '+fmt(selected)+'</div>'+(completed.length?completed.map(function(a){return '<div class="orow" style="--c:'+a.color+'"><div class="nm">'+esc(a.name)+(a.cat?'<small>'+esc(a.cat)+'</small>':'')+'</div><span class="ck on" role="img" aria-label="Splnené">'+CHK+'</span></div>'}).join(""):'<div class="meta" style="padding:8px 0">V tento deň nebola splnená žiadna aktivita.</div>')+'</div>'}
+return nav(MN[mm]+" "+yy,OV.o<0)+sumCard(R,"Splnené "+R.n+" z "+R.e,R.e?"splnení v mesiaci":"V mesiaci zatiaľ nič",cmp(R,range(prevMonthStart,prevMonthEnd,now),"rovnakému počtu dní minulého mesiaca"))+'<div class="card"><div class="sh">Mesiac po dňoch</div><div class="hm">'+hm+'</div></div>'+dayDetail+catCard(a1,a2,now)+(rows?'<details class="card ovfold"><summary>Podľa aktivít</summary><div class="ovfold-body">'+rows+'</div></details>':'')}
 function ovYear(now){var yy=new Date().getFullYear()+OV.o,a1=yy+"-01-01",a2=yy+"-12-31",R=range(a1,a2,now),me=[],mn=[],i;
 for(i=0;i<12;i++){me[i]=0;mn[i]=0}
 R.days.forEach(function(x){var m=+x.d.slice(5,7)-1;me[m]+=x.e;mn[m]+=x.n});
@@ -448,11 +452,12 @@ function setTab(x){closeAll();T=x;document.querySelector(".hd h1").textContent=x
 document.querySelectorAll(".tabs button").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-t")===x)});
 document.getElementById("addb").style.visibility="visible";
 addEl.hidden=true;wEl.hidden=true;addBtn();
-if(x==="ov"){OV={m:"day",o:0};renderOv()}else if(x==="act")render();else renderWl()}
+if(x==="ov"){OV={m:"day",o:0,day:null};renderOv()}else if(x==="act")render();else renderWl()}
 document.querySelector(".tabs").addEventListener("click",function(ev){var b=ev.target.closest("[data-t]");if(b)setTab(b.getAttribute("data-t"))});
 document.getElementById("v-ov").addEventListener("click",function(ev){
-var m=ev.target.closest("[data-m]");if(m){OV.m=m.getAttribute("data-m");OV.o=0;renderOv();return}
-var n=ev.target.closest("[data-n]");if(n&&!n.disabled){OV.o=Math.min(0,OV.o+ +n.getAttribute("data-n"));renderOv();return}
+var m=ev.target.closest("[data-m]");if(m){OV.m=m.getAttribute("data-m");OV.o=0;OV.day=null;renderOv();return}
+var n=ev.target.closest("[data-n]");if(n&&!n.disabled){OV.o=Math.min(0,OV.o+ +n.getAttribute("data-n"));OV.day=null;renderOv();return}
+var day=ev.target.closest("[data-day]");if(day&&!day.disabled){OV.day=day.getAttribute("data-day");renderOv();return}
 });
 function toast(m){var t=document.getElementById("toast");t.textContent=m;t.className="show";clearTimeout(toast.t);toast.t=setTimeout(function(){t.className=""},2200)}
 var addEl=document.getElementById("add");
@@ -714,7 +719,7 @@ document.addEventListener("click",function(ev){if(Date.now()-supClick<550&&ev.ta
 document.addEventListener("contextmenu",function(ev){if(ev.target.closest(".sw .card,.wc"))ev.preventDefault()});
 
 // Wishlist swipe-to-delete, matching the activity cards' right-to-left gesture.
-var wSwipe=null,WW=76;
+var wSwipe=null,WW=132;
 wlEl.addEventListener("pointerdown",function(ev){if(ev.pointerType==="touch")return;var wrap=ev.target.closest(".w-sw");if(!wrap||ev.target.closest("button,input,textarea,summary,details,label"))return;
   wlEl.querySelectorAll(".w-sw.open").forEach(function(x){if(x!==wrap)x.classList.remove("open")});
   wSwipe={wrap:wrap,card:wrap.querySelector(".wc"),x:ev.clientX,y:ev.clientY,drag:false,was:wrap.classList.contains("open"),id:ev.pointerId};
