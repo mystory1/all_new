@@ -191,8 +191,21 @@ body{overflow-anchor:none}
 .wc details.d>summary{display:none}
 .wc details.d{margin-top:0}
 .wc details.d[open]{margin-top:12px;border-top:1px solid var(--line);padding-top:12px}
-.drag-handle{flex:none;width:28px;height:36px;padding:0;background:#111;border:1px solid #292929;color:#777;border-radius:9px;font-size:1.1rem;line-height:1;touch-action:none;cursor:grab;display:grid;place-items:center;user-select:none;-webkit-user-select:none}
+.drag-handle{flex:none;width:28px;height:36px;padding:0;background:#111;border:1px solid #292929;color:#fff;border-radius:9px;font-size:1rem;line-height:1;touch-action:none;cursor:grab;display:grid;place-items:center;user-select:none;-webkit-user-select:none;opacity:0;pointer-events:none;transition:opacity .16s}
 .drag-handle:active{color:#fff;border-color:#666;cursor:grabbing}
+.dragging-order .drag-handle{opacity:1}
+.big{font-size:1.65rem}
+.big.muted{color:#777!important}
+.ck{width:30px;height:30px;border-radius:9px}
+.ck svg{width:16px;height:16px}
+.done-spacer{display:block;flex:none;width:30px;height:30px}
+.w-sw{position:relative;margin-bottom:10px;border-radius:16px;overflow:hidden;background:linear-gradient(90deg,#b91c1c,#ef4444)}
+.w-del{position:absolute;right:0;top:0;bottom:0;width:76px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700}
+.w-del button{width:100%;height:100%;background:transparent;color:#fff;font-weight:700}
+.wc{position:relative;z-index:1;margin:0;transition:transform .28s cubic-bezier(.22,1,.36,1);touch-action:pan-y}
+.w-sw.open .wc{transform:translateX(-76px)}
+.wc textarea{width:100%;min-height:76px;resize:vertical;background:#000;color:var(--txt);border:1px solid #2a2a2a;border-radius:10px;padding:10px;font:inherit;font-size:16px}
+.wc textarea:focus{outline:2px solid #777;outline-offset:1px}
 .dragging-order{opacity:.42;outline:1px dashed #777}
 .drop-before{box-shadow:0 -2px 0 #fff}
 .drop-after{box-shadow:0 2px 0 #fff}
@@ -288,7 +301,7 @@ return '<div class="cn"><button data-a="pm">‹</button><span>'+MN[mm]+" "+yy+'<
 var IC=function(p){return '<svg class="ic" viewBox="0 0 24 24">'+p+'</svg>'};
 var ICN={u:IC('<path d="M4 20h4L19 9a2.1 2.1 0 0 0-3-3L5 17v3z"/><path d="M13.5 7.5l3 3"/>'),c:IC('<rect x="3.5" y="5" width="17" height="15.5" rx="3.5"/><path d="M8 3v4M16 3v4M3.5 10.5h17M9 15.3l2.1 2.1 3.9-4"/>'),z:IC('<path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2.2"/><circle cx="9" cy="17" r="2.2"/>')};
 function CK(a,now){var sv='<svg viewBox="0 0 24 24"><path d="M5.5 12.5l4.2 4.2L18.5 7.5"/></svg>';
-if(isDone(a,now,now))return '<span class="ck on" role="img" aria-label="Splnené dnes">'+sv+'</span>';
+if(isDone(a,now,now))return '<span class="done-spacer" aria-hidden="true"></span>';
 return '<button class="ck" data-a="go"'+(now<a.start?' disabled':'')+' aria-label="Označiť ako splnené dnes">'+sv+'</button>'}
 function card(a,now){
 var id=a.id,d=cnt(a,now),p=pct(a,now),st=streak(a,now),h=a.history;
@@ -306,7 +319,7 @@ var set='<div class="sm">Splnených dní: <b>'+(conf(a,now)+a.base)+'</b> · Sé
 +G("u",'<span class="st">'+ICN.u+'Údaje aktivity</span>','<div class="col"><label>Názov<span class="fld"><input type="text" class="en" maxlength="60" value="'+esc(a.name)+'"></span></label><label>Začiatok<span class="fld"><input type="date" class="es" value="'+a.start+'"></span></label><label>Do kedy (nepovinné)<span class="fld"><input type="date" class="ee" value="'+(a.end||"")+'"></span></label><label>Kategória (nepovinné)<span class="fld"><input type="text" class="ec" maxlength="24" list="cats" value="'+esc(a.cat||"")+'"></span></label><label>Počet dní trvania (nepovinné)<span class="fld"><input type="number" class="eg" min="1" inputmode="numeric" value="'+(a.goal||"")+'"></span></label><label>Koľkokrát som už splnil/a (spätne)<span class="fld"><input type="number" class="eb" min="0" inputmode="numeric" value="'+a.base+'"></span></label><div><div class="cl">Farba</div><div class="dots">'+cd+'</div></div>'+'</div>')
 +G("c",'<span class="st">'+ICN.c+'Splnené dni</span>',cal(a,now))
 +G("z",'<span class="st">'+ICN.z+'Ďalšie nastavenia</span>',acts);
-return '<div class="sw'+(pd?' pd':'')+'" data-id="'+id+'"><div class="del">'+(pd?'<button data-a="yes">Áno</button><button data-a="no">Nie</button>':TRASH)+'</div><div class="card'+(flash===id?' flash':'')+'" style="--c:'+a.color+'"><div class="top"><button type="button" class="drag-handle" data-drag="activity" aria-label="Zmeniť poradie aktivity">⠿</button>'+CK(a,now)+'<div style="flex:1;min-width:0"><div class="name">'+esc(a.name)+'</div><div class="meta">'+(a.cat?esc(a.cat)+' · ':'')+'od '+fmt(a.start)+(now<a.start?' · ešte nezačala':'')+(st?' · 🔥 '+st:'')+'</div></div><div class="big">'+d+'<small>'+dni(d)+'</small></div></div>'+bar+today
+return '<div class="sw'+(pd?' pd':'')+'" data-id="'+id+'"><div class="del">'+(pd?'<button data-a="yes">Áno</button><button data-a="no">Nie</button>':TRASH)+'</div><div class="card'+(flash===id?' flash':'')+'" style="--c:'+a.color+'"><div class="top"><button type="button" class="drag-handle" data-drag="activity" aria-label="Zmeniť poradie aktivity">⠿</button>'+CK(a,now)+'<div style="flex:1;min-width:0"><div class="name">'+esc(a.name)+'</div><div class="meta">'+(a.cat?esc(a.cat)+' · ':'')+'od '+fmt(a.start)+(now<a.start?' · ešte nezačala':'')+(st?' · 🔥 '+st:'')+'</div></div><div class="big'+(isDone(a,now,now)?'':' muted')+'">'+d+'<small>'+dni(d)+'</small></div></div>'+bar+today
 +'<details class="d" data-k="'+id+'"'+op(id)+'><summary>⚙ Nastavenia</summary><div class="dc">'+set+'</div></details></div></div>'}
 function render(){
 var now=todayStr(),box=document.getElementById("list");
@@ -326,7 +339,7 @@ cp.innerHTML=cats.length>1?cats.map(function(c){return cb(c,esc(c))}).join(""):"
 document.getElementById("cats").innerHTML=cats.map(function(c){return '<option value="'+esc(c)+'">'}).join("");
 var fl=function(a,end){if(S.cat==="__done")return !end&&now>=a.start&&isDone(a,now,now);return !S.cat||a.cat===S.cat};
 var act=items.filter(function(a){return !a.ended&&fl(a)}),en=items.filter(function(a){return a.ended&&fl(a,true)});
-var h=act.length?act.map(function(a){return card(a,now)}).join(""):'<div class="empty">'+(S.cat?'Žiadne aktivity v tomto filtri.':'Zatiaľ žiadne aktivity. Pridaj prvú tlačidlom Nová.')+'</div>';
+var h=act.length?act.map(function(a){return card(a,now)}).join(""):'<div class="empty">'+(S.cat?'Žiadne aktivity v tomto filtri.':'Zatiaľ žiadne aktivity. Pridaj prvú tlačidlom ＋.')+'</div>';
 if(en.length)h+='<div class="card"><details class="d" data-k="ended" style="margin-top:0"'+(openIds.ended?" open":"")+'><summary>🏁 Ukončené aktivity ('+en.length+')</summary><div style="margin-top:12px">'+en.map(function(a){var l=a.history[a.history.length-1]||{},cf=pend&&pend.id===a.id&&pend.src==="end";
 return '<div class="er" data-id="'+a.id+'" style="--c:'+a.color+'"><div><div class="name">'+esc(a.name)+'</div><div class="meta">'+fmt(l.start||a.start)+' – '+fmt(l.end||a.start)+' · <b>'+(l.days||0)+' '+dni(l.days||0)+'</b>'+(l.pct!=null?' · '+l.pct+' %':'')+(a.history.length>1?' · '+(a.history.length-1)+'× reset':'')+'</div></div><div class="r">'+(cf?B("yes","Zmazať","danger")+B("no","Zrušiť"):B("restore","Obnoviť")+B("edel","Zmazať","danger"))+'</div></div>'}).join("")+'</div></details></div>';
 box.innerHTML=h;flash=null}
@@ -390,7 +403,7 @@ function renderOv(){var now=todayStr(),box=document.getElementById("v-ov");
 var seg='<div class="seg">'+[["day","Deň"],["week","Týždeň"],["month","Mesiac"],["year","Rok"]].map(function(m){return '<button data-m="'+m[0]+'" class="'+(OV.m===m[0]?"on":"")+'">'+m[1]+'</button>'}).join("")+'</div>';
 if(!items.length){box.innerHTML=seg+'<div class="empty">Zatiaľ žiadne aktivity.<br>Pridaj ich v záložke Aktivity.</div>';return}
 box.innerHTML=seg+(OV.m==="day"?ovDay(now):OV.m==="week"?ovWeek(now):OV.m==="month"?ovMonth(now):ovYear(now))}
-function setTab(x){closeAll();T=x;["ov","act","wl"].forEach(function(k){document.getElementById("v-"+k).hidden=x!==k});
+function setTab(x){closeAll();T=x;document.querySelector(".hd h1").textContent=x==="wl"?"Wishlist":"Habits";["ov","act","wl"].forEach(function(k){document.getElementById("v-"+k).hidden=x!==k});
 document.querySelectorAll(".tabs button").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-t")===x)});
 document.getElementById("addb").style.visibility=x==="ov"?"hidden":"visible";
 addEl.hidden=true;wEl.hidden=true;addBtn();
@@ -509,7 +522,7 @@ if(pend.act==="del"){full=true;items=items.filter(function(x){return x!==a})}
 else if(pend.act==="end"){full=true;a.history.push({start:a.start,end:now,days:cnt(a,now),pct:pct(a,now),type:"end"});a.ended=true}
 else{a.history.push({start:a.start,end:now,days:cnt(a,now),pct:pct(a,now),type:"reset"});a.done={};a.base=0;a.start=now;if(a.end&&pd(a.end)<=pd(now))a.end=null}
 pend=null;save()}
-if(full||forced.length||(S.cat.indexOf("__")===0&&(act==="go"||act==="dyes"||act==="dno"))||!list.querySelector('.sw[data-id="'+id+'"]'))render();
+if(full||forced.length||(S.cat.indexOf("__")===0&&(act==="go"||act==="dyes"||act==="dno"))||!list.querySelector('.sw[data-id="'+id+'"]')){var oldScroll=window.scrollY;render();if(full)requestAnimationFrame(function(){var max=Math.max(0,document.documentElement.scrollHeight-window.innerHeight);window.scrollTo(0,Math.min(oldScroll,max))})}
 else{renderOne(id);if(pp&&pp.id!==id&&pend!==pp)renderOne(pp.id)}});
 list.addEventListener("toggle",function(ev){var d=ev.target,k=d.getAttribute&&d.getAttribute("data-k");if(k)openIds[k]=d.open},true);
 var W=76,sw=null;
@@ -532,30 +545,28 @@ else if(s.was){supClick=Date.now();s.w.classList.remove("open");s.c.style.transf
 list.addEventListener("pointerup",endSw);list.addEventListener("pointercancel",endSw);
 document.addEventListener("visibilitychange",function(){if(!document.hidden){render();if(T==="ov")renderOv();if(T==="wl")renderWl()}});
 var WLK="aktivity_wish_v1",WL=[],WF="act",wPend=null,wDirty={},wEl=document.getElementById("wadd"),wlEl=document.getElementById("v-wl"),wOpen={};
-function wLoad(){try{var r=localStorage.getItem(WLK);WL=r?JSON.parse(r):[]}catch(x){WL=[]}if(!Array.isArray(WL))WL=[];WL=WL.filter(function(w){return w&&w.id&&w.text})}
+function wLoad(){try{var r=localStorage.getItem(WLK);WL=r?JSON.parse(r):[]}catch(x){WL=[]}if(!Array.isArray(WL))WL=[];WL=WL.filter(function(w){return w&&w.id&&w.text}).map(function(w){if(typeof w.note!=="string")w.note="";return w})}
 function wSave(){try{localStorage.setItem(WLK,JSON.stringify(WL))}catch(x){}scheduleRemoteSave()}
 function wCard(w,now){var left=w.due?diff(now,w.due):null,id=w.id,col,meta,big="",bar="";
-if(w.done){col="#22c55e";var tk=Math.max(0,diff(w.created,w.done)),dd=w.due?diff(w.done,w.due):null;
-meta="Splnené "+fmt(w.done)+(dd===null?"":dd>0?" · "+dd+" "+dni(dd)+" pred termínom":dd===0?" · v deň termínu":" · po termíne o "+(-dd)+" "+dni(-dd));big='<div class="big">'+tk+'<small>'+dni(tk)+'</small></div>'}
+if(w.done){col="#22c55e";var dd=w.due?diff(w.done,w.due):null;
+meta="Splnené "+fmt(w.done)+(dd===null?"":dd>0?" · "+dd+" "+dni(dd)+" pred termínom":dd===0?" · v deň termínu":" · po termíne o "+(-dd)+" "+dni(-dd));}
 else if(w.due){col=left<=3?"#ef4444":left<=14?"#f59e0b":"#22c55e";var ab=Math.abs(left);
 meta="do "+fmt(w.due)+" · "+(left>0?"zostáva "+left+" "+dni(left):left===0?"dnes je termín":"po termíne o "+ab+" "+dni(ab));
 big='<div class="big">'+(left<0?"−":"")+ab+'<small>'+dni(ab)+'</small></div>';
 var tot=Math.max(1,diff(w.created,w.due)),p=Math.max(0,Math.min(100,Math.round(diff(w.created,now)/tot*100)));bar='<div class="bar"><i style="width:'+p+'%"></i></div>'}
-else{col="#3b82f6";meta="bez termínu · pridané "+fmt(w.created)}
-var ck=w.done?'<span class="ck on">'+CHK+'</span>':'<button class="ck" data-w-a="done" aria-label="Označiť ako splnené">'+CHK+'</button>';
+else{col="#3b82f6";meta="bez termínu"}
+var ck=w.done?'<span class="done-spacer" aria-hidden="true"></span>':'<button class="ck" data-w-a="done" aria-label="Označiť ako splnené">'+CHK+'</button>';
 var cf=wPend===id?'<div class="r"><span class="cf">Odstrániť prianie?</span><button class="ghost danger" data-w-a="yes">Áno</button><button class="ghost" data-w-a="no">Zrušiť</button></div>':'<button class="ghost danger" data-w-a="del">Odstrániť</button>';
-return '<div class="card wc" data-w="'+id+'" style="--c:'+col+'"><div class="top"><button type="button" class="drag-handle" data-drag="wishlist" aria-label="Zmeniť poradie priania">⠿</button>'+ck+'<div style="flex:1;min-width:0"><div class="name">'+esc(w.text)+'</div><div class="meta">'+meta+'</div></div>'+big+'</div>'+bar
-+'<details class="d" data-wk="'+id+'"'+(wOpen[id]?" open":"")+'><summary>⚙</summary><div class="dc"><div class="col"><label>Prianie<span class="fld"><input type="text" class="wt" maxlength="80" value="'+esc(w.text)+'"></span></label><label>Do kedy (nepovinné)<span class="fld"><input type="date" class="wdd" value="'+(w.due||"")+'"></span></label>'+(w.done?'<button class="ghost" data-w-a="undone">Vrátiť medzi aktívne</button>':'')+cf+'</div></div></details></div>'}
+return '<div class="w-sw'+(wPend===id?' open':'')+'" data-wsw="'+id+'"><div class="w-del">'+(wPend===id?'<button type="button" data-w-a="yes">Áno</button><button type="button" data-w-a="no">Nie</button>':'<button type="button" data-w-a="del">Odstrániť</button>')+'</div><div class="card wc" data-w="'+id+'" style="--c:'+col+'"><div class="top"><button type="button" class="drag-handle" data-drag="wishlist" aria-label="Zmeniť poradie priania">⠿</button>'+ck+'<div style="flex:1;min-width:0"><div class="name">'+esc(w.text)+'</div><div class="meta">'+meta+'</div></div>'+big+'</div>'+bar
++'<details class="d" data-wk="'+id+'"'+(wOpen[id]?" open":"")+'><summary>⚙</summary><div class="dc"><div class="col"><label>Prianie<span class="fld"><input type="text" class="wt" maxlength="80" value="'+esc(w.text)+'"></span></label><label>Do kedy (nepovinné)<span class="fld"><input type="date" class="wdd" value="'+(w.due||"")+'"></span></label><label>Poznámka (nepovinné)<textarea class="wnote" maxlength="1000" placeholder="Doplň poznámku...">'+esc(w.note||"")+'</textarea></label><div class="meta">Pridané '+fmt(w.created)+'</div>'+(w.done?'<button class="ghost" data-w-a="undone">Vrátiť medzi aktívne</button>':'')+cf+'</div></div></details></div></div>'}
 function renderWl(){var now=todayStr(),box=document.getElementById("wlist");
 box.querySelectorAll("details[data-wk]").forEach(function(d){wOpen[d.getAttribute("data-wk")]=d.open});
-var act=WL.filter(function(w){return !w.done});
-var dn=WL.filter(function(w){return !!w.done});
-var l=WF==="act"?act:dn;
+var act=WL.filter(function(w){return !w.done});var dn=WL.filter(function(w){return !!w.done});var l=WF==="act"?act:dn;
 box.innerHTML='<div class="seg"><button data-wf="act" class="'+(WF==="act"?"on":"")+'">Aktívne ('+act.length+')</button><button data-wf="done" class="'+(WF==="done"?"on":"")+'">Done ('+dn.length+')</button></div>'
 +(l.length?l.map(function(w){return wCard(w,now)}).join(""):'<div class="empty">'+(WF==="act"?"Zatiaľ žiadne priania.<br>Pridaj prvé tlačidlom ＋.":"Zatiaľ nič v Done.")+'</div>')}
 wlEl.addEventListener("click",function(ev){
 var sg=ev.target.closest("[data-wf]");if(sg){WF=sg.getAttribute("data-wf");renderWl();return}
-var cd=ev.target.closest(".wc");if(!cd)return;var id=cd.getAttribute("data-w"),w=WL.filter(function(x){return x.id===id})[0];if(!w)return;
+var cd=ev.target.closest(".wc"),wrap=ev.target.closest(".w-sw");if(!cd&&wrap)cd=wrap.querySelector(".wc");if(!cd)return;var id=cd.getAttribute("data-w"),w=WL.filter(function(x){return x.id===id})[0];if(!w)return;
 var t=ev.target.closest("[data-w-a]");
 if(!t){if(!ev.target.closest("button,input,label,details")){var dd=cd.querySelector("details.d");
 if(!dd.open){var y0=window.scrollY;closeAddForm(wEl);[].forEach.call(wlEl.querySelectorAll("details.d[open]"),function(o){if(o!==dd)o.open=false});origY={};origY[id]=y0;anim(dd,true);sTo(topOf(cd)-12)}
@@ -563,14 +574,14 @@ else{anim(dd,false);if(origY[id]!==undefined){sTo(origY[id]);delete origY[id]}}}
 var a=t.getAttribute("data-w-a"),now=todayStr();
 if(a==="done"){w.done=now;wSave();toast("🎉 Presunuté do Done")}
 else if(a==="undone"){w.done=null;wSave()}
-else if(a==="del")wPend=id;
+else if(a==="del"){wPend=id;renderWl();return}
 else if(a==="no")wPend=null;
-else if(a==="yes"&&wPend===id){WL=WL.filter(function(x){return x!==w});wPend=null;wSave()}
+else if(a==="yes"&&wPend===id){var oldY=window.scrollY;WL=WL.filter(function(x){return x!==w});wPend=null;wSave();renderWl();requestAnimationFrame(function(){var max=Math.max(0,document.documentElement.scrollHeight-window.innerHeight);window.scrollTo(0,Math.min(oldY,max))});return}
 renderWl()});
-wlEl.addEventListener("input",function(ev){var el=ev.target;if(!el.matches||!el.matches(".wt,.wdd"))return;
+wlEl.addEventListener("input",function(ev){var el=ev.target;if(!el.matches||!el.matches(".wt,.wdd,.wnote"))return;
 var cd=el.closest(".wc"),w=WL.filter(function(x){return x.id===cd.getAttribute("data-w")})[0];if(!w)return;okF(el);
 if(el.classList.contains("wt")){var v=el.value.trim();if(!v){badF(el,"Napíš, čo si praješ.");return}w.text=v;cd.querySelector(".name").textContent=v}
-else w.due=el.value||null;
+else if(el.classList.contains("wdd"))w.due=el.value||null;else w.note=el.value;
 wDirty[w.id]=true;wSave()});
 wlEl.addEventListener("focusout",function(ev){var cd=ev.target.closest&&ev.target.closest(".wc");if(!cd)return;var id=cd.getAttribute("data-w");if(!wDirty[id])return;
 setTimeout(function(){var c=wlEl.querySelector('[data-w="'+id+'"]');if(!c||!wDirty[id]||c.contains(document.activeElement))return;delete wDirty[id];renderWl();toast("Uložené")},150)});
@@ -583,70 +594,54 @@ var v=ti.value.trim(),dv=di.value;
 if(!v)bad(ti,"Napíš, čo si praješ.");
 if(dv&&dv<now)bad(di,"Termín nemôže byť v minulosti.");
 if(first){try{first.closest(".fld").scrollIntoView({block:"center",behavior:"smooth"})}catch(x){}return}
-WL.unshift({sort_order:0,id:"w"+Date.now()+Math.floor(Math.random()*1e3),text:v,due:dv||null,created:now,done:null});wSave();this.reset();wEl.hidden=true;addBtn();WF="act";renderWl();toast("Pridané do wishlistu")});
+WL.unshift({sort_order:0,id:"w"+Date.now()+Math.floor(Math.random()*1e3),text:v,due:dv||null,note:"",created:now,done:null});wSave();this.reset();wEl.hidden=true;addBtn();WF="act";renderWl();toast("Pridané do wishlistu")});
 
 
-// Touch-friendly reordering via the dedicated grip. The grip uses pointer events,
-// so the same interaction works with touch, mouse and stylus.
-var orderDrag=null;
+// Long-press a card to start reordering. The grip appears only while dragging.
+var orderDrag=null,orderPress=null,orderPressData=null;
 function visibleOrderCards(type){return type==="activity"?Array.prototype.slice.call(list.querySelectorAll(".sw[data-id]")):Array.prototype.slice.call(wlEl.querySelectorAll(".wc[data-w]"))}
 function clearDropMarks(){document.querySelectorAll(".drop-before,.drop-after,.dragging-order").forEach(function(el){el.classList.remove("drop-before","drop-after","dragging-order")})}
+function dragTypeCard(el){var a=el&&el.closest&&el.closest(".sw[data-id]"),w=el&&el.closest&&el.closest(".wc[data-w]");return a?{type:"activity",card:a,id:a.getAttribute("data-id")}:w?{type:"wishlist",card:w,id:w.getAttribute("data-w")}:null}
 document.addEventListener("pointerdown",function(ev){
-  var grip=ev.target.closest&&ev.target.closest('[data-drag]');
-  if(!grip)return;
-  var type=grip.getAttribute("data-drag"),card=grip.closest(type==="activity"?".sw":".wc");
-  if(!card)return;
-  orderDrag={type:type,card:card,id:type==="activity"?card.getAttribute("data-id"):card.getAttribute("data-w"),pointerId:ev.pointerId,x:ev.clientX,y:ev.clientY,active:false,target:null,after:false};
-  ev.preventDefault();
+  var found=dragTypeCard(ev.target);if(!found||ev.target.closest("button,input,textarea,select,summary,details,label,a"))return;
+  clearTimeout(orderPress);orderDrag=null;
+  var data={type:found.type,card:found.card,id:found.id,pointerId:ev.pointerId,x:ev.clientX,y:ev.clientY,active:false,target:null,after:false};
+  orderPressData=data;
+  orderPress=setTimeout(function(){orderPress=null;orderDrag=data;data.active=true;data.card.classList.add("dragging-order");if(typeof sw!=="undefined")sw=null;if(typeof wSwipe!=="undefined")wSwipe=null;},260);
 });
 document.addEventListener("pointermove",function(ev){
+  if(orderPress&&orderPressData&&ev.pointerId===orderPressData.pointerId&&Math.hypot(ev.clientX-orderPressData.x,ev.clientY-orderPressData.y)>10){clearTimeout(orderPress);orderPress=null;orderPressData=null}
   if(!orderDrag||ev.pointerId!==orderDrag.pointerId)return;
-  if(!orderDrag.active&&Math.hypot(ev.clientX-orderDrag.x,ev.clientY-orderDrag.y)>6){
-    orderDrag.active=true;orderDrag.card.classList.add("dragging-order");
-  }
-  if(!orderDrag.active)return;
-  clearDropMarks();
-  orderDrag.card.classList.add("dragging-order");
-  var el=document.elementFromPoint(ev.clientX,ev.clientY);
-  var target=el&&el.closest(orderDrag.type==="activity"?".sw[data-id]":".wc[data-w]");
-  if(target&&target!==orderDrag.card){
-    var r=target.getBoundingClientRect(),after=ev.clientY>r.top+r.height/2;
-    target.classList.add(after?"drop-after":"drop-before");
-    orderDrag.target=target;orderDrag.after=after;
-  }else orderDrag.target=null;
+  clearDropMarks();orderDrag.card.classList.add("dragging-order");
+  var el=document.elementFromPoint(ev.clientX,ev.clientY),target=el&&el.closest(orderDrag.type==="activity"?".sw[data-id]":".wc[data-w]");
+  if(target&&target!==orderDrag.card){var r=target.getBoundingClientRect(),after=ev.clientY>r.top+r.height/2;target.classList.add(after?"drop-after":"drop-before");orderDrag.target=target;orderDrag.after=after}else orderDrag.target=null;
   ev.preventDefault();
 },{passive:false});
 document.addEventListener("pointerup",function(ev){
-  if(!orderDrag||ev.pointerId!==orderDrag.pointerId)return;
-  var d=orderDrag;orderDrag=null;clearDropMarks();
-  if(!d.active||!d.target||d.target===d.card)return;
+  clearTimeout(orderPress);orderPress=null;orderPressData=null;if(!orderDrag||ev.pointerId!==orderDrag.pointerId)return;
+  var d=orderDrag;orderDrag=null;clearDropMarks();if(!d.active||!d.target||d.target===d.card)return;
   if(d.type==="activity"){
-    var targetId=d.target.getAttribute("data-id");
-    var from=items.findIndex(function(x){return String(x.id)===String(d.id)});
-    var to=items.findIndex(function(x){return String(x.id)===String(targetId)});
-    if(from<0||to<0)return;
-    var moved=items.splice(from,1)[0];
-    to=items.findIndex(function(x){return String(x.id)===String(targetId)});
-    items.splice(to+(d.after?1:0),0,moved);
-    items.forEach(function(a,i){a.sort_order=i});
-    persistSavedOrder(items,KEY+"_order");save();render();
+    var targetId=d.target.getAttribute("data-id"),from=items.findIndex(function(x){return String(x.id)===String(d.id)}),to=items.findIndex(function(x){return String(x.id)===String(targetId)});if(from<0||to<0)return;
+    var moved=items.splice(from,1)[0];to=items.findIndex(function(x){return String(x.id)===String(targetId)});items.splice(to+(d.after?1:0),0,moved);items.forEach(function(a,i){a.sort_order=i});persistSavedOrder(items,KEY+"_order");save();render();
   }else{
-    var targetId2=d.target.getAttribute("data-w");
-    var group=WL.filter(function(w){return WF==="done"?!!w.done:!w.done});
-    var from2=group.findIndex(function(w){return String(w.id)===String(d.id)});
-    var to2=group.findIndex(function(w){return String(w.id)===String(targetId2)});
-    if(from2<0||to2<0)return;
-    var moved2=group.splice(from2,1)[0];
-    to2=group.findIndex(function(w){return String(w.id)===String(targetId2)});
-    group.splice(to2+(d.after?1:0),0,moved2);
-    var idx=0;
-    WL=WL.map(function(w){return (WF==="done"?!!w.done:!w.done)?group[idx++]:w});
-    WL.forEach(function(w,i){w.sort_order=i});
-    persistSavedOrder(WL,WLK+"_order");wSave();renderWl();
-  }
-  toast("Poradie uložené");
+    var targetId2=d.target.getAttribute("data-w"),group=WL.filter(function(w){return WF==="done"?!!w.done:!w.done}),from2=group.findIndex(function(w){return String(w.id)===String(d.id)});if(from2<0)return;
+    var moved2=group.splice(from2,1)[0],to2=group.findIndex(function(w){return String(w.id)===String(targetId2)});if(to2<0)return;group.splice(to2+(d.after?1:0),0,moved2);var idx=0;WL=WL.map(function(w){return (WF==="done"?!!w.done:!w.done)?group[idx++]:w});WL.forEach(function(w,i){w.sort_order=i});persistSavedOrder(WL,WLK+"_order");wSave();renderWl();
+  }toast("Poradie uložené");
 });
-document.addEventListener("pointercancel",function(){orderDrag=null;clearDropMarks()});
+document.addEventListener("pointercancel",function(){clearTimeout(orderPress);orderPress=null;orderPressData=null;orderDrag=null;clearDropMarks()});
+
+// Wishlist swipe-to-delete, matching the activity cards' right-to-left gesture.
+var wSwipe=null,WW=76;
+wlEl.addEventListener("pointerdown",function(ev){var wrap=ev.target.closest(".w-sw");if(!wrap||ev.target.closest("button,input,textarea,summary,details,label"))return;
+  wlEl.querySelectorAll(".w-sw.open").forEach(function(x){if(x!==wrap)x.classList.remove("open")});
+  wSwipe={wrap:wrap,card:wrap.querySelector(".wc"),x:ev.clientX,y:ev.clientY,drag:false,was:wrap.classList.contains("open"),id:ev.pointerId};
+});
+wlEl.addEventListener("pointermove",function(ev){if(!wSwipe||ev.pointerId!==wSwipe.id)return;var dx=ev.clientX-wSwipe.x,dy=ev.clientY-wSwipe.y;
+  if(!wSwipe.drag){if(Math.abs(dx)>8&&Math.abs(dx)>Math.abs(dy)*1.2){wSwipe.drag=true;wSwipe.card.style.transition="none";try{wSwipe.card.setPointerCapture(wSwipe.id)}catch(e){}}else return}
+  var x=(wSwipe.was?-WW:0)+dx;wSwipe.card.style.transform="translateX("+(x<-WW?-WW+(x+WW)*.25:x>0?x*.2:x)+"px)";ev.preventDefault();
+},{passive:false});
+function endWishlistSwipe(ev){if(!wSwipe||ev&&ev.pointerId!==wSwipe.id)return;var s=wSwipe;wSwipe=null;s.card.style.transition="";if(!s.drag){if(s.was)s.wrap.classList.remove("open");return}var x=parseFloat((s.card.style.transform.match(/-?[0-9.]+/)||[0])[0]);var open=x<-WW*.4;s.wrap.classList.toggle("open",open);s.card.style.transform="";}
+wlEl.addEventListener("pointerup",endWishlistSwipe);wlEl.addEventListener("pointercancel",endWishlistSwipe);
 
 var DB=null,DB_READY=false,REMOTE_TIMER=null,REMOTE_CHAIN=Promise.resolve(),CURRENT_USER=null;
 function dbError(e){console.error("Supabase:",e);toast("Chyba synchronizácie: "+(e&&e.message?e.message:"neznáma chyba"))}
@@ -658,7 +653,7 @@ function scheduleRemoteSave(){
       activities:items.map(function(a,i){return{id:String(a.id),sort_order:i,name:a.name,category:a.cat||"",color:a.color||COLORS[0],start_date:a.start,end_date:a.end||null,goal_days:a.goal||0,auto_count:a.auto!==false,base_count:a.base||0,ended:!!a.ended}}),
       activity_days:[],
       activity_history:[],
-      wishlist_items:WL.map(function(w,i){return{id:String(w.id),sort_order:i,text:w.text,due_date:w.due||null,created_date:w.created,completed_date:w.done||null}})
+      wishlist_items:WL.map(function(w,i){return{id:String(w.id),sort_order:i,text:w.text,due_date:w.due||null,created_date:w.created,completed_date:w.done||null,note:w.note||""}})
     };
     items.forEach(function(a){
       var keys={};Object.keys(a.done||{}).forEach(function(k){keys[k]=1});Object.keys(a.notes||{}).forEach(function(k){keys[k]=1});
@@ -709,7 +704,7 @@ async function loadRemoteWorkspace(){
   items=applySavedOrder(items,KEY+"_order");
   dRows.forEach(function(r){var a=byId[r.activity_id];if(!a)return;if(r.is_done!==null)a.done[r.day_date]=r.is_done?"":false;if(r.note)a.notes[r.day_date]=r.note});
   hRows.forEach(function(r){var a=byId[r.activity_id];if(a)a.history.push({start:r.start_date,end:r.end_date,days:r.days_count,pct:r.completion_pct,type:r.event_type})});
-  WL=wRows.map(function(r){return{id:r.id,sort_order:r.sort_order,text:r.text,due:r.due_date||null,created:r.created_date,done:r.completed_date||null}}).sort(function(a,b){return (a.sort_order==null?0:a.sort_order)-(b.sort_order==null?0:b.sort_order)});
+  WL=wRows.map(function(r){return{id:r.id,sort_order:r.sort_order,text:r.text,due:r.due_date||null,created:r.created_date,done:r.completed_date||null,note:r.note||""}}).sort(function(a,b){return (a.sort_order==null?0:a.sort_order)-(b.sort_order==null?0:b.sort_order)});
   WL=applySavedOrder(WL,WLK+"_order");
   return {hasRemoteData:aRows.length>0||wRows.length>0||dRows.length>0||hRows.length>0};
 }
