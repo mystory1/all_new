@@ -11,7 +11,7 @@ html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *,*::before,*::after{box-sizing:inherit}
 [hidden]{display:none!important}
 body{margin:0;background:#000;color:var(--txt);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.4}
-main{max-width:720px;margin:0 auto;padding:0 14px 60px;background:#000;min-height:100vh}
+main{max-width:720px;margin:0 auto;padding:0 14px 14px;background:#000;min-height:100vh;min-height:100dvh}
 .hd{display:flex;justify-content:space-between;align-items:center;margin:6px 0 14px;gap:10px}
 h1{font-size:1.5rem;margin:0;font-weight:700;letter-spacing:-.02em}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px}
@@ -227,17 +227,14 @@ body{overflow-anchor:none}
 
 #v-wl .seg{margin-bottom:10px}
 
-/* iOS Safari: sticky header/nav must remain in the main page stacking context.
-   A fixed pseudo-element above main was covering the header and creating the
-   large black strip seen on mobile. */
-main{position:relative;isolation:auto}
-body::before{content:"";position:fixed;inset:0 0 auto 0;height:calc(132px + env(safe-area-inset-top,0px));background:#000;z-index:10;pointer-events:none}
-.hd,.tabs{backface-visibility:hidden;-webkit-backface-visibility:hidden;background-clip:padding-box}
-/* Keep the complete page header and primary navigation visible and opaque. */
-.hd{position:sticky;top:0;z-index:30;height:calc(56px + env(safe-area-inset-top,0px));margin:0 0 10px;padding:calc(6px + env(safe-area-inset-top,0px)) 0 4px;background:#000;opacity:1;isolation:isolate;transform:none;backface-visibility:visible;contain:none;will-change:auto;}
-.tabs{position:sticky;top:calc(56px + env(safe-area-inset-top,0px));z-index:29;background:#101010;opacity:1;isolation:isolate;transform:none;backface-visibility:visible;box-shadow:none;will-change:auto;}
-/* Filters and secondary controls scroll with their content. */
+/* Mobile layout: keep all controls in normal document flow.
+   No fixed overlay or sticky layer may cover category filters on any tab. */
+main{position:relative;isolation:auto;min-height:100vh;min-height:100dvh;padding-bottom:max(14px,env(safe-area-inset-bottom,0px))}
+.hd{position:relative;top:auto;z-index:auto;height:auto;min-height:40px;margin:6px 0 14px;padding:0;background:#000;isolation:auto;}
+.tabs{position:relative;top:auto;z-index:auto;background:#101010;box-shadow:none;isolation:auto;}
 #chips,#catp,#v-wl .seg{position:static;box-shadow:none}
+html,body{max-width:100%;overflow-x:hidden}
+body{overscroll-behavior-y:auto}
 #chips{padding:0;margin:0 0 8px;flex-wrap:wrap;overflow:visible;}
 #chips::-webkit-scrollbar{display:none}
 .orow .nm{flex:1;min-width:0}
