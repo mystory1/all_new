@@ -170,6 +170,8 @@ body{overflow-anchor:none}
 .seg{padding:2px;gap:2px}
 .seg button{padding:5px 6px;font-size:.76rem}
 .chips button,.catp button{border-radius:9px;padding:5px 6px;font-size:.76rem;min-height:29px;font-weight:600}
+/* Activity category filters use the same control dimensions as Overview period selectors. */
+.chips button,.catp button,.seg button{min-height:29px;padding:5px 8px;font-size:.76rem;line-height:1.2;font-weight:600;box-sizing:border-box}
 .chips{margin:0 0 10px}
 #v-ov .card{margin-bottom:10px}
 .ovfold{padding:0;overflow:hidden}.ovfold>summary{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 14px;cursor:pointer;list-style:none;font-size:.9rem;font-weight:600}.ovfold>summary::-webkit-details-marker{display:none}.ovfold>summary::after{content:"›";font-size:1.3rem;line-height:1;color:var(--mut);transition:transform .2s}.ovfold[open]>summary::after{transform:rotate(90deg)}.ovfold-body{padding:0 14px 12px}
@@ -243,7 +245,7 @@ body{overscroll-behavior-y:auto}
 .ovsum-copy{flex:1;min-width:0}.ovs .ot{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ovs .meta,.ovs .cm{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;min-height:1.2em}
 .ovs .cm{line-height:1.2;margin-top:3px}
 /* Consistent progress alignment and compact category/filter controls. */
-.progress-block.aligned{margin-left:38px}
+.progress-block.aligned{margin-inline:38px;min-width:0}.progress-block.aligned .bar{width:100%}.progress-block.aligned .pl{display:flex;justify-content:space-between;gap:10px;min-width:0}.progress-block.aligned .pl span{min-width:0}.progress-block.aligned .pl span:last-child{text-align:right;overflow-wrap:anywhere}
 .progress-block .pl{align-items:flex-start}
 .wc .note-fld{height:38px;min-height:38px;padding:0}
 .wc .note-fld input{height:100%}
@@ -604,7 +606,7 @@ if(w.done){col="#22c55e";meta="Splnené "+fmt(w.done);}
 else if(w.due){col="#ffffff";var ab=Math.abs(left);
 meta="do "+fmt(w.due)+" · "+(left>0?"zostáva "+left+" "+dni(left):left===0?"dnes je termín":"po termíne o "+ab+" "+dni(ab));
 big='<div class="big">'+(left<0?"−":"")+ab+'<small>'+dni(ab)+'</small></div>';
-var tot=Math.max(1,diff(w.created,w.due)),p=Math.max(0,Math.min(100,Math.round(diff(w.created,now)/tot*100)));bar='<div class="bar"><i style="width:'+p+'%"></i></div>'}
+var tot=Math.max(1,diff(w.created,w.due)),p=Math.max(0,Math.min(100,Math.round(diff(w.created,now)/tot*100)));bar='<div class="progress-block aligned"><div class="bar"><i style="width:'+p+'%"></i></div></div>'}
 else{col="#3b82f6";meta=""}
 var ck=w.done?'<span class="ck on" role="img" aria-label="Splnené">'+CHK+'</span>':'<button class="ck" data-w-a="done" aria-label="Označiť ako splnené">'+CHK+'</button>';
 var del=wPend===id?'<button type="button" data-w-a="yes">Áno</button><button type="button" data-w-a="no">Nie</button>':'<button type="button" data-w-a="del" aria-label="Odstrániť prianie"><svg viewBox="0 0 24 24" width="27" height="27" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5h6v2m-8 0 1 13h8l1-13M10 11v5m4-5v5"/></svg></button>';
