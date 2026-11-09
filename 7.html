@@ -240,39 +240,40 @@ body{overscroll-behavior-y:auto}
 #chips{padding:0;margin:0 0 8px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;overflow:visible;}
 #chips button{display:inline-flex;align-items:center;justify-content:center;width:100%;min-width:0;height:32px;min-height:32px;margin:0;padding:0 8px;box-sizing:border-box;font-size:.76rem;line-height:1;font-weight:600;white-space:nowrap;border-radius:10px;overflow:hidden;text-overflow:ellipsis;}
 #chips button.cm{max-width:none;flex:none;font-size:.76rem;margin:0;padding:0 8px;height:32px;min-height:32px;line-height:1;}
-/* Activities: joined filter controls, same visual language as Overview segmented tabs.
-   Scope strictly to #chips; do not touch progress bars or wishlist. */
+/* Activity category filters intentionally mirror the Overview .seg control.
+   Keep dimensions and spacing identical; only the number of columns differs. */
 #v-act #chips{
-  display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
+  display:flex;
+  flex-wrap:nowrap;
   gap:2px;
-  padding:3px;
-  margin:0 0 14px;
+  padding:2px;
+  margin:0 0 12px;
   min-height:0;
   background:#101010;
   border:1px solid #1d1d1d;
   border-radius:12px;
+  box-sizing:border-box;
 }
 #v-act #chips button,
 #v-act #chips button.cm{
   display:flex;
   align-items:center;
   justify-content:center;
-  width:100%;
+  flex:1 1 0;
+  width:auto;
   min-width:0;
   max-width:none;
-  height:34px;
-  min-height:34px;
-  padding:0 6px;
+  height:auto;
+  min-height:0;
+  padding:5px 6px;
   margin:0;
-  flex:initial;
   border:0;
   border-radius:9px;
   background:transparent;
   color:var(--mut);
   font-size:.76rem;
   font-weight:600;
-  line-height:1.2;
+  line-height:1.4;
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
@@ -283,6 +284,53 @@ body{overscroll-behavior-y:auto}
   color:#000;
 }
 #chips::-webkit-scrollbar{display:none}
+.freq-box{display:grid;gap:8px;padding:10px;background:#0a0a0a;border:1px solid #1d1d1d;border-radius:12px}
+.freq-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.freq-days label{display:block;min-width:0}
+.freq-days input{position:absolute;opacity:0;pointer-events:none}
+.freq-days span{display:flex;align-items:center;justify-content:center;min-height:34px;border:1px solid #292929;border-radius:9px;background:#141414;color:var(--mut);font-size:.76rem;font-weight:600}
+.freq-days input:checked+span{background:#fff;color:#000;border-color:#fff}
+.freq-days input:focus-visible+span{outline:2px solid #fff;outline-offset:2px}
+.freq-help{display:none}
+.freq-toggle{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:3px;background:#151515;border:1px solid #292929;border-radius:10px}
+.freq-toggle button{padding:8px 6px;border-radius:7px;background:transparent;color:var(--mut);font-size:.82rem;font-weight:600}
+.freq-toggle button.on{background:#fff;color:#000}
+.detail-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin:12px 0 10px}
+.detail-tabs button{padding:9px 4px;background:#151515;border:1px solid #252525;color:var(--mut);border-radius:9px;font-size:.78rem;font-weight:600}
+.detail-tabs button.on{background:#fff;color:#000;border-color:#fff}
+.detail-panel[hidden]{display:none!important}
+.detail-panel>.col{gap:10px}
+.detail-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:4px 0 10px}
+.detail-stat{padding:10px;background:#0a0a0a;border:1px solid #1d1d1d;border-radius:10px}
+.detail-stat b{display:block;font-size:1.05rem;color:var(--txt)}
+.detail-stat span{font-size:.72rem;color:var(--mut)}
+.detail-note{margin-top:10px;padding:10px;background:#0a0a0a;border:1px solid #1d1d1d;border-radius:10px;display:grid;gap:5px;overflow-wrap:anywhere}
+.cal .rest-day{opacity:.22;cursor:default;background:#090909}
+.cal button.day{
+  appearance:none;-webkit-appearance:none;
+  position:relative;
+  display:flex;align-items:center;justify-content:center;
+  width:100%;min-width:0;min-height:0;aspect-ratio:1;
+  padding:0;margin:0;border:0;border-radius:8px;
+  background:#141414;color:var(--txt);
+  font:inherit;font-size:.8rem;line-height:1;
+  cursor:pointer;touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+}
+.cal button.day.on{background:var(--c);color:#000;font-weight:700}
+.cal button.day.t{outline:1px solid #666}
+.cal button.day.sel{outline:2px solid #fff;outline-offset:1px}
+.cal button.day.hn::after{content:"";position:absolute;right:5px;top:5px;width:5px;height:5px;border-radius:50%;background:#fff}
+.cal button.day.on.hn::after{background:#000}
+.cal button.day:focus-visible{outline:2px solid #fff;outline-offset:2px}
+
+.sq i.r{background:transparent;border:1px dashed #333}
+.freq-summary{font-size:.76rem;color:var(--mut)}
+.day-note{display:grid;gap:5px;min-width:0}
+.day-note textarea{display:block;width:100%;min-width:0;box-sizing:border-box;min-height:58px;resize:vertical;background:#000;color:var(--txt);border:1px solid #2a2a2a;border-radius:10px;padding:9px 11px;font:inherit;font-size:16px;line-height:1.4;outline:none;-webkit-user-select:text;user-select:text;touch-action:pan-y}
+.day-note textarea:focus{border-color:#777;outline:1px solid #777}
+.dp{touch-action:pan-y}
+
 .orow .nm{flex:1;min-width:0}
 .orow .ck{margin-left:auto;flex:none}
 .ovsum-copy{flex:1;min-width:0}.ovs .ot{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ovs .meta,.ovs .cm{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;min-height:1.2em}
@@ -342,6 +390,19 @@ body{overscroll-behavior-y:auto}
 <form id="f" novalidate>
 <label>Názov aktivity<span class="fld"><input type="text" id="n" maxlength="60" placeholder="napr. Bez cukru"></span></label>
 <label>Kategória (nepovinné)<span class="fld"><input type="text" id="cat" maxlength="24" list="cats" placeholder="napr. Zdravie"></span></label>
+<div class="freq-box">
+ <div class="freq-toggle" id="newFrequencyToggle"><button type="button" class="on" data-frequency="daily">Denne</button><button type="button" data-frequency="custom">Vybrané dni</button></div>
+ <select id="newFrequency" hidden aria-hidden="true"><option value="daily">Denne</option><option value="custom">Vybrané dni</option></select>
+ <div class="freq-days" id="newFrequencyDays" hidden>
+  <label><input type="checkbox" value="1" checked><span>Po</span></label>
+  <label><input type="checkbox" value="2" checked><span>Ut</span></label>
+  <label><input type="checkbox" value="3" checked><span>St</span></label>
+  <label><input type="checkbox" value="4" checked><span>Št</span></label>
+  <label><input type="checkbox" value="5" checked><span>Pi</span></label>
+  <label><input type="checkbox" value="6" checked><span>So</span></label>
+  <label><input type="checkbox" value="7" checked><span>Ne</span></label>
+ </div>
+</div>
 <datalist id="cats"></datalist>
 <div class="row">
 <label>Kedy som začal<span class="fld"><input type="date" id="s"></span></label>
@@ -375,7 +436,7 @@ body{overscroll-behavior-y:auto}
 try{if("scrollRestoration" in history)history.scrollRestoration="manual";}catch(e){}
 var COLORS=["#3b82f6","#22c55e","#f59e0b","#ef4444","#a855f7","#22d3ee","#f472b6"],KEY="aktivity_v1";
 var TRASH='<button data-a="trash" aria-label="Odstrániť"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9 7V5.2A1.2 1.2 0 0 1 10.2 4h3.6A1.2 1.2 0 0 1 15 5.2V7"/><path d="M6.2 7l.8 11.2A2 2 0 0 0 9 20h6a2 2 0 0 0 2-1.8L17.8 7"/><path d="M10 11v5M14 11v5"/></svg></button>';
-var catOpen=false,flash=null,sel={},S={cat:""},forced=[],items=[],openIds={},mon={},pend=null,pickC=COLORS[0];
+var catOpen=false,flash=null,sel={},S={cat:""},forced=[],items=[],openIds={},detailTabs={},mon={},pend=null,pickC=COLORS[0];
 var MN=["Január","Február","Marec","Apríl","Máj","Jún","Júl","August","September","Október","November","December"];
 function unr(list,map,val){list.forEach(function(r){var p=String(r).split(".."),d=p[0],e=p[1]||p[0],g=0;while(d<=e&&g++<40000){map[d]=val;d=addDays(d,1)}})}
 function rng(arr){var out=[],a=null,p=null;arr.forEach(function(d){if(a===null){a=p=d}else if(addDays(p,1)===d){p=d}else{out.push(a===p?a:a+".."+p);a=p=d}});if(a!==null)out.push(a===p?a:a+".."+p);return out}
@@ -384,7 +445,11 @@ function norm(a){var d=a.done;
 if(Array.isArray(d)){var o={};d.forEach(function(x){o[x]=""});a.done=o}
 else if(d&&Array.isArray(d.t)&&Array.isArray(d.f)){var m={};unr(d.t,m,"");unr(d.f,m,false);a.done=m}
 if(!a.done||typeof a.done!=="object")a.done={};if(!a.notes||typeof a.notes!=="object")a.notes={};a.note=typeof a.note==="string"?a.note:"";
-if(!Array.isArray(a.history))a.history=[];a.cat=a.cat||"";a.base=Math.max(0,parseInt(a.base,10)||0);return a}
+if(!Array.isArray(a.history))a.history=[];a.cat=a.cat||"";a.base=Math.max(0,parseInt(a.base,10)||0);
+a.frequency=a.frequency==="custom"?"custom":"daily";
+a.frequencyDays=Array.isArray(a.frequencyDays)?a.frequencyDays.map(Number).filter(function(x,i,v){return x>=1&&x<=7&&v.indexOf(x)===i}).sort():[1,2,3,4,5,6,7];
+if(a.frequency==="custom"&&!a.frequencyDays.length)a.frequencyDays=[1,2,3,4,5,6,7];
+return a}
 function load(){try{var r=localStorage.getItem(KEY);items=r?JSON.parse(r):[]}catch(x){items=[]}
 if(!Array.isArray(items))items=[];items=items.filter(function(a){return a&&a.id&&a.name&&a.start}).map(norm)}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(items.map(function(a){var c={};for(var k in a)c[k]=a[k];c.done=pack(a.done);return c}))) }catch(x){}scheduleRemoteSave()}
@@ -396,13 +461,16 @@ function diff(a,b){return Math.round((pd(b)-pd(a))/864e5)}
 function fmt(s){var a=s.split("-");return a[2]+"."+a[1]+"."+a[0]}
 function esc(t){return String(t).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
 function dni(n){return n===1?"deň":(n>=2&&n<=4?"dni":"dní")}
-function isDone(a,d,now){var v=a.done[d];if(v===false)return false;if(v!==undefined)return true;return a.auto!==false&&d>=a.start&&d<now}
-function conf(a,now){var au=a.auto!==false,n=au?Math.max(0,diff(a.start,now)):0;
-for(var k in a.done){if(k<a.start||k>now)continue;var f=a.done[k]===false;if(au){if(k<now){if(f)n--}else if(!f)n++}else if(!f)n++}return n}
+function weekday(d){return (new Date(pd(d)).getUTCDay()+6)%7+1}
+function isScheduled(a,d){return a.frequency!=="custom"||a.frequencyDays.indexOf(weekday(d))>=0}
+function isDone(a,d,now){if(!isScheduled(a,d))return false;var v=a.done[d];if(v===false)return false;if(v!==undefined)return true;return a.auto!==false&&d>=a.start&&d<now}
+function scheduledCount(a,from,to){var n=0;for(var d=from;d<=to;d=addDays(d,1))if(isScheduled(a,d))n++;return n}
+function conf(a,now){var au=a.auto!==false,n=au?scheduledCount(a,a.start,addDays(now,-1)):0;
+for(var k in a.done){if(k<a.start||k>now||!isScheduled(a,k))continue;var f=a.done[k]===false;if(au){if(k<now){if(f)n--}else if(!f)n++}else if(!f)n++}return Math.max(0,n)}
 function cnt(a,now){return conf(a,now)+a.base}
-function total(a){return a.goal>0?a.goal:(a.end?diff(a.start,a.end):null)}
+function total(a){return a.goal>0?a.goal:(a.end?scheduledCount(a,a.start,addDays(a.end,-1)):null)}
 function pct(a,now){var t=total(a);if(t===null)return null;if(t<=0)return 100;return Math.max(0,Math.min(100,Math.round(cnt(a,now)/t*100)))}
-function streak(a,now){var n=0,d=now;if(!isDone(a,d,now))d=addDays(d,-1);while(d>=a.start&&isDone(a,d,now)){n++;d=addDays(d,-1)}return n}
+function streak(a,now){var n=0,d=now;if(d>now)d=now;while(d>=a.start&&!isScheduled(a,d))d=addDays(d,-1);while(d>=a.start&&isScheduled(a,d)&&isDone(a,d,now)){n++;d=addDays(d,-1);while(d>=a.start&&!isScheduled(a,d))d=addDays(d,-1)}return n}
 function B(act,t,c){return '<button class="ghost '+(c||"")+'" data-a="'+act+'">'+t+'</button>'}
 function dots(cur,attr){return COLORS.map(function(c){return '<button type="button" class="dot'+(c===cur?" on":"")+'" style="--c:'+c+'" '+attr+'="'+c+'" aria-label="farba"></button>'}).join("")}
 function cal(a,now){var m=mon[a.id]||0,t=new Date(),f=new Date(Date.UTC(t.getFullYear(),t.getMonth()+m,1)),yy=f.getUTCFullYear(),mm=f.getUTCMonth();
@@ -411,12 +479,12 @@ var selD=sel[a.id]&&sel[a.id]<=now?sel[a.id]:now;
 var h='<div class="cal">';
 ["Po","Ut","St","Št","Pi","So","Ne"].forEach(function(w){h+='<span class="w">'+w+'</span>'});
 for(var i=0;i<off;i++)h+='<span class="e"></span>';
-for(var d=1;d<=len;d++){var ds=yy+"-"+pad(mm+1)+"-"+pad(d),on=isDone(a,ds,now),ok=ds<=now;if(on)inM++;
-h+='<span class="'+(on?"on ":"")+(ds===now?"t ":"")+(ok?"":"x ")+(a.notes[ds]?"hn ":"")+(ds===selD?"sel":"")+'"'+(ok?' data-a="sel" data-d="'+ds+'"':'')+'>'+d+'</span>'}
+for(var d=1;d<=len;d++){var ds=yy+"-"+pad(mm+1)+"-"+pad(d),scheduled=isScheduled(a,ds),on=isDone(a,ds,now),ok=ds<=now&&scheduled;if(on)inM++;
+h+=ok?'<button type="button" class="day '+(on?"on ":"")+(ds===now?"t ":"")+(a.notes[ds]?"hn ":"")+(ds===selD?"sel":"")+'" data-a="sel" data-d="'+ds+'" aria-label="Vybrať deň '+fmt(ds)+'" title="Vybrať '+fmt(ds)+'">'+d+'</button>':'<span title="'+(scheduled?"Budúci naplánovaný deň":"Voľný deň")+'" class="'+(scheduled?"x ":"rest-day ")+'">'+d+'</span>'}
 var dn=isDone(a,selD,now),wk=["Ne","Po","Ut","St","Št","Pi","So"][new Date(pd(selD)).getUTCDay()];
 var XI='<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>';
 var action=dn?'<button class="ib no on" data-a="dno" data-d="'+selD+'" aria-label="Označiť ako nesplnené">'+XI+'</button>':'<button class="ib yes" data-a="dyes" data-d="'+selD+'" aria-label="Označiť ako splnené">'+CHK+'</button>';
-var panel=!(sel[a.id]&&sel[a.id]<=now)?'':'<div class="dp"><div class="r" style="justify-content:space-between"><b class="sm">'+wk+' '+fmt(selD)+'</b><div class="r">'+action+'</div></div><span class="fld"><input type="text" class="nt" data-d="'+selD+'" maxlength="140" placeholder="Poznámka ku dňu" value="'+esc(a.notes[selD]||"")+'"></span></div>';
+var panel=!(sel[a.id]&&sel[a.id]<=now)?'':'<div class="dp"><div class="r" style="justify-content:space-between"><b class="sm">'+wk+' '+fmt(selD)+'</b><div class="r">'+action+'</div></div><label class="day-note"><span class="meta">Poznámka k dňu</span><textarea class="nt" data-d="'+selD+'" maxlength="140" rows="2" placeholder="Doplň poznámku k tomuto dňu" aria-label="Poznámka k dňu">'+esc(a.notes[selD]||"")+'</textarea></label></div>';
 return '<div class="cn"><button data-a="pm">‹</button><span>'+MN[mm]+" "+yy+'</span><button data-a="nm">›</button></div>'+h+'</div>'+panel}
 var IC=function(p){return '<svg class="ic" viewBox="0 0 24 24">'+p+'</svg>'};
 var ICN={u:IC('<path d="M4 20h4L19 9a2.1 2.1 0 0 0-3-3L5 17v3z"/><path d="M13.5 7.5l3 3"/>'),c:IC('<rect x="3.5" y="5" width="17" height="15.5" rx="3.5"/><path d="M8 3v4M16 3v4M3.5 10.5h17M9 15.3l2.1 2.1 3.9-4"/>'),z:IC('<path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2.2"/><circle cx="9" cy="17" r="2.2"/>')};
@@ -435,12 +503,14 @@ var acts=isP("reset")?cfm("Resetovať? Aktuálny priebeh sa uloží do histórie
 var cd=COLORS.map(function(c){return '<button type="button" class="dot'+(c===a.color?" on":"")+'" style="--c:'+c+'" data-a="col" data-c="'+c+'" aria-label="farba"></button>'}).join("");
 var op=function(k){return openIds[k]?" open":""};
 var G=function(k,title,body){return '<details class="n" data-k="'+id+k+'"'+op(id+k)+'><summary>'+title+'</summary><div class="in">'+body+'</div></details>'};
-var set='<div class="sm">Začiatok: <b>'+fmt(a.start)+'</b>'+(a.end?' · Koniec: <b>'+fmt(a.end)+'</b>':'')+'</div><div class="sm">Splnených dní: <b>'+(conf(a,now)+a.base)+'</b> · Séria: <b>'+st+'</b></div>'
-+G("u",'<span class="st">'+ICN.u+'Údaje aktivity</span>','<div class="col"><label>Názov<span class="fld"><input type="text" class="en" maxlength="60" value="'+esc(a.name)+'"></span></label><label>Začiatok<span class="fld"><input type="date" class="es" value="'+a.start+'"></span></label><label>Do kedy (nepovinné)<span class="fld"><input type="date" class="ee" value="'+(a.end||"")+'"></span></label><label>Kategória (nepovinné)<span class="fld"><input type="text" class="ec" maxlength="24" list="cats" value="'+esc(a.cat||"")+'"></span></label><label>Poznámka (nepovinné)<span class="fld"><input type="text" class="an" maxlength="140" placeholder="Poznámka k aktivite" value="'+esc(a.note||'')+'"></span></label><label>Počet dní trvania (nepovinné)<span class="fld"><input type="number" class="eg" min="1" inputmode="numeric" value="'+(a.goal||"")+'"></span></label><label>Koľkokrát som už splnil/a (spätne)<span class="fld"><input type="number" class="eb" min="0" inputmode="numeric" value="'+a.base+'"></span></label><div><div class="cl">Farba</div><div class="dots">'+cd+'</div></div>'+'</div>')
-+G("c",'<span class="st">'+ICN.c+'Splnené dni</span>',cal(a,now))
-+G("z",'<span class="st">'+ICN.z+'Ďalšie nastavenia</span>',acts);
+var freqLabel=a.frequency==="custom"?a.frequencyDays.map(function(v){return ["","Po","Ut","St","Št","Pi","So","Ne"][v]}).join(", "):"Denne";
+var editPanel='<form class="col edit-activity-form" data-edit-form novalidate><label>Názov<span class="fld"><input type="text" class="en" maxlength="60" value="'+esc(a.name)+'"></span></label><div class="row"><label>Začiatok<span class="fld"><input type="date" class="es" value="'+a.start+'"></span></label><label>Koniec<span class="fld"><input type="date" class="ee" value="'+(a.end||"")+'" aria-label="Dátum konca"></span></label></div><label>Kategória<span class="fld"><input type="text" class="ec" maxlength="24" list="cats" value="'+esc(a.cat||"")+'"></span></label><div class="freq-box"><div class="freq-toggle e-frequency-toggle"><button type="button" data-frequency="daily" class="'+(a.frequency!=="custom"?"on":"")+'">Denne</button><button type="button" data-frequency="custom" class="'+(a.frequency==="custom"?"on":"")+'">Vybrané dni</button></div><select class="efrequency" hidden><option value="daily"'+(a.frequency!=="custom"?" selected":"")+'>Denne</option><option value="custom"'+(a.frequency==="custom"?" selected":"")+'>Vybrané dni</option></select><div class="freq-days e-frequency-days"'+(a.frequency==="custom"?"":" hidden")+'>'+["Po","Ut","St","Št","Pi","So","Ne"].map(function(day,i){var v=i+1;return '<label><input type="checkbox" class="efday" value="'+v+'"'+(a.frequencyDays.indexOf(v)>=0?" checked":"")+'><span>'+day+'</span></label>'}).join("")+'</div></div><label>Poznámka<span class="fld"><input type="text" class="an" maxlength="140" placeholder="Poznámka k aktivite" value="'+esc(a.note||"")+'"></span></label><div class="row"><label>Cieľ (počet dní)<span class="fld"><input type="number" class="eg" min="1" inputmode="numeric" value="'+(a.goal||"")+'"></span></label><label>Splnené spätne<span class="fld"><input type="number" class="eb" min="0" inputmode="numeric" value="'+a.base+'"></span></label></div><div><div class="cl">Farba</div><div class="dots">'+cd+'</div></div></form>';
+var overviewPanel='<div class="detail-summary"><div class="detail-stat"><b>'+d+'</b><span>Splnené dni</span></div><div class="detail-stat"><b>'+st+'</b><span>Aktuálna séria</span></div><div class="detail-stat"><b>'+freqLabel+'</b><span>Frekvencia</span></div><div class="detail-stat"><b>'+fmt(a.start)+'</b><span>Začiatok</span></div></div>'+(a.end?'<div class="sm">Koniec: <b>'+fmt(a.end)+'</b></div>':'')+(a.note?'<div class="detail-note"><div class="meta">Poznámka k aktivite</div><div class="sm">'+esc(a.note)+'</div></div>':'');
+var detailTab=detailTabs[id]||"overview";
+var detail='<div class="detail-tabs"><button type="button" data-detail-tab="overview" class="'+(detailTab==="overview"?"on":"")+'">Info</button><button type="button" data-detail-tab="calendar" class="'+(detailTab==="calendar"?"on":"")+'">Kalendár</button><button type="button" data-detail-tab="edit" class="'+(detailTab==="edit"?"on":"")+'">Upraviť</button></div><div class="detail-panel" data-detail-panel="overview"'+(detailTab==="overview"?"":" hidden")+'>'+overviewPanel+'</div><div class="detail-panel" data-detail-panel="calendar"'+(detailTab==="calendar"?"":" hidden")+'>'+cal(a,now)+'</div><div class="detail-panel" data-detail-panel="edit"'+(detailTab==="edit"?"":" hidden")+'>'+editPanel+'<div class="sec">'+acts+'</div></div>';
+
 return '<div class="sw'+(pd?' pd':'')+'" data-id="'+id+'"><div class="del">'+(pd?'<button data-a="yes">Áno</button><button data-a="no">Nie</button>':TRASH)+'</div><div class="card'+(flash===id?' flash':'')+'" style="--c:'+a.color+'"><div class="top"><button type="button" class="drag-handle" data-drag="activity" aria-label="Zmeniť poradie aktivity">⠿</button><div style="flex:1;min-width:0"><div class="name">'+esc(a.name)+'</div><div class="meta">'+(a.cat?esc(a.cat):'')+(now<a.start?' · ešte nezačala':'')+(st?' · 🔥 '+st:'')+'</div></div><div class="r day-count"><div class="big'+(isDone(a,now,now)?'':' muted')+'">'+d+'<small>'+dni(d)+'</small></div>'+CK(a,now)+'</div></div>'+bar+today
-+'<details class="d" data-k="'+id+'"'+op(id)+'><summary>⚙ Nastavenia</summary><div class="dc">'+set+'</div></details></div></div>'}
++'<details class="d" data-k="'+id+'"'+op(id)+'><summary>Detail aktivity</summary><div class="dc">'+detail+'</div></details></div></div>'}
 function render(){
 var now=todayStr(),box=document.getElementById("list");
 box.querySelectorAll("details[data-k]").forEach(function(d){openIds[d.getAttribute("data-k")]=d.open});
@@ -475,9 +545,9 @@ var T="ov",OV={m:"day",o:0},DN=["Po","Ut","St","Št","Pi","So","Ne"];
 function wd(d){return (new Date(pd(d)).getUTCDay()+6)%7}
 function endOf(a){if(!a.ended)return"9999-12-31";for(var i=a.history.length-1;i>=0;i--)if(a.history[i].type==="end")return a.history[i].end;return"9999-12-31"}
 function inP(a,f,t){return a.start<=t&&(!a.ended||endOf(a)>=f)}
-function dstat(d,now){var e=0,n=0;if(d>now)return{e:0,n:0};items.forEach(function(a){if(a.start>d||(a.ended&&d>endOf(a)))return;e++;if(isDone(a,d,now))n++});return{e:e,n:n}}
+function dstat(d,now){var e=0,n=0;if(d>now)return{e:0,n:0};items.forEach(function(a){if(a.start>d||(a.ended&&d>endOf(a))||!isScheduled(a,d))return;e++;if(isDone(a,d,now))n++});return{e:e,n:n}}
 function range(f,t,now){var e=0,n=0,l=[];for(var d=f;d<=t;d=addDays(d,1)){var x=dstat(d,now);e+=x.e;n+=x.n;l.push({d:d,e:x.e,n:x.n})}return{e:e,n:n,days:l}}
-function astat(a,f,t,now){var e=0,n=0,eo=endOf(a);for(var d=f;d<=t&&d<=now&&d<=eo;d=addDays(d,1)){if(d<a.start)continue;e++;if(isDone(a,d,now))n++}return{e:e,n:n}}
+function astat(a,f,t,now){var e=0,n=0,eo=endOf(a);for(var d=f;d<=t&&d<=now&&d<=eo;d=addDays(d,1)){if(d<a.start||!isScheduled(a,d))continue;e++;if(isDone(a,d,now))n++}return{e:e,n:n}}
 function pc(p){return p<34?"#ef4444":p<67?"#f59e0b":"#22c55e"}
 function ring(n,e,z){var r=z*.42,c=2*Math.PI*r,p=e?n/e:0,m=z/2,col=e?pc(p*100):"#444";return '<svg class="rg" width="'+z+'" height="'+z+'" viewBox="0 0 '+z+' '+z+'"><circle cx="'+m+'" cy="'+m+'" r="'+r+'" fill="none" stroke="#1c1c1c" stroke-width="'+z*.09+'"/><circle cx="'+m+'" cy="'+m+'" r="'+r+'" fill="none" stroke="'+col+'" stroke-width="'+z*.09+'" stroke-linecap="round" stroke-dasharray="'+(c*p)+' '+c+'" transform="rotate(-90 '+m+' '+m+')"/><text x="50%" y="50%" dy=".35em" text-anchor="middle" fill="#fff" font-size="'+z*.22+'" font-weight="700">'+n+'/'+e+'</text></svg>'}
 var CHK='<svg viewBox="0 0 24 24"><path d="M5.5 12.5l4.2 4.2L18.5 7.5"/></svg>';
@@ -500,7 +570,7 @@ function ovWeek(now){var ws=addDays(addDays(now,-wd(now)),OV.o*7),we=addDays(ws,
 var sh=function(x){return x.slice(8)+"."+x.slice(5,7)+"."};
 var bars=R.days.map(function(x,i){var p=x.e?Math.round(x.n/x.e*100):0;return '<div class="bc"><div class="bt"><div class="bb'+(x.e&&x.n?'':' z')+'" style="height:'+Math.max(4,p)+'%'+(x.e&&x.n?';background:'+pc(p):'')+'"></div></div><span>'+DN[i]+'</span><span>'+(x.e?x.n+"/"+x.e:"–")+'</span></div>'}).join("");
 var rows=items.filter(function(a){return inP(a,ws,we)}).map(function(a){var st=astat(a,ws,we,now);if(!st.e)return"";
-return '<div class="arow" style="--c:'+a.color+'"><div class="nm">'+esc(a.name)+'</div><div class="sq">'+R.days.map(function(x){return '<i class="'+(x.d<a.start||x.d>now||x.d>endOf(a)?"x":isDone(a,x.d,now)?"on":"")+'"></i>'}).join("")+'</div><b>'+st.n+'/'+st.e+'</b></div>'}).join("");
+return '<div class="arow" style="--c:'+a.color+'"><div class="nm">'+esc(a.name)+'</div><div class="sq">'+R.days.map(function(x){return '<i class="'+(x.d<a.start||x.d>now||x.d>endOf(a)?"x":!isScheduled(a,x.d)?"r":isDone(a,x.d,now)?"on":"")+'"></i>'}).join("")+'</div><b>'+st.n+'/'+st.e+'</b></div>'}).join("");
 return nav(OV.o===0?"Tento týždeň":sh(ws)+" – "+fmt(we),OV.o<0)+sumCard(R,"Splnené "+R.n+" z "+R.e,R.e?"splnení v týždni":"V týždni zatiaľ nič",cmp(R,range(addDays(ws,-7),addDays(ws,Math.min(6,Math.max(0,diff(ws,now)))-7),now),"rovnakému obdobiu minulého týždňa"))+'<div class="card"><div class="sh">Po dňoch</div><div class="bars">'+bars+'</div></div>'+catCard(ws,we,now)+(rows?'<details class="card ovfold"><summary>Podľa aktivít</summary><div class="ovfold-body"><div class="arow hl"><div class="nm"></div><div class="sq l">'+["P","U","S","Š","P","S","N"].map(function(l){return '<span>'+l+'</span>'}).join("")+'</div><b style="visibility:hidden">0/0</b></div>'+rows+'</div></details>':'')}
 function ovMonth(now){var t=new Date(),f=new Date(Date.UTC(t.getFullYear(),t.getMonth()+OV.o,1)),yy=f.getUTCFullYear(),mm=f.getUTCMonth(),len=new Date(Date.UTC(yy,mm+1,0)).getUTCDate();
 var a1=yy+"-"+pad(mm+1)+"-01",a2=yy+"-"+pad(mm+1)+"-"+pad(len),R=range(a1,a2,now),off=(f.getUTCDay()+6)%7;
@@ -562,6 +632,8 @@ document.getElementById("addb").addEventListener("click",function(){
 });
 document.getElementById("pick").innerHTML=dots(pickC,"data-pc");
 document.getElementById("s").value=todayStr();
+document.getElementById("newFrequency").addEventListener("change",function(){document.getElementById("newFrequencyDays").hidden=this.value!=="custom";document.querySelectorAll("#newFrequencyToggle button").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-frequency")===document.getElementById("newFrequency").value)})});
+document.getElementById("newFrequencyToggle").addEventListener("click",function(ev){var b=ev.target.closest("button[data-frequency]");if(!b)return;var f=document.getElementById("newFrequency");f.value=b.getAttribute("data-frequency");f.dispatchEvent(new Event("change"))});
 document.getElementById("pick").addEventListener("click",function(ev){var c=ev.target.getAttribute("data-pc");if(!c)return;pickC=c;this.innerHTML=dots(pickC,"data-pc")});
 function badF(el,msg){var w=el.closest(".fld");if(!w)return;w.classList.add("bad");var p=w.parentNode,m=p.querySelector(".fe");if(!m){m=document.createElement("div");m.className="fe";p.appendChild(m)}m.textContent=msg}
 function okF(el){var w=el.closest(".fld");if(!w)return;w.classList.remove("bad");var m=w.parentNode.querySelector(".fe");if(m)m.remove()}
@@ -574,16 +646,18 @@ var bad=function(el,m){badF(el,m);if(!first)first=el};
 [ni,si,ei,gi].forEach(okF);
 var n=ni.value.trim(),s=si.value,e=ei.value,gv=gi.value.trim(),g=parseInt(gv,10);
 if(!n)bad(ni,"Zadaj názov aktivity.");
-if(!s)bad(si,"Zadaj dátum začiatku.");
-if(e&&s&&pd(e)<=pd(s))bad(ei,"Dátum konca musí byť po dátume začiatku.");
+var dateError=validateActivityDates(s,e);
+if(dateError){if(!s)bad(si,dateError);else bad(ei,dateError);}
 if(gv&&!(g>=1&&g<=3650&&String(g)===gv))bad(gi,"Počet dní musí byť celé číslo od 1 do 3650.");
 if(first){try{first.closest(".fld").scrollIntoView({block:"center",behavior:"smooth"})}catch(x){}return}
-items.unshift({sort_order:0,cat:document.getElementById("cat").value.trim(),notes:{},id:"a"+Date.now()+Math.floor(Math.random()*1e3),name:n,color:pickC,start:s,end:e||null,goal:g>0?g:0,auto:document.getElementById("au").checked,base:0,done:{},history:[]});
-save();this.reset();document.getElementById("s").value=todayStr();addEl.hidden=true;addBtn();render()});
+var newFreq=document.getElementById("newFrequency").value,newDays=[].slice.call(document.querySelectorAll("#newFrequencyDays input:checked")).map(function(x){return Number(x.value)});
+if(newFreq==="custom"&&!newDays.length){toast("Vyber aspoň jeden deň v týždni.");return}
+items.unshift({sort_order:0,cat:document.getElementById("cat").value.trim(),notes:{},id:"a"+Date.now()+Math.floor(Math.random()*1e3),name:n,color:pickC,start:s,end:e||null,goal:g>0?g:0,auto:document.getElementById("au").checked,base:0,done:{},history:[],frequency:newFreq,frequencyDays:newFreq==="custom"?newDays:[1,2,3,4,5,6,7]});
+save();this.reset();document.getElementById("s").value=todayStr();document.getElementById("newFrequencyDays").hidden=true;addEl.hidden=true;addBtn();render()});
 var list=document.getElementById("list");
 var ty=0;
 document.addEventListener("touchstart",function(e){ty=e.touches[0].clientY},{passive:true});
-document.addEventListener("touchmove",function(e){var a=document.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)&&a!==e.target&&Math.abs(e.touches[0].clientY-ty)>12)a.blur()},{passive:true});
+document.addEventListener("touchmove",function(e){var a=document.activeElement;if(a&&a.matches&&a.matches('input[type="date"]'))return;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)&&a!==e.target&&Math.abs(e.touches[0].clientY-ty)>12)a.blur()},{passive:true});
 var origY={},prevY={};
 function anim(d,open){var c=d.querySelector(":scope>.dc")||d.querySelector(":scope>.in");
 if(!c||!c.animate||RM()){d.open=open;return}
@@ -596,24 +670,66 @@ function sTo(y){y=Math.max(0,y);try{window.scrollTo({top:y,behavior:RM()?"auto":
 function topOf(el){return el.getBoundingClientRect().top+window.scrollY}
 function stickyTopOffset(){var h=document.querySelector(".hd"),t=document.querySelector(".tabs");return (h?h.getBoundingClientRect().height:0)+(t?t.getBoundingClientRect().height:0)+10}
 var supClick=0,dirty={};
-function editField(ev){var el=ev.target;if(!el.matches||!el.matches(".en,.es,.ee,.eg,.eb,.ec,.an,.nt"))return;
+function editField(ev){var el=ev.target;if(!el.matches||!el.matches(".en,.es,.ee,.eg,.eb,.ec,.an,.nt,.efrequency,.efday"))return;
 var c=el.closest("[data-id]"),id=c&&c.getAttribute("data-id"),a=items.filter(function(x){return x.id===id})[0];if(!a)return;
-var v=el.value.trim(),ch=ev.type==="change",cl=el.classList;okF(el);
+var v=el.value.trim(),cl=el.classList;okF(el);
 if(cl.contains("an")){a.note=v;save();return}
-if(cl.contains("nt")){var nd=el.getAttribute("data-d");if(v)a.notes[nd]=v;else delete a.notes[nd];var ce=c.querySelector('.cal [data-d="'+nd+'"]');if(ce)ce.classList.toggle("hn",!!v);save();return}
-if(cl.contains("en")){if(!v){badF(el,"Názov nemôže byť prázdny.");return}a.name=v;c.querySelector(".name").textContent=v}
-else if(cl.contains("es")){if(!el.value)return;if(a.end&&pd(a.end)<=pd(el.value)){badF(el,"Začiatok musí byť pred koncom.");return}a.start=el.value}
+if(cl.contains("nt")){var nd=el.getAttribute("data-d"),note=el.value;if(note.trim())a.notes[nd]=note;else delete a.notes[nd];var ce=c.querySelector('.cal [data-d="'+nd+'"]');if(ce)ce.classList.toggle("hn",!!note.trim());save();return}
+if(cl.contains("es")){if(el.value&&a.end&&pd(a.end)<=pd(el.value)){badF(el,"Začiatok musí byť pred koncom.");return}a.start=el.value||""}
 else if(cl.contains("ee")){if(!el.value)a.end=null;else if(pd(el.value)<=pd(a.start)){badF(el,"Dátum konca musí byť po dátume začiatku.");return}else a.end=el.value}
+if(cl.contains("en")){if(!v){badF(el,"Názov nemôže byť prázdny.");return}a.name=v;c.querySelector(".name").textContent=v}
 else if(cl.contains("eg")){var g=parseInt(v,10);a.goal=g>0?g:0}
 else if(cl.contains("eb"))a.base=Math.max(0,parseInt(v,10)||0);
 else if(cl.contains("ec"))a.cat=v;
+else if(cl.contains("efrequency")){a.frequency=v==="custom"?"custom":"daily";if(a.frequency==="custom"&&!a.frequencyDays.length)a.frequencyDays=[1,2,3,4,5,6,7];var daysWrap=c.querySelector(".e-frequency-days");if(daysWrap)daysWrap.hidden=a.frequency!=="custom";c.querySelectorAll(".e-frequency-toggle button").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-frequency")===a.frequency)})}
+else if(cl.contains("efday")){a.frequency="custom";a.frequencyDays=[].slice.call(c.querySelectorAll(".efday:checked")).map(function(x){return Number(x.value)});if(!a.frequencyDays.length){el.checked=true;a.frequencyDays=[Number(el.value)];toast("Aktivita musí mať aspoň jeden naplánovaný deň.")}var freqSel=c.querySelector(".efrequency");if(freqSel)freqSel.value="custom";c.querySelectorAll(".e-frequency-toggle button").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-frequency")==="custom")})}
 dirty[id]=(cl.contains("ec")||dirty[id]==="cat")?"cat":true;save()}
-list.addEventListener("input",editField);list.addEventListener("change",editField);
-list.addEventListener("focusout",function(ev){var c=ev.target.closest&&ev.target.closest("[data-id]");if(!c)return;var id=c.getAttribute("data-id");if(!dirty[id])return;
+function syncEditDateInput(el){
+if(!el||!el.matches||!el.matches(".es,.ee"))return false;
+var c=el.closest("[data-id]"),id=c&&c.getAttribute("data-id"),a=items.find(function(x){return x.id===id});if(!a)return false;
+var value=el.value||"",next=el.classList.contains("ee")?(value||null):value;
+var current=el.classList.contains("ee")?(a.end||null):(a.start||"");
+if(current===next)return false;
+if(el.classList.contains("ee")&&value&&a.start&&pd(value)<=pd(a.start)){badF(el,"Dátum konca musí byť po dátume začiatku.");return false;}
+if(el.classList.contains("es")&&value&&a.end&&pd(a.end)<=pd(value)){badF(el,"Začiatok musí byť pred koncom.");return false;}
+if(el.classList.contains("ee"))a.end=next;else a.start=next;
+okF(el);dirty[id]=true;save();return true;
+}
+list.addEventListener("input",function(ev){if(ev.target.closest(".edit-activity-form"))okF(ev.target);if(!syncEditDateInput(ev.target))editField(ev)});
+list.addEventListener("change",function(ev){if(ev.target.closest(".edit-activity-form"))okF(ev.target);if(!syncEditDateInput(ev.target))editField(ev)});
+// Niektoré natívne výbery dátumu (najmä Safari/iOS) po stlačení Reset
+// nezavolajú spoľahlivo input/change. Počas otvoreného poľa preto sledujeme
+// jeho skutočnú DOM hodnotu a každú zmenu okamžite uložíme.
+var editDatePollers=new WeakMap();
+list.addEventListener("focusin",function(ev){
+var el=ev.target;if(!el.matches||!el.matches(".es,.ee")||editDatePollers.has(el))return;
+var timer=setInterval(function(){
+if(!el.isConnected){clearInterval(timer);editDatePollers.delete(el);return;}
+syncEditDateInput(el);
+if(document.activeElement!==el){clearInterval(timer);editDatePollers.delete(el);}
+},120);
+editDatePollers.set(el,timer);
+});
+list.addEventListener("reset",function(ev){
+var form=ev.target;if(!form.matches(".edit-activity-form"))return;
+var c=form.closest("[data-id]"),id=c&&c.getAttribute("data-id"),a=items.find(function(x){return x.id===id});if(!a)return;
+setTimeout(function(){
+var start=form.querySelector(".es"),end=form.querySelector(".ee");
+if(start){a.start=start.value||""}
+if(end){a.end=end.value||null}
+dirty[id]=true;save();
+},0);
+});
+list.addEventListener("submit",function(ev){if(ev.target.matches(".edit-activity-form"))ev.preventDefault()});
+list.addEventListener("focusout",function(ev){
+var dateInput=ev.target;if(dateInput&&dateInput.matches&&dateInput.matches(".es,.ee"))syncEditDateInput(dateInput);
+var c=ev.target.closest&&ev.target.closest("[data-id]");if(!c)return;var id=c.getAttribute("data-id");if(!dirty[id])return;
 setTimeout(function(){var cc=list.querySelector('[data-id="'+id+'"]');if(!cc||!dirty[id]||cc.contains(document.activeElement))return;var f=dirty[id]==="cat";delete dirty[id];if(f)render();else renderOne(id);toast("Uložené")},150)});
 list.addEventListener("click",function(ev){
+var tab=ev.target.closest("[data-detail-tab]");if(tab){var wrap=tab.closest(".sw"),aid=wrap&&wrap.getAttribute("data-id"),which=tab.getAttribute("data-detail-tab");if(aid){detailTabs[aid]=which;wrap.querySelectorAll("[data-detail-tab]").forEach(function(b){b.classList.toggle("on",b===tab)});wrap.querySelectorAll("[data-detail-panel]").forEach(function(p){p.hidden=p.getAttribute("data-detail-panel")!==which})}return}
+var freq=ev.target.closest(".e-frequency-toggle button[data-frequency]");if(freq){var fw=freq.closest(".freq-box"),freqSelect=fw&&fw.querySelector(".efrequency");if(freqSelect){freqSelect.value=freq.getAttribute("data-frequency");freqSelect.dispatchEvent(new Event("change",{bubbles:true}));fw.querySelectorAll(".e-frequency-toggle button").forEach(function(b){b.classList.toggle("on",b===freq)})}return}
 var cd=ev.target.closest(".sw .card");
-if(cd&&!ev.target.closest("button,input,label,details,select,textarea")){
+if(cd&&!ev.target.closest("button,input,label,details,select,textarea,[data-a],.cal,.dp")){
 if(Date.now()-supClick<350)return;
 var dd=cd.querySelector("details.d");
 if(dd){var cid=cd.closest("[data-id]").getAttribute("data-id");
@@ -649,7 +765,9 @@ if(pend.act==="del"){full=true;items=items.filter(function(x){return x!==a})}
 else if(pend.act==="end"){full=true;a.history.push({start:a.start,end:now,days:cnt(a,now),pct:pct(a,now),type:"end"});a.ended=true}
 else{a.history.push({start:a.start,end:now,days:cnt(a,now),pct:pct(a,now),type:"reset"});a.done={};a.base=0;a.start=now;if(a.end&&pd(a.end)<=pd(now))a.end=null}
 pend=null;save()}
-if(full||forced.length||(S.cat.indexOf("__")===0&&(act==="go"||act==="dyes"||act==="dno"))||!list.querySelector('.sw[data-id="'+id+'"]')){var oldScroll=window.scrollY;render();if(full)requestAnimationFrame(function(){var max=Math.max(0,document.documentElement.scrollHeight-window.innerHeight);window.scrollTo(0,Math.min(oldScroll,max))})}
+var needsFull=full||forced.length||(S.cat.indexOf("__")===0&&(act==="go"||act==="dyes"||act==="dno"))||!list.querySelector('.sw[data-id="'+id+'"]');
+if(needsFull){var oldScroll=window.scrollY;render();if(full)requestAnimationFrame(function(){var max=Math.max(0,document.documentElement.scrollHeight-window.innerHeight);window.scrollTo(0,Math.min(oldScroll,max))})}
+else if(act==="sel"||act==="dyes"||act==="dno"||act==="pm"||act==="nm"){renderOne(id)}
 else{renderOne(id);if(pp&&pp.id!==id&&pend!==pp)renderOne(pp.id)}});
 list.addEventListener("toggle",function(ev){var d=ev.target,k=d.getAttribute&&d.getAttribute("data-k");if(k)openIds[k]=d.open},true);
 var W=76,sw=null;
@@ -768,7 +886,7 @@ function beginOrderDrag(data){data.active=true;orderDrag=data;document.body.clas
 // Mobile: normal vertical movement scrolls the page; a stationary long press
 // switches that same gesture into reorder mode without requiring a second touch.
 document.addEventListener("touchstart",function(ev){if(ev.touches.length!==1)return;var found=dragTypeCard(ev.target);if(!found)return;
- if(scrollInertiaFrame){cancelAnimationFrame(scrollInertiaFrame);scrollInertiaFrame=0;}cancelOrderPress();if(orderDrag)finishOrderDrag();var t=ev.touches[0],wishDone=found.type==="wishlist"?getWishDone(found.id):false,blocked=!!ev.target.closest("button,input,textarea,select,summary,details,label,a");
+ if(scrollInertiaFrame){cancelAnimationFrame(scrollInertiaFrame);scrollInertiaFrame=0;}cancelOrderPress();if(orderDrag)finishOrderDrag();var t=ev.touches[0],wishDone=found.type==="wishlist"?getWishDone(found.id):false,blocked=!!ev.target.closest("button,input,textarea,select,summary,details,label,a,.cal,.dp,[data-detail-tab]");
  var data={type:found.type,card:found.card,id:found.id,doneState:wishDone,blocked:blocked,dragAllowed:!blocked&&!wishDone,pointerId:"touch",x:t.clientX,y:t.clientY,lastY:t.clientY,lastX:t.clientX,lastTime:performance.now(),velocity:0,moved:false,scrollMode:false,swipeMode:false,swipeTx:0,swipeVelocity:0,active:false,target:null,after:false,scrollStart:window.scrollY,wasOpen:!!(found.type==="wishlist"?found.card.closest(".w-sw").classList.contains("open"):found.card.classList.contains("open")),swipeCard:found.type==="wishlist"?found.card:found.card.querySelector(":scope>.card")};orderPressData=data;
  if(data.dragAllowed)orderPress=setTimeout(function(){orderPress=null;if(orderPressData===data&&!data.moved){beginOrderDrag(data);}},360);
 },{passive:true});
@@ -817,7 +935,7 @@ function scheduleRemoteSave(){
   clearTimeout(REMOTE_TIMER);
   REMOTE_TIMER=setTimeout(function(){
     var snapshot={
-      activities:items.map(function(a,i){return{id:String(a.id),sort_order:i,name:a.name,category:a.cat||"",note:a.note||"",color:a.color||COLORS[0],start_date:a.start,end_date:a.end||null,goal_days:a.goal||0,auto_count:a.auto!==false,base_count:a.base||0,ended:!!a.ended}}),
+      activities:items.map(function(a,i){return{id:String(a.id),sort_order:i,name:a.name,category:a.cat||"",note:a.note||"",color:a.color||COLORS[0],start_date:a.start,end_date:a.end||null,goal_days:a.goal||0,auto_count:a.auto!==false,base_count:a.base||0,ended:!!a.ended,frequency_type:a.frequency||"daily",frequency_days:a.frequencyDays||[1,2,3,4,5,6,7]}}),
       activity_days:[],
       activity_history:[],
       wishlist_items:WL.map(function(w,i){return{id:String(w.id),sort_order:i,text:w.text,due_date:w.due||null,created_date:w.created,completed_date:w.done||null,note:w.note||""}})
@@ -865,7 +983,7 @@ async function loadRemoteWorkspace(){
   var aRows=payload.activities||[],dRows=payload.activity_days||[],hRows=payload.activity_history||[],wRows=payload.wishlist_items||[];
   var byId={};
   items=aRows.map(function(r){
-    var a=norm({id:r.id,sort_order:r.sort_order,name:r.name,cat:r.category||"",note:r.note||"",color:r.color||COLORS[0],start:r.start_date,end:r.end_date||null,goal:r.goal_days||0,auto:r.auto_count,base:r.base_count||0,ended:!!r.ended,done:{},notes:{},history:[]});
+    var a=norm({id:r.id,sort_order:r.sort_order,name:r.name,cat:r.category||"",note:r.note||"",color:r.color||COLORS[0],start:r.start_date,end:r.end_date||null,goal:r.goal_days||0,auto:r.auto_count,base:r.base_count||0,ended:!!r.ended,frequency:r.frequency_type||"daily",frequencyDays:r.frequency_days||[1,2,3,4,5,6,7],done:{},notes:{},history:[]});
     byId[a.id]=a;return a;
   }).sort(function(a,b){return (a.sort_order==null?0:a.sort_order)-(b.sort_order==null?0:b.sort_order)});
   items=applySavedOrder(items,KEY+"_order");
