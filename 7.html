@@ -243,13 +243,6 @@ body{overscroll-behavior-y:auto}
 .orow .ck{margin-left:auto;flex:none}
 .ovsum-copy{flex:1;min-width:0}.ovs .ot{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ovs .meta,.ovs .cm{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;min-height:1.2em}
 .ovs .cm{line-height:1.2;margin-top:3px}
-/* Consistent progress alignment and compact category/filter controls. */
-.progress-block.aligned{margin-inline:38px;min-width:0}
-.progress-block.aligned .bar{width:100%}
-.progress-block.aligned .pl{display:flex;justify-content:space-between;gap:10px;min-width:0}
-.progress-block.aligned .pl span{min-width:0}
-.progress-block.aligned .pl span:last-child{text-align:right;overflow-wrap:anywhere}
-.progress-block .pl{align-items:flex-start}
 .wc .note-fld{height:38px;min-height:38px;padding:0}
 .wc .note-fld input{height:100%}
 /* Keep sticky layers opaque and dragged cards out of hit-testing. */
@@ -259,6 +252,54 @@ body{overscroll-behavior-y:auto}
 .order-drag-active{overscroll-behavior:none}
 .orow{min-height:42px}
 .drop-before,.drop-after{transition:box-shadow .1s ease;}
+
+
+/* Final mobile alignment fix: center the complete progress block inside each card. */
+#v-act .progress-block.aligned,
+#v-wl .progress-block.aligned{
+  display:block !important;
+  width:calc(100% - 76px) !important;
+  max-width:calc(100% - 76px) !important;
+  min-width:0 !important;
+  margin-left:auto !important;
+  margin-right:auto !important;
+  box-sizing:border-box !important;
+}
+#v-act .progress-block.aligned > .bar,
+#v-wl .progress-block.aligned > .bar{
+  display:block;
+  width:100%;
+  box-sizing:border-box;
+}
+#v-act .progress-block.aligned > .pl{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:10px;
+  width:100%;
+  min-width:0;
+  box-sizing:border-box;
+}
+#v-act .progress-block.aligned > .pl span{min-width:0}
+#v-act .progress-block.aligned > .pl span:last-child{
+  text-align:right;
+  overflow-wrap:anywhere;
+}
+
+/* Match filter chips to the Overview period controls in actual rendered height and typography. */
+#v-act #chips button,
+#v-act #catp button,
+#v-ov .seg button{
+  height:29px !important;
+  min-height:29px !important;
+  max-height:29px !important;
+  padding:0 6px !important;
+  font-size:12.16px !important;
+  line-height:1.2 !important;
+  font-weight:600 !important;
+  box-sizing:border-box !important;
+  border-radius:9px;
+}
 
 </style>
 </head>
