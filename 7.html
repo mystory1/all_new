@@ -271,6 +271,38 @@ body{overscroll-behavior-y:auto}
 #v-act #list > .sw:first-child,
 #v-ov > .card:first-of-type{margin-top:0}
 
+
+/* Final mobile alignment fix: center the complete progress block inside each card. */
+#v-act .progress-block.aligned,
+#v-wl .progress-block.aligned{
+  display:block !important;
+  width:calc(100% - 76px) !important;
+  max-width:calc(100% - 76px) !important;
+  min-width:0 !important;
+  margin-left:auto !important;
+  margin-right:auto !important;
+  box-sizing:border-box !important;
+}
+#v-act .progress-block.aligned > .bar,
+#v-wl .progress-block.aligned > .bar{
+  display:block;
+  width:100%;
+  box-sizing:border-box;
+}
+#v-act .progress-block.aligned > .pl{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:10px;
+  width:100%;
+  min-width:0;
+  box-sizing:border-box;
+}
+#v-act .progress-block.aligned > .pl span{min-width:0}
+#v-act .progress-block.aligned > .pl span:last-child{
+  text-align:right;
+  overflow-wrap:anywhere;
+}
 </style>
 </head>
 <body>
