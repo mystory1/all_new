@@ -12,29 +12,32 @@
 html,body{width:100%;height:100%;min-height:0;margin:0;background:#000;color:var(--txt)}
 body{height:100vh;height:100svh;display:flex;align-items:flex-start;overflow:hidden;padding:calc(10px + env(safe-area-inset-top,0px)) 12px calc(8px + env(safe-area-inset-bottom,0px));font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.35}
 main{width:100%;max-width:720px;margin:0 auto}
-.hd{display:flex;justify-content:flex-end;align-items:center;gap:12px;margin:0 0 10px;min-height:36px}
-.user{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.hd{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:0 0 10px;min-height:36px}
+.user{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;margin-left:auto}
 .meta{font-size:.78rem;color:var(--mut);overflow-wrap:anywhere}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:clamp(10px,2.5vh,14px)}
 .buttons{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .nav-btn{display:flex;align-items:center;justify-content:center;min-height:54px;min-width:0;padding:12px;text-decoration:none;text-align:center;color:var(--txt);background:#111;border:1px solid #242424;border-radius:12px;font-size:.95rem;font-weight:600;transition:background .15s,border-color .15s,transform .15s;overflow-wrap:anywhere}
 .nav-btn:hover{background:#191919;border-color:#444}
 .nav-btn:active{transform:scale(.985)}
-.ghost{background:#161616;color:var(--txt);padding:8px 12px;font-size:.82rem;border:1px solid #262626;border-radius:10px;min-height:36px}
-.logout{color:#ff7777;border-color:#4a2424}
+.ghost{display:inline-flex;align-items:center;justify-content:center;background:#161616;color:var(--txt);padding:8px 12px;font-size:.82rem;font-weight:600;text-decoration:none;border:1px solid #262626;border-radius:10px;min-height:36px;white-space:nowrap}
+.ghost:hover{background:#202020;border-color:#444}
+.admin-link{color:var(--txt)}
+.logout{color:#ff7777;border-color:#4a2424;cursor:pointer}
 .empty{padding:28px 14px;text-align:center;color:var(--mut);font-size:.9rem}
 .loading{min-height:112px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:var(--mut)}
 .spinner{width:32px;height:32px;border:3px solid #383838;border-top-color:#f2f2f2;border-radius:50%;animation:menuSpin .75s linear infinite}
 @keyframes menuSpin{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){.spinner{animation:none;border-top-color:#f2f2f2}}
-@media(max-width:600px){body{padding-left:10px;padding-right:10px}.buttons{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.hd{align-items:center;margin-bottom:8px;min-height:32px}.user{gap:6px}.card{padding:9px}.nav-btn{min-height:44px;padding:7px;font-size:.88rem}}
+@media(max-width:600px){body{padding-left:10px;padding-right:10px}.buttons{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.hd{align-items:center;margin-bottom:8px;min-height:32px}.user{gap:6px}.card{padding:9px}.nav-btn{min-height:44px;padding:7px;font-size:.88rem}.ghost{min-height:32px;padding:6px 9px;font-size:.76rem}}
 @media(max-height:700px){body{padding-top:calc(6px + env(safe-area-inset-top,0px));padding-bottom:calc(5px + env(safe-area-inset-bottom,0px))}.hd{margin-bottom:6px;min-height:30px}.card{padding:7px}.buttons{gap:6px}.nav-btn{min-height:40px;padding:6px;font-size:.85rem}}
-@media(max-width:380px){body{padding-left:9px;padding-right:9px}.buttons{grid-template-columns:repeat(2,minmax(0,1fr))}.nav-btn{min-height:40px;padding:5px;font-size:.82rem}.user{width:auto;justify-content:flex-end}.meta{max-width:42vw;text-align:right;font-size:.7rem}.ghost{min-height:32px;padding:6px 9px;font-size:.76rem}}
+@media(max-width:380px){body{padding-left:9px;padding-right:9px}.buttons{grid-template-columns:repeat(2,minmax(0,1fr))}.nav-btn{min-height:40px;padding:5px;font-size:.82rem}.user{width:auto;justify-content:flex-end}.meta{max-width:42vw;text-align:right;font-size:.7rem}}
 </style>
 </head>
 <body>
 <main>
   <header class="hd">
+    <a class="ghost admin-link" id="adminPortalBtn" href="admin.html" hidden>Admin portal</a>
     <div class="user"><span class="meta" id="userInfo"></span><button class="ghost logout" id="logoutBtn" type="button">Odhlásiť</button></div>
   </header>
   <section class="card" aria-label="Hlavné menu"><div id="menu"><div class="loading" role="status" aria-label="Načítavam menu"><span class="spinner" aria-hidden="true"></span></div></div></section>
@@ -63,18 +66,19 @@ main{width:100%;max-width:720px;margin:0 auto}
   session={...session,...data,token:token,habits_token:token};
   localStorage.setItem("session_user",JSON.stringify(session));
   document.getElementById("userInfo").textContent=(session.username||"Používateľ")+" · "+(session.role||"user");
+  const adminPortalBtn=document.getElementById("adminPortalBtn");
+  adminPortalBtn.hidden=!session.is_admin;
   const all=["1.html","2.html","3.html","4.html","5.html","6.html","7.html"];
-  // allowed_pages is authoritative for application pages for every account,
-  // including administrators. Admin status grants access to this panel only.
+  // allowed_pages is authoritative for application pages for every account.
+  // Admin status grants access to the admin panel, shown separately in the header.
   const allowed=new Set(Array.isArray(session.allowed_pages)?session.allowed_pages:[]);
   const visible=all.filter(p=>allowed.has(p));
-  if(session.is_admin)visible.push("admin.html");
   const menu=document.getElementById("menu");
   if(visible.length){
    const grid=document.createElement("div");grid.className="buttons";
    visible.forEach(page=>{
     const a=document.createElement("a");a.className="nav-btn";a.href=page;
-    a.textContent=page==="admin.html"?"Admin portal":page.replace(".html","");
+    a.textContent=page.replace(".html","");
     grid.appendChild(a);
    });
    menu.replaceChildren(grid);
