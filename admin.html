@@ -205,11 +205,19 @@ input:disabled{opacity:.75}
   const renderChips=()=>{
     const wrap=$('pageChips');wrap.replaceChildren();
     PAGES.forEach(page=>{
-      const b=document.createElement('button');b.type='button';b.className='chip'+(state.draft.allowed_pages.includes(page)?' on':'');b.textContent=page;b.setAttribute('aria-pressed',String(state.draft.allowed_pages.includes(page)));
-      b.addEventListener('click',()=>{
-        const set=new Set(state.draft.allowed_pages);set.has(page)?set.delete(page):set.add(page);
-        state.draft.allowed_pages=[...set];renderChips();updateDirty();
-      });
+      const isAdminPage=page==='admin.html'&&state.draft.role==='admin';
+      const checked=state.draft.allowed_pages.includes(page)||isAdminPage;
+      const b=document.createElement('button');b.type='button';b.className='chip'+(checked?' on':'');b.textContent=page;b.setAttribute('aria-pressed',String(checked));
+      if(isAdminPage){
+        b.disabled=true;
+        b.title='Administrátor musí mať prístup k admin.html.';
+        b.setAttribute('aria-label','admin.html – povinné oprávnenie pre rolu Admin');
+      }else{
+        b.addEventListener('click',()=>{
+          const set=new Set(state.draft.allowed_pages);set.has(page)?set.delete(page):set.add(page);
+          state.draft.allowed_pages=[...set];renderChips();updateDirty();
+        });
+      }
       wrap.appendChild(b);
     });
   };
@@ -297,7 +305,16 @@ input:disabled{opacity:.75}
   $('refreshBtn').addEventListener('click',()=>loadDb(false).catch(()=>{}));
   $('backBtn').addEventListener('click',()=>location.href='0.html');
   $('logoutBtn').addEventListener('click',logout);
-  $('detailRole').addEventListener('change',e=>{if(state.draft){state.draft.role=e.target.value;updateDirty();}});
+  $('detailRole').addEventListener('change',e=>{
+    if(!state.draft)return;
+    state.draft.role=e.target.value;
+    const pages=new Set(state.draft.allowed_pages);
+    if(state.draft.role==='admin')pages.add('admin.html');
+    else pages.delete('admin.html');
+    state.draft.allowed_pages=[...pages];
+    renderChips();
+    updateDirty();
+  });
   $('saveBtn').addEventListener('click',saveToDb);
   $('approveBtn').addEventListener('click',()=>{
     if(!state.draft||state.draft.approved)return;
