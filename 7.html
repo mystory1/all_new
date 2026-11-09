@@ -11,7 +11,7 @@ html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *,*::before,*::after{box-sizing:inherit}
 [hidden]{display:none!important}
 body{margin:0;background:#000;color:var(--txt);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.4}
-main{zoom:.9;width:111.111%;max-width:800px;margin:0 auto;padding:0 14px 14px;background:#000;min-height:100vh;min-height:100dvh}
+main{width:100%;max-width:800px;margin:0 auto;padding:0 14px 14px;background:#000;min-height:100vh;min-height:100dvh}
 .hd{display:flex;justify-content:space-between;align-items:center;margin:6px 0 14px;gap:10px}
 h1{font-size:1.5rem;margin:0;font-weight:700;letter-spacing:-.02em}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px}
@@ -90,7 +90,7 @@ details.n[open]{border-color:#2c2c2c}
 .h{display:flex;justify-content:space-between;gap:8px;font-size:.82rem;padding:7px 0;border-bottom:1px solid #161616;flex-wrap:wrap}
 .h b{color:var(--c)}
 .empty{text-align:center;color:var(--mut);padding:36px 0}
-#toast{zoom:.9;position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#fff;color:#000;padding:11px 18px;border-radius:99px;font-weight:600;font-size:.88rem;opacity:0;pointer-events:none;z-index:9;transition:opacity .25s}
+#toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#fff;color:#000;padding:11px 18px;border-radius:99px;font-weight:600;font-size:.88rem;opacity:0;pointer-events:none;z-index:9;transition:opacity .25s}
 #toast.show{opacity:1}
 .chips,.catp{display:flex;flex-wrap:wrap;gap:6px}
 .chips{margin:0 0 8px}
@@ -287,7 +287,8 @@ body{overscroll-behavior-y:auto}
 .freq-box{display:grid;gap:8px;padding:10px;background:#0a0a0a;border:1px solid #1d1d1d;border-radius:12px}
 .freq-label{font-size:.75rem;color:var(--mut);font-weight:600}
 .freq-box.invalid{border-color:#ef4444;background:rgba(239,68,68,.05)}
-.freq-error{color:#ff6b6b;font-size:.76rem;line-height:1.3}\n.date-hint{display:block;margin-top:4px;color:var(--mut);font-size:.72rem;line-height:1.3}
+.freq-error{color:#ff6b6b;font-size:.76rem;line-height:1.3}
+.date-hint{display:block;margin-top:4px;color:var(--mut);font-size:.72rem;line-height:1.3}
 .freq-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
 .freq-days label{display:block;min-width:0}
 .freq-days input{position:absolute;opacity:0;pointer-events:none}
@@ -381,6 +382,142 @@ body{overscroll-behavior-y:auto}
   text-align:right;
   overflow-wrap:anywhere;
 }
+
+
+/* Responsive layout v6: fluid sizing without CSS zoom or enlarged containers. */
+html, body {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: clip;
+}
+body { -webkit-text-size-adjust: 100%; }
+main {
+  width: 100%;
+  max-width: 800px;
+  min-width: 0;
+  margin-inline: auto;
+  padding-left: clamp(10px, 3.5vw, 18px);
+  padding-right: clamp(10px, 3.5vw, 18px);
+  padding-bottom: max(18px, env(safe-area-inset-bottom, 0px));
+}
+main, main * { min-width: 0; }
+img, svg, canvas, video { max-width: 100%; }
+.card, .sw, .wc, .w-sw, .detail-panel, .detail-panel form,
+#v-ov, #v-act, #v-wl, #list, #wlist { min-width: 0; max-width: 100%; }
+.hd { width: 100%; min-width: 0; gap: 8px; }
+.hd > * { min-width: 0; }
+.hd .r { flex-wrap: nowrap; min-width: 0; gap: 6px; }
+#accountName { max-width: 28vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tabs { width: 100%; min-width: 0; }
+.tabs button, .seg button { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.fld, .fld input, textarea, select { min-width: 0; max-width: 100%; }
+.freq-days { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+.freq-days label, .freq-days span { min-width: 0; }
+.detail-tabs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.detail-tabs button { min-width: 0; white-space: nowrap; }
+.cal, .hm { width: 100%; grid-template-columns: repeat(7, minmax(0, 1fr)); }
+.bars { width: 100%; grid-template-columns: repeat(7, minmax(0, 1fr)); }
+.bars.y { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+.pl { min-width: 0; flex-wrap: wrap; }
+.pl span { min-width: 0; overflow-wrap: anywhere; }
+.progress-block { min-width: 0; max-width: 100%; }
+#toast {
+  width: max-content;
+  max-width: calc(100vw - 28px);
+  white-space: normal;
+  text-align: center;
+  overflow-wrap: anywhere;
+  z-index: 10000;
+}
+button { max-width: 100%; }
+
+/* Small phones: stack paired fields and keep controls comfortably tappable. */
+@media (max-width: 600px) {
+  main { padding-top: 2px; }
+  .row { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .hd { margin: 6px 0 12px; }
+  h1 { font-size: 1.35rem; }
+  .hd .ghost { padding: 7px 9px; font-size: .82rem; }
+  .add { flex: 0 0 38px; width: 38px; height: 38px; }
+  .tabs { gap: 2px; padding: 3px; }
+  .tabs button { padding: 8px 4px; font-size: .82rem; }
+  .card { padding: 11px 11px; border-radius: 14px; }
+  .top { gap: 8px; align-items: flex-start; }
+  .name { font-size: 1rem; line-height: 1.25; }
+  .day-count { gap: 5px; }
+  .day-count .big { font-size: 1.35rem; }
+  .day-count .big small { font-size: .68rem; margin-left: 3px; }
+  .day-count .ck, .done-spacer { width: 28px; height: 28px; }
+  .progress-block.aligned,
+  #v-act .progress-block.aligned,
+  #v-wl .progress-block.aligned {
+    width: calc(100% - 52px) !important;
+    max-width: calc(100% - 52px) !important;
+  }
+  .pl { font-size: .72rem; }
+  .detail-tabs { gap: 4px; margin-top: 10px; }
+  .detail-tabs button { padding: 8px 2px; font-size: .74rem; }
+  .detail-summary { gap: 6px; }
+  .detail-stat { padding: 8px; }
+  .detail-stat b { font-size: .98rem; overflow-wrap: anywhere; }
+  .detail-stat span { font-size: .68rem; }
+  .freq-box { padding: 9px; }
+  .freq-days { gap: 4px; }
+  .freq-days span { min-height: 36px; font-size: .72rem; }
+  .freq-toggle button { padding: 8px 4px; font-size: .78rem; }
+  .cal { gap: 3px; font-size: .74rem; }
+  .cal button.day { border-radius: 6px; font-size: .74rem; }
+  .hm { gap: 3px; }
+  .hm span, .hm button.hm-day { border-radius: 6px; font-size: .68rem; }
+  .bars { gap: 4px; }
+  .bt { height: 62px; }
+  .bc { font-size: .62rem; }
+  .bars.y { gap: 2px; }
+  .bars.y .bc { font-size: .52rem; }
+  .sq { gap: 3px; }
+  .sq i { width: 10px; height: 10px; border-radius: 3px; }
+  .orow { gap: 8px; }
+  .orow .nm { font-size: .86rem; }
+  .arow { gap: 7px; font-size: .82rem; }
+  .arow b { min-width: 28px; }
+  .chips button, .catp button { max-width: 100%; }
+  #v-act #chips button, #v-act #chips button.cm {
+    padding-left: 3px; padding-right: 3px; font-size: .70rem;
+  }
+  .w-done-actions { flex-wrap: wrap; gap: 6px; }
+  .w-done-actions button { min-width: 0; }
+}
+
+/* Very narrow phones (e.g. iPhone SE / compact Android). */
+@media (max-width: 360px) {
+  main { padding-left: 9px; padding-right: 9px; }
+  .hd { gap: 5px; }
+  h1 { font-size: 1.22rem; }
+  #accountName { display: none; }
+  .tabs button { font-size: .76rem; padding-inline: 2px; }
+  .card { padding: 9px; }
+  .name { font-size: .94rem; }
+  .day-count .big { font-size: 1.2rem; }
+  .detail-tabs button { font-size: .68rem; }
+  .freq-days { gap: 3px; }
+  .freq-days span { min-height: 33px; font-size: .68rem; }
+  #v-act #chips button, #v-act #chips button.cm { font-size: .65rem; }
+  .progress-block.aligned,
+  #v-act .progress-block.aligned,
+  #v-wl .progress-block.aligned {
+    width: calc(100% - 42px) !important;
+    max-width: calc(100% - 42px) !important;
+  }
+}
+
+/* Tablet/desktop: preserve the centered content width and paired fields. */
+@media (min-width: 601px) {
+  main { padding-left: 18px; padding-right: 18px; }
+  .row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
 </style>
 </head>
 <body>
