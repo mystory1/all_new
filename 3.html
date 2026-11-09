@@ -1,201 +1,385 @@
 <!DOCTYPE html>
 <html lang="sk">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dashboard</title>
-  <style>
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:system-ui,Arial,sans-serif;background:#0b0b0b;color:#fff;min-height:100vh;padding:32px 14px}
-    .wrap{max-width:1100px;margin:0 auto}
-    .topblock{margin-bottom:20px}.weathercard{margin-top:12px;background:#111827;border:1px solid #1f2937;border-radius:16px;padding:14px;max-width:520px}.weathergrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.wx{background:#0f172a;border:1px solid #243042;border-radius:14px;padding:12px}.wxlabel{font-size:12px;color:#94a3b8;margin-bottom:6px}.wxvalue{font-size:26px;font-weight:800;line-height:1}.wxunit{font-size:13px;color:#cbd5e1;margin-top:6px}.wxbar{height:8px;background:#1f2937;border-radius:999px;overflow:hidden;margin-top:10px}.wxbar > span{display:block;height:100%;background:#3b82f6;border-radius:999px}
-    .topline{font-size:14px;color:#9ca3af}
-    .main{font-size:clamp(24px,5vw,38px);font-weight:800;line-height:1.15;margin-top:4px}
-    .sub{font-size:14px;color:#cbd5e1;margin-top:6px}
-    .section{margin-top:28px}
-    .section h2{font-size:18px;margin-bottom:10px;color:#e5e7eb}
-    .days{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;margin-bottom:12px;scrollbar-width:thin}
-    .days::-webkit-scrollbar{height:8px}.days::-webkit-scrollbar-thumb{background:#374151;border-radius:999px}
-    .daybtn{border:1px solid #374151;background:#111827;color:#e5e7eb;padding:8px 12px;border-radius:999px;cursor:pointer;white-space:nowrap;font-size:13px}
-    .daybtn.active{background:#2563eb;border-color:#2563eb;color:#fff}
-    .track{display:flex;gap:10px;overflow-x:auto;padding-bottom:8px;scrollbar-width:thin}
-    .track::-webkit-scrollbar{height:8px}.track::-webkit-scrollbar-thumb{background:#374151;border-radius:999px}
-    .item{min-width:220px;max-width:220px;background:#111;border:1px solid #1f2937;border-radius:16px;padding:14px 14px 12px;flex:0 0 auto}
-    .time{font-size:12px;color:#93c5fd;margin-bottom:8px;letter-spacing:.04em;font-weight:700}
-    .title{font-size:16px;font-weight:700;line-height:1.25;color:#fff;margin-bottom:6px}
-    .meta{font-size:12px;color:#9ca3af;line-height:1.35}.rating{margin-top:8px;font-size:12px;color:#fbbf24;font-weight:700}.rating a{color:#fbbf24;text-decoration:none}.rating a:hover{text-decoration:underline}.rating.missing{color:#6b7280}
-    .status{font-size:13px;color:#6b7280;margin:10px 0 0}
-    .status.err{color:#f87171}
-  </style>
+<meta charset="UTF-8">
+<meta name="theme-color" content="#000000">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
+<title>Prehľad – Habits</title>
+<style>
+:root{color-scheme:dark;--bg:#000;--card:#0e0e0e;--card2:#111;--line:#222;--txt:#f2f2f2;--mut:#8a8a8a;--soft:#bdbdbd;--accent:#e8e8e8;--danger:#ff7777;--ok:#a7d7b2}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{background:var(--bg);scroll-behavior:smooth}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.4;padding:calc(14px + env(safe-area-inset-top,0px)) 14px calc(24px + env(safe-area-inset-bottom,0px))}
+button,a{font:inherit}
+button{color:inherit}
+.wrap{width:100%;max-width:980px;margin:0 auto}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+.back{color:var(--mut);font-size:.85rem;text-decoration:none}.back:hover{color:var(--txt)}
+.top-actions{display:flex;align-items:center;gap:8px}
+.refresh{border:1px solid #303030;background:#151515;color:var(--txt);border-radius:10px;padding:8px 12px;min-height:36px;font-size:.8rem;font-weight:650;cursor:pointer}
+.refresh:hover{background:#202020;border-color:#444}.refresh:disabled{opacity:.55;cursor:wait}
+h1{font-size:clamp(1.45rem,4vw,2rem);line-height:1.15;letter-spacing:-.035em;margin:0 0 5px;font-weight:750}
+.lead{font-size:.86rem;color:var(--mut);margin-bottom:18px}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;min-width:0}
+.weather-card{grid-column:1/-1}
+.card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.card-title{font-size:.98rem;font-weight:700;letter-spacing:-.01em}
+.card-sub{font-size:.75rem;color:var(--mut);margin-top:2px}
+.weather-values{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.metric{background:#111;border:1px solid #242424;border-radius:12px;padding:12px;min-width:0}
+.metric-label{font-size:.72rem;color:var(--mut);margin-bottom:6px}
+.metric-value{font-size:clamp(1.25rem,4vw,1.7rem);font-weight:750;line-height:1.1;letter-spacing:-.04em}
+.metric-unit{font-size:.72rem;color:var(--mut);margin-top:4px}
+.weather-foot,.updated{font-size:.7rem;color:var(--mut);margin-top:10px}
+.progress{height:5px;background:#262626;border-radius:999px;overflow:hidden;margin-top:10px}
+.progress>span{display:block;height:100%;width:0;background:#bdbdbd;border-radius:inherit;transition:width .25s}
+.cinema-feature{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:14px}
+.feature-label{font-size:.72rem;color:var(--mut);margin-bottom:4px}
+.feature-title{font-size:clamp(1.05rem,3vw,1.35rem);font-weight:750;line-height:1.25}
+.source-link{font-size:.75rem;color:#ddd;text-decoration:none;border:1px solid #303030;border-radius:10px;padding:8px 10px;white-space:nowrap}
+.source-link:hover{background:#1b1b1b}
+.section{margin-top:18px}
+.section-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:0 2px 9px}
+.section-heading h2{font-size:1rem;font-weight:720;letter-spacing:-.015em}
+.section-heading p{font-size:.7rem;color:var(--mut)}
+.days{display:flex;gap:6px;overflow-x:auto;padding:1px 1px 9px;scrollbar-width:thin;scrollbar-color:#3a3a3a transparent}
+.daybtn{flex:0 0 auto;border:1px solid #292929;background:#111;color:#c8c8c8;border-radius:10px;padding:7px 10px;min-height:34px;font-size:.75rem;font-weight:600;cursor:pointer;white-space:nowrap}
+.daybtn.active{background:#eee;color:#111;border-color:#eee}
+.track{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px}
+.item{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;min-width:0}
+.time{display:inline-flex;font-size:.72rem;color:#d4d4d4;font-weight:700;letter-spacing:.02em;margin-bottom:8px}
+.title{font-size:.91rem;font-weight:700;line-height:1.3;margin-bottom:5px;overflow-wrap:anywhere}
+.meta{font-size:.73rem;color:var(--mut);line-height:1.4}
+.rating{margin-top:9px;font-size:.7rem}.rating a{color:#bdbdbd;text-decoration:underline;text-underline-offset:2px}
+.empty{grid-column:1/-1;background:var(--card);border:1px dashed #303030;border-radius:14px;padding:18px;color:var(--mut);font-size:.8rem}
+.state{font-size:.72rem;color:var(--mut);margin-top:8px;min-height:1em}
+.state.err{color:var(--danger)}.state.ok{color:var(--ok)}
+.section-note{font-size:.68rem;color:#777;margin-top:7px}
+.loading{display:flex;align-items:center;gap:9px;color:var(--mut);font-size:.78rem;padding:14px 2px}
+.spinner{width:15px;height:15px;border:2px solid #383838;border-top-color:#eee;border-radius:50%;animation:spin .75s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}.spinner{animation:none}}
+@media(max-width:680px){body{padding-left:10px;padding-right:10px}.grid{grid-template-columns:1fr 1fr}.weather-card,.cinema-feature{grid-column:1/-1}.track{grid-template-columns:repeat(2,minmax(0,1fr))}.card{padding:12px}}
+@media(max-width:420px){.track{grid-template-columns:1fr 1fr;gap:6px}.item{padding:10px}.days{gap:5px}.daybtn{padding:6px 8px}.metric{padding:10px 8px}.topbar{margin-bottom:14px}}
+@media(max-width:340px){.track{grid-template-columns:1fr}.metric-value{font-size:1.2rem}}
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="topblock">
-      <div class="topline" id="namesDay">Meniny: —</div>
-      <div class="sub" id="weatherTitle">Počasie v Bratislave</div>
-      <div class="weathercard" id="weatherCard">
-        <div class="weathergrid">
-          <div class="wx"><div class="wxlabel">Teplota</div><div class="wxvalue" id="wxTemp">—</div><div class="wxunit">°C</div></div>
-          <div class="wx"><div class="wxlabel">Vietor</div><div class="wxvalue" id="wxWind">—</div><div class="wxunit">km/h</div></div>
-          <div class="wx"><div class="wxlabel">Zrážky</div><div class="wxvalue" id="wxRain">—</div><div class="wxunit">%</div></div>
-        </div>
-        <div class="wxbar"><span id="wxBar" style="width:0%"></span></div>
+<main class="wrap">
+  <header class="topbar">
+    <a class="back" href="./0.html">← Späť na menu</a>
+    <div class="top-actions"><button class="refresh" id="refreshBtn" type="button">Obnoviť údaje</button></div>
+  </header>
+
+  <h1>Prehľad</h1>
+  <p class="lead" id="todayLabel">Aktuálne informácie a program kín</p>
+
+  <div class="grid">
+    <section class="card weather-card" aria-labelledby="weatherHeading">
+      <div class="card-head">
+        <div><div class="card-title" id="weatherHeading">Počasie</div><div class="card-sub" id="weatherTitle">Zisťujem polohu…</div></div>
       </div>
-    </div>
+      <div class="weather-values">
+        <div class="metric"><div class="metric-label">Teplota</div><div class="metric-value" id="wxTemp">—</div><div class="metric-unit">°C</div></div>
+        <div class="metric"><div class="metric-label">Vietor</div><div class="metric-value" id="wxWind">—</div><div class="metric-unit">km/h</div></div>
+        <div class="metric"><div class="metric-label">Zrážky</div><div class="metric-value" id="wxRain">—</div><div class="metric-unit">%</div></div>
+      </div>
+      <div class="progress"><span id="wxBar"></span></div>
+      <div class="weather-foot" id="weatherUpdated">Údaje poskytuje Open-Meteo.</div>
+      <div class="state" id="weatherState" role="status"></div>
+    </section>
 
-    <div class="topline"><a href="0.html" style="color:#9ca3af;text-decoration:none">Späť na menu</a> · Cinema City 1+1 Vivo:</div>
-    <div class="main" id="cinemaTitle">—</div>
-    <div class="status" id="cinemaStatus">Načítavam…</div>
-
-    <div class="section">
-      <h2>Kino Lumière dnes</h2>
-      <div class="days" id="lumiereDays"></div>
-      <div class="track" id="lumiereTrack"></div>
-    </div>
-
-    <div class="section">
-      <h2>Kino Mladosť dnes</h2>
-      <div class="days" id="mladostDays"></div>
-      <div class="track" id="mladostTrack"></div>
-    </div>
-
-    <div class="section">
-      <h2>Kino Film Europe</h2>
-      <div class="days" id="filmEuropeDays"></div>
-      <div class="track" id="filmEuropeTrack"></div>
-      <div class="status">Zobrazuje všetky dostupné dátumy z úvodnej stránky kfe.sk.</div>
-    </div>
+    <section class="card cinema-feature" aria-labelledby="cinemaHeading">
+      <div><div class="feature-label">Cinema City · Filmánia · Vivo</div><div class="feature-title" id="cinemaTitle">Načítavam ponuku…</div><div class="state" id="cinemaState" role="status"></div></div>
+      <a class="source-link" href="https://www.cinemacity.sk/static/sk/sk/offers" target="_blank" rel="noopener noreferrer">Zdroj ↗</a>
+    </section>
   </div>
+
+  <section class="section" aria-labelledby="lumiereHeading">
+    <div class="section-heading"><h2 id="lumiereHeading">Kino Lumière</h2><p>Program podľa Citylife</p></div>
+    <div class="days" id="lumiereDays"></div><div class="track" id="lumiereTrack"><div class="loading"><span class="spinner"></span>Načítavam program…</div></div><div class="state" id="lumiereState" role="status"></div>
+  </section>
+
+  <section class="section" aria-labelledby="mladostHeading">
+    <div class="section-heading"><h2 id="mladostHeading">Kino Mladosť</h2><p>Program podľa Citylife</p></div>
+    <div class="days" id="mladostDays"></div><div class="track" id="mladostTrack"><div class="loading"><span class="spinner"></span>Načítavam program…</div></div><div class="state" id="mladostState" role="status"></div>
+  </section>
+
+  <section class="section" aria-labelledby="filmEuropeHeading">
+    <div class="section-heading"><h2 id="filmEuropeHeading">Kino Film Europe</h2><p>Program podľa kfe.sk</p></div>
+    <div class="days" id="filmEuropeDays"></div><div class="track" id="filmEuropeTrack"><div class="loading"><span class="spinner"></span>Načítavam program…</div></div><div class="state" id="filmEuropeState" role="status"></div>
+    <p class="section-note">Ak oficiálna stránka neposkytne čitateľný rozpis predstavení, zobrazí sa upozornenie namiesto vymyslených údajov.</p>
+  </section>
+
+  <footer class="updated" id="lastUpdated">Údaje sa načítavajú priamo zo zdrojov.</footer>
+</main>
 <script>
-const TARGET='https://www.cinemacity.sk/static/sk/sk/offers';
-const PROXY='https://api.codetabs.com/v1/proxy?quest=';
-const LUM='https://www.citylife.sk/miesto/kino-lumiere-bratislava';
-const MLA='https://www.citylife.sk/miesto/kino-mladost';
-const FE='https://www.kfe.sk/';
-const now=new Date();
-function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-function setCinemaStatus(t,c){const e=document.getElementById('cinemaStatus');e.textContent=t;e.className='status'+(c?' '+c:'')}
-function showCinemaTitle(t){document.getElementById('cinemaTitle').textContent=t||'—'}
-function parseCinema(html){const doc=new DOMParser().parseFromString(html,'text/html');const raw=(doc.body.textContent||'').replace(/\s+/g,' ').trim();const m=raw.match(/platí\s+Filmánia\s+na\s+film:\s*([^\.\n]+)/i);return m?m[1].trim():'—'}
-function fmtLabel(dateStr){const [d,m,y]=dateStr.split('.').map(Number);const dt=new Date(y,m-1,d);return dt.toLocaleDateString('sk-SK',{weekday:'short', day:'2-digit', month:'2-digit'}).replace('.', '')+'.'}
-function sameDate(a,b){return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate()}
-function filterToday(items,date){if(!date) return items; const [d,m,y]=date.split('.').map(Number); const selected=new Date(y,m-1,d); if(sameDate(selected,now)){const cur=now.getHours()*60+now.getMinutes(); return items.filter(x=>{const mm=x.time.match(/^(\d{1,2}):(\d{2})$/); return !mm || (Number(mm[1])*60+Number(mm[2])>=cur);});} return items;}
-function render(groups, activeDate, targetDaysId, targetTrackId){
-  const days=document.getElementById(targetDaysId);
-  const track=document.getElementById(targetTrackId);
-  days.innerHTML=groups.map(g=>`<button class="daybtn ${g.date===activeDate?'active':''}" data-date="${esc(g.date)}">${esc(fmtLabel(g.date))}</button>`).join('');
-  const active=groups.find(g=>g.date===activeDate) || groups[0];
-  const items=filterToday(active?active.items.slice():[], activeDate);
-  track.innerHTML = items.length ? items.map(x=>`<div class="item"><div class="time">${esc(x.time)}</div><div class="title">${esc(x.title)}</div><div class="meta">${esc(x.meta||'')}</div>${(() => { const r=getRating(x.title); return r ? `<div class="rating"><a href="${r.url}" target="_blank" rel="noopener noreferrer">ČSFD: ${r.rating}</a></div>` : `<div class="rating missing">ČSFD: —</div>`; })()}</div>`).join('') : '<div class="item"><div class="title">Žiadne ďalšie filmy</div><div class="meta">Pre vybraný deň už všetky časy prešli alebo nie sú dostupné.</div></div>';
-  [...days.querySelectorAll('.daybtn')].forEach(btn=>btn.onclick=()=>render(groups, btn.dataset.date, targetDaysId, targetTrackId));
+"use strict";
+
+const SOURCES = {
+  cinemaCity: "https://www.cinemacity.sk/static/sk/sk/offers",
+  lumiere: "https://www.citylife.sk/miesto/kino-lumiere-bratislava",
+  mladost: "https://www.citylife.sk/miesto/kino-mladost",
+  filmEurope: "https://www.kfe.sk/"
+};
+const PROXY = "https://api.codetabs.com/v1/proxy?quest=";
+const BRATISLAVA = {lat:48.1486, lon:17.1077, label:"Bratislava"};
+const REQUEST_TIMEOUT = 15000;
+
+const $ = id => document.getElementById(id);
+const esc = value => String(value ?? "").replace(/[&<>"']/g, ch => ({
+  "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+}[ch]));
+
+function localDateKey(date = new Date()) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth()+1).padStart(2,"0");
+  const d = String(date.getDate()).padStart(2,"0");
+  return `${d}.${m}.${y}`;
 }
-function parseCity(html){
-  const txt=html.replace(/<[^>]+>/g,'\n').replace(/\u00a0/g,' ');
-  const lines=txt.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
-  const groups=[]; let current=null;
-  for(let i=0;i<lines.length;i++){
-    const dm=lines[i].match(/^(\d{2}\.\d{2}\.\d{4}),?/);
-    if(dm){current={date:dm[1], items:[]}; groups.push(current); continue;}
-    if(current && /^\d{1,2}:\d{2}$/.test(lines[i])){
-      const title=lines[i+1]||'';
-      if(title && !/^[-|]+$/.test(title) && !/^film$/i.test(title)) current.items.push({time:lines[i], title, meta:''});
-    }
+function parseDateKey(value) {
+  const m = String(value).match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+  if (!m) return null;
+  const date = new Date(Number(m[3]), Number(m[2])-1, Number(m[1]));
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+function dateLabel(value) {
+  const d = parseDateKey(value);
+  return d ? new Intl.DateTimeFormat("sk-SK",{weekday:"short",day:"2-digit",month:"2-digit"}).format(d).replace(/\.$/,"") : value;
+}
+function status(id, message="", type="") {
+  const el = $(id);
+  if (!el) return;
+  el.textContent = message;
+  el.className = "state" + (type ? " " + type : "");
+}
+function setEmpty(trackId, message) {
+  $(trackId).innerHTML = `<div class="empty">${esc(message)}</div>`;
+}
+function cacheBustedUrl(url) {
+  const u = new URL(url);
+  u.searchParams.set("_habits_refresh", String(Date.now()) + Math.random().toString(36).slice(2));
+  return u.toString();
+}
+
+/* The cache is bypassed in the browser and at the proxy target URL. */
+async function fetchText(url) {
+  const target = cacheBustedUrl(url);
+  const proxyUrl = PROXY + encodeURIComponent(target);
+  const response = await fetch(proxyUrl, {
+    method:"GET",
+    cache:"no-store",
+    credentials:"omit",
+    headers:{"Cache-Control":"no-cache, no-store, max-age=0","Pragma":"no-cache"},
+    signal:AbortSignal.timeout(REQUEST_TIMEOUT)
+  });
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  const text = await response.text();
+  if (!text || text.length < 80) throw new Error("Zdroj vrátil prázdne alebo neúplné dáta.");
+  if (/<!doctype html/i.test(text) && /cloudflare|access denied|captcha|just a moment/i.test(text.slice(0,5000))) {
+    throw new Error("Zdroj alebo proxy zablokovali požiadavku.");
   }
-  return groups.filter(g=>g.items.length);
+  return text;
 }
-function parseFE(html){
-  const body=(new DOMParser().parseFromString(html,'text/html').body.textContent||'').replace(/\u00a0/g,' ').replace(/\s+/g,' ');
-  const hits=[...body.matchAll(/\b(\d{1,2}\.\d{1,2}\.\d{4})\b/g)].map(m=>m[1]);
-  const groups=[];
-  for(const d of [...new Set(hits)]){
-    const idx=body.indexOf(d); if(idx<0) continue;
-    const seg=body.slice(idx, idx+5000);
-    const items=[];
-    const re=/(\d{1,2}:\d{2})/g; let m;
-    while((m=re.exec(seg))){
-      const time=m[1];
-      const after=seg.slice(m.index + time.length);
-      const title=after.match(/([A-ZÁÄČĎÉÍĹĽŇÓÔŔŠŤÚÝŽ][^•·|]{2,90}?)(?=\s(?:2D|České titulky|Slovenské titulky|Nevhodné|Vhodné|\d{1,2}:\d{2}|$))/);
-      if(title){
-        const t=title[1].trim().replace(/\s+/g,' ');
-        if(t && !/^2D$|^3D$/.test(t)) items.push({time,title:t,meta:''});
+
+function extractScheduleGroups(html) {
+  const doc = new DOMParser().parseFromString(html,"text/html");
+  const raw = (doc.body?.textContent || "").replace(/\u00a0/g," ").replace(/\r/g,"\n");
+  const normalized = raw.replace(/[ \t]+/g," ").replace(/\n{2,}/g,"\n").trim();
+  const dateRegex = /\b(\d{1,2}\.\d{1,2}\.\d{4})\b/g;
+  const matches = [...normalized.matchAll(dateRegex)];
+  const groups = [];
+  for (let i=0;i<matches.length;i++) {
+    const date = matches[i][1];
+    const start = matches[i].index + matches[i][0].length;
+    const end = i+1 < matches.length ? matches[i+1].index : normalized.length;
+    const segment = normalized.slice(start,end);
+    const items = [];
+    const eventRegex = /(?:^|\n|\s)(\d{1,2}:\d{2})\s*(?:\|\s*|\s{1,})([^|\n]{2,120}?)(?=\s*\||\n|$)/g;
+    let event;
+    while ((event = eventRegex.exec(segment)) !== null) {
+      const title = event[2].replace(/\s+/g," ").trim();
+      if (!title || /^(film|program|vstupenky)$/i.test(title)) continue;
+      if (!items.some(x => x.time === event[1] && x.title === title)) {
+        items.push({time:event[1], title, meta:""});
       }
     }
-    if(items.length) groups.push({date:d, items});
+    if (items.length) groups.push({date,items});
   }
   return groups;
 }
-function parseNameDay(){
-  const d=now.getDate(), m=now.getMonth()+1;
-  const map={1:{1:'Nový rok'},2:{20:'Dagmara'},4:{20:'Marcel'},5:{20:'Bernard'},6:{20:'Valéria'},7:{20:'Štefánia'},8:{20:'Anabela'},9:{20:'Miloš'},10:{20:'Vendelín'},11:{20:'Irma'},12:{20:'Otília'}};
-  return (map[m]&&map[m][d])||'Marcel';
+
+function filterPastShowings(items, dateKey) {
+  if (dateKey !== localDateKey()) return items;
+  const now = new Date();
+  const currentMinutes = now.getHours()*60 + now.getMinutes();
+  return items.filter(item => {
+    const m = item.time.match(/^(\d{1,2}):(\d{2})$/);
+    return !m || Number(m[1])*60+Number(m[2]) >= currentMinutes;
+  });
 }
-const ratingMap={
-  'posledna sanca':{rating:'85%', url:'https://www.csfd.sk/film/1018007-posledna-sanca/prehlad/'},
-  'posledny viking':{rating:'74%', url:'https://www.csfd.sk/film/1563219-posledny-viking/prehlad/'},
-  'stur':{rating:'57%', url:'https://www.csfd.sk/film/1767223-stur/prehlad/'},
-  'ak by som mala nohy tak ta nakopem':{rating:'78%', url:'https://www.csfd.sk/film/1618340-ak-by-som-mala-nohy-tak-ta-nakopem/prehlad/'},
-  'kdybych mela nohy tak ti nakopu':{rating:'78%', url:'https://www.csfd.cz/film/1618340-kdybych-mela-nohy-tak-ti-nakopu/prehled/'},
-  'if i had legs id kick you':{rating:'78%', url:'https://www.csfd.cz/en/film/1618340-if-i-had-legs-i-d-kick-you/overview/'},
-  'turisti':{rating:'61%', url:'https://www.csfd.cz/film/1811096-turisti/prehled/'},
-  'turista':{rating:'61%', url:'https://www.csfd.cz/film/1811096-turisti/prehled/'},
-  'pan nikto proti putinovi':{rating:'77%', url:'https://www.csfd.sk/film/1606307-pan-nikto-proti-putinovi/prehlad/'},
-  'pan nikdo proti putinovi':{rating:'77%', url:'https://www.csfd.cz/film/1606307-pan-nikdo-proti-putinovi/prehled/'},
-  'mr nobody against putin':{rating:'77%', url:'https://www.csfd.cz/en/film/1606307-mr-nobody-against-putin/overview/'},
-  'posledna sanca':{rating:'85%', url:'https://www.csfd.sk/film/1018007-posledna-sanca/prehlad/'},
-  'drama':{rating:'—', url:'https://www.csfd.sk'}
-};
-function norm(s){return (s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,' ').trim();}
-function getRating(title){
-  const n=norm(title);
-  const exact = Object.keys(ratingMap).find(k => n===k);
-  if(exact) return ratingMap[exact];
-  const hit = Object.keys(ratingMap).find(k => n.includes(k) || k.includes(n));
-  if(hit) return ratingMap[hit];
-  return {rating:'—', url:fallbackUrl(title)};
+
+function renderSchedule(groups, selectedDate, daysId, trackId) {
+  const days = $(daysId);
+  const track = $(trackId);
+  if (!Array.isArray(groups) || !groups.length) {
+    days.replaceChildren();
+    setEmpty(trackId,"Zdroj momentálne neposkytol čitateľný program. Skús obnoviť údaje alebo otvor oficiálnu stránku kina.");
+    return;
+  }
+  const active = groups.find(g => g.date === selectedDate) || groups[0];
+  days.innerHTML = groups.map(group =>
+    `<button type="button" class="daybtn${group.date===active.date?" active":""}" data-date="${esc(group.date)}">${esc(dateLabel(group.date))}</button>`
+  ).join("");
+  const items = filterPastShowings(active.items,active.date);
+  track.innerHTML = items.length ? items.map(item => {
+    const searchUrl = "https://www.csfd.sk/sk/film/search/?search=" + encodeURIComponent(item.title);
+    return `<article class="item">
+      <div class="time">${esc(item.time)}</div>
+      <div class="title">${esc(item.title)}</div>
+      ${item.meta ? `<div class="meta">${esc(item.meta)}</div>` : ""}
+      <div class="rating"><a href="${esc(searchUrl)}" target="_blank" rel="noopener noreferrer">Vyhľadať film na ČSFD ↗</a></div>
+    </article>`;
+  }).join("") : `<div class="empty">Na tento deň už nie sú naplánované ďalšie predstavenia.</div>`;
+  days.querySelectorAll(".daybtn").forEach(button => {
+    button.addEventListener("click",() => renderSchedule(groups,button.dataset.date,daysId,trackId));
+  });
 }
-function fallbackUrl(title){
-  return `https://www.csfd.sk/sk/film/search/?search=${encodeURIComponent(title)}`;
+
+function parseCinemaOffer(html) {
+  const doc = new DOMParser().parseFromString(html,"text/html");
+  const text = (doc.body?.textContent || "").replace(/\u00a0/g," ").replace(/\s+/g," ");
+  const patterns = [
+    /FILMÁNIA[\s\S]{0,320}?film:\s*([^.!?]{2,100})/i
+  ];
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (match) return match[1].replace(/\s+/g," ").trim();
+  }
+  return "";
 }
-async function loadWeatherForCoords(lat, lon, label){
-  try{
-    const r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,wind_speed_10m,precipitation_probability&timezone=auto`,{signal:AbortSignal.timeout(10000)});
-    const j=await r.json();
-    const t=Math.round(j.current?.temperature_2m*10)/10;
-    const w=Math.round(j.current?.wind_speed_10m*10)/10;
-    const p=Math.round(j.current?.precipitation_probability||0);
-    document.getElementById('weatherTitle').textContent = `Počasie: ${label}`;
-    document.getElementById('wxTemp').textContent = isFinite(t) ? t : '—';
-    document.getElementById('wxWind').textContent = isFinite(w) ? w : '—';
-    document.getElementById('wxRain').textContent = isFinite(p) ? p : '—';
-    document.getElementById('wxBar').style.width = Math.max(0, Math.min(100, p)) + '%';
-  }catch(e){
-    document.getElementById('wxTemp').textContent='—';
-    document.getElementById('wxWind').textContent='—';
-    document.getElementById('wxRain').textContent='—';
-    document.getElementById('wxBar').style.width='0%';
+
+async function loadCinemaCity() {
+  try {
+    const html = await fetchText(SOURCES.cinemaCity);
+    const offer = parseCinemaOffer(html);
+    if (!offer) throw new Error("Na stránke sa nepodarilo nájsť aktuálnu ponuku Filmánia.");
+    $("cinemaTitle").textContent = offer;
+    status("cinemaState","Ponuka načítaná z oficiálnej stránky.","ok");
+  } catch (error) {
+    $("cinemaTitle").textContent = "Ponuku sa nepodarilo načítať";
+    status("cinemaState",error.message,"err");
   }
 }
-async function loadWeather(){
-  if(navigator.geolocation){
-    navigator.geolocation.getCurrentPosition(
-      pos => loadWeatherForCoords(pos.coords.latitude, pos.coords.longitude, 'tvoja poloha'),
-      () => loadWeatherForCoords(48.1486, 17.1077, 'Bratislava'),
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
-    );
-  } else {
-    loadWeatherForCoords(48.1486, 17.1077, 'Bratislava');
+
+async function loadCitylife(url, daysId, trackId, stateId) {
+  try {
+    const html = await fetchText(url);
+    const groups = extractScheduleGroups(html);
+    if (!groups.length) throw new Error("Stránka neobsahuje rozpoznateľný rozpis predstavení.");
+    const today = localDateKey();
+    const selected = groups.find(group => group.date === today)?.date || groups[0].date;
+    renderSchedule(groups,selected,daysId,trackId);
+    status(stateId,`Načítaných ${groups.reduce((n,g)=>n+g.items.length,0)} predstavení z ${groups.length} dátumov.`,"ok");
+  } catch (error) {
+    setEmpty(trackId,error.message);
+    $(daysId).replaceChildren();
+    status(stateId,"Údaje sa nepodarilo načítať.","err");
   }
 }
-async function load(){
-  document.getElementById('namesDay').textContent='Meniny: '+parseNameDay();
-  await loadWeather();
-  try{const r=await fetch(PROXY+encodeURIComponent(TARGET),{cache:'no-store',signal:AbortSignal.timeout(10000)});const h=await r.text();showCinemaTitle(parseCinema(h));setCinemaStatus('')}catch(e){setCinemaStatus('Cinema City: '+e.message,'err')}
-  try{const r2=await fetch(PROXY+encodeURIComponent(LUM),{cache:'no-store',signal:AbortSignal.timeout(10000)});const h2=await r2.text();const groups=parseCity(h2);const today=now.toLocaleDateString('sk-SK');const first=(groups.find(g=>g.date===today)||groups[0]||{}).date;render(groups, first, 'lumiereDays', 'lumiereTrack')}catch(e){document.getElementById('lumiereTrack').innerHTML=`<div class="item"><div class="title">Chyba</div><div class="meta">${esc(e.message)}</div></div>`}
-  try{const r3=await fetch(PROXY+encodeURIComponent(MLA),{cache:'no-store',signal:AbortSignal.timeout(10000)});const h3=await r3.text();const groups=parseCity(h3);const today=now.toLocaleDateString('sk-SK');const first=(groups.find(g=>g.date===today)||groups[0]||{}).date;render(groups, first, 'mladostDays', 'mladostTrack')}catch(e){document.getElementById('mladostTrack').innerHTML=`<div class="item"><div class="title">Chyba</div><div class="meta">${esc(e.message)}</div></div>`}
-  try{const r4=await fetch(PROXY+encodeURIComponent(FE),{cache:'no-store',signal:AbortSignal.timeout(10000)});const h4=await r4.text();const groups=parseFE(h4);const today=now.toLocaleDateString('sk-SK');const first=(groups.find(g=>g.date===today)||groups[0]||{}).date;render(groups, first, 'filmEuropeDays', 'filmEuropeTrack')}catch(e){document.getElementById('filmEuropeTrack').innerHTML=`<div class="item"><div class="title">Chyba</div><div class="meta">${esc(e.message)}</div></div>`}
+
+async function loadFilmEurope() {
+  try {
+    const html = await fetchText(SOURCES.filmEurope);
+    const groups = extractScheduleGroups(html);
+    if (!groups.length) {
+      setEmpty("filmEuropeTrack","Oficiálna úvodná stránka momentálne neposkytuje dátumy a časy predstavení v čitateľnom texte. Nezobrazujem neoverené údaje.");
+      $("filmEuropeDays").replaceChildren();
+      status("filmEuropeState","Program na kfe.sk sa nepodarilo automaticky rozparsovať. Otvor oficiálny web kina.","err");
+      return;
+    }
+    const today = localDateKey();
+    renderSchedule(groups,groups.find(g=>g.date===today)?.date || groups[0].date,"filmEuropeDays","filmEuropeTrack");
+    status("filmEuropeState",`Načítaných ${groups.reduce((n,g)=>n+g.items.length,0)} predstavení.`,"ok");
+  } catch (error) {
+    setEmpty("filmEuropeTrack",error.message);
+    $("filmEuropeDays").replaceChildren();
+    status("filmEuropeState","Údaje sa nepodarilo načítať.","err");
+  }
 }
-load();
+
+async function loadWeather() {
+  let location = BRATISLAVA;
+  if (navigator.geolocation) {
+    try {
+      const position = await new Promise((resolve,reject) => navigator.geolocation.getCurrentPosition(resolve,reject,{
+        enableHighAccuracy:false, timeout:4500, maximumAge:0
+      }));
+      location = {lat:position.coords.latitude,lon:position.coords.longitude,label:"Tvoja poloha"};
+    } catch (_) { /* Permission denied or timeout: use Bratislava. */ }
+  }
+  try {
+    const url = new URL("https://api.open-meteo.com/v1/forecast");
+    url.search = new URLSearchParams({
+      latitude:String(location.lat),
+      longitude:String(location.lon),
+      current:"temperature_2m,wind_speed_10m,precipitation",
+      hourly:"precipitation_probability",
+      forecast_days:"1",
+      timezone:"auto"
+    }).toString();
+    url.searchParams.set("_refresh",String(Date.now()));
+    const response = await fetch(url,{cache:"no-store",headers:{"Cache-Control":"no-cache"},signal:AbortSignal.timeout(REQUEST_TIMEOUT)});
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    if (!data.current) throw new Error("API nevrátilo aktuálne počasie.");
+    const temp = Number(data.current.temperature_2m);
+    const wind = Number(data.current.wind_speed_10m);
+    const precipitation = Number(data.current.precipitation);
+    const currentTime = String(data.current.time || "").slice(0,16);
+    const hourlyIndex = Array.isArray(data.hourly?.time)
+      ? data.hourly.time.findIndex(value => String(value).slice(0,16) === currentTime)
+      : -1;
+    const probability = hourlyIndex >= 0
+      ? Number(data.hourly.precipitation_probability?.[hourlyIndex])
+      : NaN;
+    $("weatherTitle").textContent = location.label;
+    $("wxTemp").textContent = Number.isFinite(temp) ? Math.round(temp*10)/10 : "—";
+    $("wxWind").textContent = Number.isFinite(wind) ? Math.round(wind) : "—";
+    $("wxRain").textContent = Number.isFinite(probability) ? Math.round(probability) : "—";
+    $("wxBar").style.width = `${Math.max(0,Math.min(100,Number.isFinite(probability)?probability:0))}%`;
+    $("weatherUpdated").textContent = `Aktuálne údaje · ${new Date().toLocaleTimeString("sk-SK",{hour:"2-digit",minute:"2-digit"})} · Open-Meteo`;
+    status("weatherState","Počasie načítané.","ok");
+  } catch (error) {
+    $("weatherTitle").textContent = location.label;
+    $("weatherUpdated").textContent = "Aktuálne počasie nie je dostupné.";
+    status("weatherState",error.message,"err");
+  }
+}
+
+async function refreshAll() {
+  const button = $("refreshBtn");
+  button.disabled = true;
+  button.textContent = "Obnovujem…";
+  $("todayLabel").textContent = new Intl.DateTimeFormat("sk-SK",{weekday:"long",day:"numeric",month:"long",year:"numeric"}).format(new Date());
+  const tasks = [
+    loadWeather(),
+    loadCinemaCity(),
+    loadCitylife(SOURCES.lumiere,"lumiereDays","lumiereTrack","lumiereState"),
+    loadCitylife(SOURCES.mladost,"mladostDays","mladostTrack","mladostState"),
+    loadFilmEurope()
+  ];
+  await Promise.allSettled(tasks);
+  $("lastUpdated").textContent = `Posledná aktualizácia: ${new Date().toLocaleString("sk-SK")} · pri každej aktualizácii sa žiadajú nové dáta.`;
+  button.disabled = false;
+  button.textContent = "Obnoviť údaje";
+}
+
+$("refreshBtn").addEventListener("click",refreshAll);
+refreshAll();
 </script>
 </body>
 </html>
