@@ -240,6 +240,48 @@ body{overscroll-behavior-y:auto}
 #chips{padding:0;margin:0 0 8px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;overflow:visible;}
 #chips button{display:inline-flex;align-items:center;justify-content:center;width:100%;min-width:0;height:32px;min-height:32px;margin:0;padding:0 8px;box-sizing:border-box;font-size:.76rem;line-height:1;font-weight:600;white-space:nowrap;border-radius:10px;overflow:hidden;text-overflow:ellipsis;}
 #chips button.cm{max-width:none;flex:none;font-size:.76rem;margin:0;padding:0 8px;height:32px;min-height:32px;line-height:1;}
+/* Activities: joined filter controls, same visual language as Overview segmented tabs.
+   Scope strictly to #chips; do not touch progress bars or wishlist. */
+#v-act #chips{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:2px;
+  padding:3px;
+  margin:0 0 14px;
+  min-height:0;
+  background:#101010;
+  border:1px solid #1d1d1d;
+  border-radius:12px;
+}
+#v-act #chips button,
+#v-act #chips button.cm{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  min-width:0;
+  max-width:none;
+  height:34px;
+  min-height:34px;
+  padding:0 6px;
+  margin:0;
+  flex:initial;
+  border:0;
+  border-radius:9px;
+  background:transparent;
+  color:var(--mut);
+  font-size:.76rem;
+  font-weight:600;
+  line-height:1.2;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+#v-act #chips button.on,
+#v-act #chips button.cm.on{
+  background:#fff;
+  color:#000;
+}
 #chips::-webkit-scrollbar{display:none}
 .orow .nm{flex:1;min-width:0}
 .orow .ck{margin-left:auto;flex:none}
