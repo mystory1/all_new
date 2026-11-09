@@ -60,8 +60,10 @@ main{width:100%;max-width:720px;margin:0 auto}
   localStorage.setItem("session_user",JSON.stringify(session));
   document.getElementById("userInfo").textContent=(session.username||"Používateľ")+" · "+(session.role||"user");
   const all=["1.html","2.html","3.html","4.html","5.html","6.html","7.html"];
-  const allowed=session.is_admin?all:(Array.isArray(session.allowed_pages)?session.allowed_pages:[]);
-  const visible=all.filter(p=>allowed.includes(p));
+  // allowed_pages is authoritative for application pages for every account,
+  // including administrators. Admin status grants access to this panel only.
+  const allowed=new Set(Array.isArray(session.allowed_pages)?session.allowed_pages:[]);
+  const visible=all.filter(p=>allowed.has(p));
   if(session.is_admin)visible.push("admin.html");
   const menu=document.getElementById("menu");
   if(visible.length){
