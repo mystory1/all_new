@@ -11,7 +11,7 @@ html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *,*::before,*::after{box-sizing:inherit}
 [hidden]{display:none!important}
 body{margin:0;background:#000;color:var(--txt);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.4}
-main{max-width:720px;margin:0 auto;padding:0 14px 14px;background:#000;min-height:100vh;min-height:100dvh}
+main{zoom:.9;width:111.111%;max-width:800px;margin:0 auto;padding:0 14px 14px;background:#000;min-height:100vh;min-height:100dvh}
 .hd{display:flex;justify-content:space-between;align-items:center;margin:6px 0 14px;gap:10px}
 h1{font-size:1.5rem;margin:0;font-weight:700;letter-spacing:-.02em}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px}
@@ -90,7 +90,7 @@ details.n[open]{border-color:#2c2c2c}
 .h{display:flex;justify-content:space-between;gap:8px;font-size:.82rem;padding:7px 0;border-bottom:1px solid #161616;flex-wrap:wrap}
 .h b{color:var(--c)}
 .empty{text-align:center;color:var(--mut);padding:36px 0}
-#toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#fff;color:#000;padding:11px 18px;border-radius:99px;font-weight:600;font-size:.88rem;opacity:0;pointer-events:none;z-index:9;transition:opacity .25s}
+#toast{zoom:.9;position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#fff;color:#000;padding:11px 18px;border-radius:99px;font-weight:600;font-size:.88rem;opacity:0;pointer-events:none;z-index:9;transition:opacity .25s}
 #toast.show{opacity:1}
 .chips,.catp{display:flex;flex-wrap:wrap;gap:6px}
 .chips{margin:0 0 8px}
@@ -124,7 +124,7 @@ button.ck:not(:disabled):active{transform:scale(.88)}
 @keyframes draw{from{stroke-dashoffset:24}to{stroke-dashoffset:0}}
 .add{width:40px;height:40px;padding:0;border-radius:12px;font-size:1.5rem;line-height:1;display:grid;place-items:center;font-weight:500}
 html{background:#000}
-html,body{overscroll-behavior:none;min-height:100%;background:#000}
+html,body{overscroll-behavior:none;min-height:100%;background:#000;overflow-x:hidden}
 button,.cal span,.hm span{touch-action:manipulation}
 .tabs,.seg{display:flex;background:#101010;border:1px solid #1d1d1d;border-radius:12px;padding:3px;gap:3px;margin-bottom:12px}
 .tabs button,.seg button{flex:1;background:none;color:var(--mut);padding:9px 6px;font-size:.88rem;border-radius:9px;font-weight:600}
@@ -392,7 +392,10 @@ body{overscroll-behavior-y:auto}
 <div class="card" id="add" hidden style="margin-bottom:12px">
 <form id="f" novalidate>
 <label>Názov aktivity<span class="fld"><input type="text" id="n" maxlength="60" placeholder="napr. Bez cukru"></span></label>
-<label>Kategória (nepovinné)<span class="fld"><input type="text" id="cat" maxlength="24" list="cats" placeholder="napr. Zdravie"></span></label>
+<div class="row">
+<label>Kedy som začal<span class="fld"><input type="date" id="s"></span></label>
+<label>Do kedy (nepovinné)<span class="fld"><input type="date" id="e"></span></label>
+</div>
 <div class="freq-box">
  <div class="freq-label">Opakovanie</div>
  <div class="freq-toggle" id="newFrequencyToggle"><button type="button" class="on" data-frequency="daily">Denne</button><button type="button" data-frequency="custom">Vybrané dni</button></div>
@@ -407,11 +410,8 @@ body{overscroll-behavior-y:auto}
   <label><input type="checkbox" value="7"><span>Ne</span></label>
  </div>
 </div>
+<label>Kategória (nepovinné)<span class="fld"><input type="text" id="cat" maxlength="24" list="cats" placeholder="napr. Zdravie"></span></label>
 <datalist id="cats"></datalist>
-<div class="row">
-<label>Kedy som začal<span class="fld"><input type="date" id="s"></span></label>
-<label>Do kedy (nepovinné)<span class="fld"><input type="date" id="e"></span></label>
-</div>
 <label>Počet dní trvania (nepovinné, bez ohľadu na dátum)<span class="fld"><input type="number" id="g" min="1" max="3650" inputmode="numeric" placeholder="napr. 30"></span></label>
 <label class="tg"><input type="checkbox" id="au"> Počítať dni automaticky</label>
 <div class="dots" id="pick"></div>
@@ -508,7 +508,7 @@ var cd=COLORS.map(function(c){return '<button type="button" class="dot'+(c===a.c
 var op=function(k){return openIds[k]?" open":""};
 var G=function(k,title,body){return '<details class="n" data-k="'+id+k+'"'+op(id+k)+'><summary>'+title+'</summary><div class="in">'+body+'</div></details>'};
 var freqLabel=a.frequency==="custom"?a.frequencyDays.map(function(v){return ["","Po","Ut","St","Št","Pi","So","Ne"][v]}).join(", "):"Denne";
-var editPanel='<form class="col edit-activity-form" data-edit-form novalidate><label>Názov<span class="fld"><input type="text" class="en" maxlength="60" value="'+esc(a.name)+'"></span></label><div class="row"><label>Začiatok<span class="fld"><input type="date" class="es" value="'+a.start+'"></span></label><label>Koniec<span class="fld"><input type="date" class="ee" value="'+(a.end||"")+'" aria-label="Dátum konca"></span></label></div><label>Kategória<span class="fld"><input type="text" class="ec" maxlength="24" list="cats" value="'+esc(a.cat||"")+'"></span></label><div class="freq-box"><div class="freq-label">Opakovanie</div><div class="freq-toggle e-frequency-toggle"><button type="button" data-frequency="daily" class="'+(a.frequency!=="custom"?"on":"")+'">Denne</button><button type="button" data-frequency="custom" class="'+(a.frequency==="custom"?"on":"")+'">Vybrané dni</button></div><select class="efrequency" hidden><option value="daily"'+(a.frequency!=="custom"?" selected":"")+'>Denne</option><option value="custom"'+(a.frequency==="custom"?" selected":"")+'>Vybrané dni</option></select><div class="freq-days e-frequency-days"'+(a.frequency==="custom"?"":" hidden")+'>'+["Po","Ut","St","Št","Pi","So","Ne"].map(function(day,i){var v=i+1;return '<label><input type="checkbox" class="efday" value="'+v+'"'+(a.frequencyDays.indexOf(v)>=0?" checked":"")+'><span>'+day+'</span></label>'}).join("")+'</div></div><label>Poznámka<span class="fld"><input type="text" class="an" maxlength="140" placeholder="Poznámka k aktivite" value="'+esc(a.note||"")+'"></span></label><div class="row"><label>Cieľ (počet dní)<span class="fld"><input type="number" class="eg" min="1" inputmode="numeric" value="'+(a.goal||"")+'"></span></label><label>Splnené spätne<span class="fld"><input type="number" class="eb" min="0" inputmode="numeric" value="'+a.base+'"></span></label></div><div><div class="cl">Farba</div><div class="dots">'+cd+'</div></div></form>';
+var editPanel='<form class="col edit-activity-form" data-edit-form novalidate><label>Názov<span class="fld"><input type="text" class="en" maxlength="60" value="'+esc(a.name)+'"></span></label><div class="row"><label>Začiatok<span class="fld"><input type="date" class="es" value="'+a.start+'"></span></label><label>Koniec<span class="fld"><input type="date" class="ee" value="'+(a.end||"")+'" aria-label="Dátum konca"></span><span class="date-hint">Dátum konca musí byť po dátume začiatku.</span></label></div><div class="freq-box"><div class="freq-label">Opakovanie</div><div class="freq-toggle e-frequency-toggle"><button type="button" data-frequency="daily" class="'+(a.frequency!=="custom"?"on":"")+'">Denne</button><button type="button" data-frequency="custom" class="'+(a.frequency==="custom"?"on":"")+'">Vybrané dni</button></div><select class="efrequency" hidden><option value="daily"'+(a.frequency!=="custom"?" selected":"")+'>Denne</option><option value="custom"'+(a.frequency==="custom"?" selected":"")+'>Vybrané dni</option></select><div class="freq-days e-frequency-days"'+(a.frequency==="custom"?"":" hidden")+'>'+["Po","Ut","St","Št","Pi","So","Ne"].map(function(day,i){var v=i+1;return '<label><input type="checkbox" class="efday" value="'+v+'"'+(a.frequencyDays.indexOf(v)>=0?" checked":"")+'><span>'+day+'</span></label>'}).join("")+'</div></div><label>Kategória<span class="fld"><input type="text" class="ec" maxlength="24" list="cats" value="'+esc(a.cat||"")+'"></span></label><label>Poznámka<span class="fld"><input type="text" class="an" maxlength="140" placeholder="Poznámka k aktivite" value="'+esc(a.note||"")+'"></span></label><label>Cieľ (počet dní)<span class="fld"><input type="number" class="eg" min="1" inputmode="numeric" value="'+(a.goal||"")+'"></span></label><div><div class="cl">Farba</div><div class="dots">'+cd+'</div></div></form>';
 var overviewPanel='<div class="detail-summary"><div class="detail-stat"><b>'+d+'</b><span>Splnené dni</span></div><div class="detail-stat"><b>'+st+'</b><span>Aktuálna séria</span></div><div class="detail-stat"><b>'+freqLabel+'</b><span>Frekvencia</span></div><div class="detail-stat"><b>'+fmt(a.start)+'</b><span>Začiatok</span></div></div>'+(a.end?'<div class="sm">Koniec: <b>'+fmt(a.end)+'</b></div>':'')+(a.note?'<div class="detail-note"><div class="meta">Poznámka k aktivite</div><div class="sm">'+esc(a.note)+'</div></div>':'');
 var detailTab=detailTabs[id]||"overview";
 var detail='<div class="detail-tabs"><button type="button" data-detail-tab="overview" class="'+(detailTab==="overview"?"on":"")+'">Info</button><button type="button" data-detail-tab="calendar" class="'+(detailTab==="calendar"?"on":"")+'">Kalendár</button><button type="button" data-detail-tab="edit" class="'+(detailTab==="edit"?"on":"")+'">Upraviť</button></div><div class="detail-panel" data-detail-panel="overview"'+(detailTab==="overview"?"":" hidden")+'>'+overviewPanel+'</div><div class="detail-panel" data-detail-panel="calendar"'+(detailTab==="calendar"?"":" hidden")+'>'+cal(a,now)+'</div><div class="detail-panel" data-detail-panel="edit"'+(detailTab==="edit"?"":" hidden")+'>'+editPanel+'<div class="sec">'+acts+'</div></div>';
@@ -718,11 +718,12 @@ if(current===next)return false;
 if(el.classList.contains("ee")&&value&&a.start&&pd(value)<=pd(a.start)){badF(el,"Dátum konca musí byť po dátume začiatku.");return false;}
 if(el.classList.contains("es")&&value&&a.end&&pd(a.end)<=pd(value)){badF(el,"Začiatok musí byť pred koncom.");return false;}
 if(el.classList.contains("ee"))a.end=next;else a.start=next;
-okF(el);dirty[id]=true;save();return true;
+okF(el);dirty[id]=true;save();toast("Uložené");return true;
 }
 list.addEventListener("input",function(ev){if(ev.target.closest&&ev.target.closest(".edit-activity-form")&&!ev.target.matches(".es,.ee"))okF(ev.target);if(!syncEditDateInput(ev.target))editField(ev)});
 list.addEventListener("change",function(ev){if(ev.target.closest&&ev.target.closest(".edit-activity-form")&&!ev.target.matches(".es,.ee"))okF(ev.target);if(!syncEditDateInput(ev.target))editField(ev)});
 list.addEventListener("change",function(ev){var el=ev.target;if(!el.matches||!el.matches(".efday"))return;var box=el.closest(".freq-box");groupError(box,box.querySelector(".efday:checked")?"":"Vyber aspoň jeden deň v týždni.")});
+list.addEventListener("change",function(ev){if(ev.target.closest&&ev.target.closest(".edit-activity-form")&&ev.target.matches(".en,.es,.ee,.eg,.ec,.an,.efrequency,.efday")){toast("Uložené")}});
 // Niektoré natívne výbery dátumu (najmä Safari/iOS) po stlačení Reset
 // nezavolajú spoľahlivo input/change. Počas otvoreného poľa preto sledujeme
 // jeho skutočnú DOM hodnotu a každú zmenu okamžite uložíme.
@@ -770,10 +771,10 @@ dirty[id]=true;save();
 list.addEventListener("submit",function(ev){if(ev.target.matches(".edit-activity-form"))ev.preventDefault()});
 list.addEventListener("focusout",function(ev){
 var dateInput=ev.target;if(dateInput&&dateInput.matches&&dateInput.matches(".es,.ee"))syncEditDateInput(dateInput);
-var c=ev.target.closest&&ev.target.closest("[data-id]");if(!c)return;var id=c.getAttribute("data-id");if(!dirty[id])return;
+var c=ev.target.closest&&ev.target.closest("[data-id]");if(!c)return;var id=c.getAttribute("data-id");if(!dirty[id]){if(ev.target.matches&&ev.target.matches(".an,.nt"))toast("Uložené");return;}
 setTimeout(function(){var cc=list.querySelector('[data-id="'+id+'"]');if(!cc||!dirty[id]||cc.contains(document.activeElement))return;var f=dirty[id]==="cat";delete dirty[id];if(f)render();else renderOne(id);toast("Uložené")},150)});
 list.addEventListener("click",function(ev){
-var tab=ev.target.closest("[data-detail-tab]");if(tab){var wrap=tab.closest(".sw"),aid=wrap&&wrap.getAttribute("data-id"),which=tab.getAttribute("data-detail-tab");if(aid){detailTabs[aid]=which;wrap.querySelectorAll("[data-detail-tab]").forEach(function(b){b.classList.toggle("on",b===tab)});wrap.querySelectorAll("[data-detail-panel]").forEach(function(p){p.hidden=p.getAttribute("data-detail-panel")!==which})}return}
+var tab=ev.target.closest("[data-detail-tab]");if(tab){var wrap=tab.closest(".sw"),aid=wrap&&wrap.getAttribute("data-id"),which=tab.getAttribute("data-detail-tab");if(aid){detailTabs[aid]=which;if(which==="overview"){renderOne(aid)}else{wrap.querySelectorAll("[data-detail-tab]").forEach(function(b){b.classList.toggle("on",b===tab)});wrap.querySelectorAll("[data-detail-panel]").forEach(function(p){p.hidden=p.getAttribute("data-detail-panel")!==which})}}return}
 var freq=ev.target.closest(".e-frequency-toggle button[data-frequency]");if(freq){
 var fw=freq.closest(".freq-box"),freqSelect=fw&&fw.querySelector(".efrequency"),card=freq.closest("[data-id]"),act=card&&items.find(function(x){return String(x.id)===String(card.getAttribute("data-id"))});
 if(freqSelect&&act){
@@ -798,7 +799,7 @@ if(cd&&!ev.target.closest("button,input,label,details,select,textarea,[data-a],.
 if(Date.now()-supClick<350)return;
 var dd=cd.querySelector("details.d");
 if(dd){var cid=cd.closest("[data-id]").getAttribute("data-id");
-if(!dd.open){var y0=window.scrollY;closeAddForm(addEl);[].forEach.call(list.querySelectorAll("details[data-k]:not([data-k=ended])"),function(o){if(o!==dd&&!dd.contains(o))o.open=false});origY={};prevY={};origY[cid]=y0;anim(dd,true);sTo(topOf(cd)-stickyTopOffset()-8)}
+if(!dd.open){var y0=window.scrollY;detailTabs[cid]="overview";closeAddForm(addEl);[].forEach.call(list.querySelectorAll("details[data-k]:not([data-k=ended])"),function(o){if(o!==dd&&!dd.contains(o))o.open=false});origY={};prevY={};origY[cid]=y0;anim(dd,true);sTo(topOf(cd)-stickyTopOffset()-8)}
 else{anim(dd,false);if(origY[cid]!==undefined){sTo(origY[cid]);delete origY[cid]}delete prevY[cid]}}
 return}
 var sm=ev.target.closest("summary");
