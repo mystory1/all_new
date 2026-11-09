@@ -637,6 +637,11 @@ document.getElementById("newFrequencyToggle").addEventListener("click",function(
 document.getElementById("pick").addEventListener("click",function(ev){var c=ev.target.getAttribute("data-pc");if(!c)return;pickC=c;this.innerHTML=dots(pickC,"data-pc")});
 function badF(el,msg){var w=el.closest(".fld");if(!w)return;w.classList.add("bad");var p=w.parentNode,m=p.querySelector(".fe");if(!m){m=document.createElement("div");m.className="fe";p.appendChild(m)}m.textContent=msg}
 function okF(el){var w=el.closest(".fld");if(!w)return;w.classList.remove("bad");var m=w.parentNode.querySelector(".fe");if(m)m.remove()}
+function validateActivityDates(startValue,endValue){
+  if(!startValue)return "Zadaj dátum začiatku.";
+  if(endValue&&pd(endValue)<=pd(startValue))return "Dátum konca musí byť po dátume začiatku.";
+  return "";
+}
 document.getElementById("f").addEventListener("input",function(ev){okF(ev.target)});
 document.getElementById("f").addEventListener("change",function(ev){okF(ev.target)});
 document.getElementById("f").addEventListener("submit",function(ev){
@@ -646,8 +651,8 @@ var bad=function(el,m){badF(el,m);if(!first)first=el};
 [ni,si,ei,gi].forEach(okF);
 var n=ni.value.trim(),s=si.value,e=ei.value,gv=gi.value.trim(),g=parseInt(gv,10);
 if(!n)bad(ni,"Zadaj názov aktivity.");
-if(!s)bad(si,"Zadaj dátum začiatku.");
-if(e&&s&&pd(e)<=pd(s))bad(ei,"Dátum konca musí byť po dátume začiatku.");
+var dateError=validateActivityDates(s,e);
+if(dateError){if(!s)bad(si,dateError);else bad(ei,dateError);}
 if(gv&&!(g>=1&&g<=3650&&String(g)===gv))bad(gi,"Počet dní musí byť celé číslo od 1 do 3650.");
 if(first){try{first.closest(".fld").scrollIntoView({block:"center",behavior:"smooth"})}catch(x){}return}
 var newFreq=document.getElementById("newFrequency").value,newDays=[].slice.call(document.querySelectorAll("#newFrequencyDays input:checked")).map(function(x){return Number(x.value)});
@@ -657,7 +662,7 @@ save();this.reset();document.getElementById("s").value=todayStr();document.getEl
 var list=document.getElementById("list");
 var ty=0;
 document.addEventListener("touchstart",function(e){ty=e.touches[0].clientY},{passive:true});
-document.addEventListener("touchmove",function(e){var a=document.activeElement;if(a&&a.tagName==="INPUT"&&a.type==="date")return;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)&&a!==e.target&&Math.abs(e.touches[0].clientY-ty)>12)a.blur()},{passive:true});
+document.addEventListener("touchmove",function(e){var a=document.activeElement;if(a&&a.matches&&a.matches('input[type="date"]'))return;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)&&a!==e.target&&Math.abs(e.touches[0].clientY-ty)>12)a.blur()},{passive:true});
 var origY={},prevY={};
 function anim(d,open){var c=d.querySelector(":scope>.dc")||d.querySelector(":scope>.in");
 if(!c||!c.animate||RM()){d.open=open;return}
@@ -672,18 +677,28 @@ function stickyTopOffset(){var h=document.querySelector(".hd"),t=document.queryS
 var supClick=0,dirty={};
 function editField(ev){var el=ev.target;if(!el.matches||!el.matches(".en,.es,.ee,.eg,.eb,.ec,.an,.nt,.efrequency,.efday"))return;
 var c=el.closest("[data-id]"),id=c&&c.getAttribute("data-id"),a=items.filter(function(x){return x.id===id})[0];if(!a)return;
-var v=el.value.trim(),ch=ev.type==="change",cl=el.classList;okF(el);
+var v=el.value.trim(),cl=el.classList;okF(el);
 if(cl.contains("an")){a.note=v;save();return}
 if(cl.contains("nt")){var nd=el.getAttribute("data-d"),note=el.value;if(note.trim())a.notes[nd]=note;else delete a.notes[nd];var ce=c.querySelector('.cal [data-d="'+nd+'"]');if(ce)ce.classList.toggle("hn",!!note.trim());save();return}
 if(cl.contains("es")||cl.contains("ee")){
-  // Stage the value while iOS' native picker is active. Commit after the
-  // picker confirms/closes; never replace the input while the popup is open.
-  dirty[id]="date";
-  if(ch)setTimeout(function(){commitDateEdit(id)},250);
-  return
+  // iOS Safari may report native date-picker reset as input, change, or both.
+  // Read BOTH live controls for either event and persist without replacing the
+  // focused DOM node while the native picker is open.
+  var startInput=c.querySelector(".es"),endInput=c.querySelector(".ee");
+  var nextStart=startInput?startInput.value:"",nextEnd=endInput?endInput.value:"";
+  var dateError=validateActivityDates(nextStart,nextEnd);
+  if(dateError){
+    if(!nextStart)badF(startInput,dateError);
+    else badF(endInput,dateError);
+    return;
+  }
+  a.start=nextStart;
+  a.end=nextEnd||null;
+  dirty[id]="dates";
+  save();
+  return;
 }
 if(cl.contains("en")){if(!v){badF(el,"Názov nemôže byť prázdny.");return}a.name=v;c.querySelector(".name").textContent=v}
-else if(cl.contains("es")){if(!el.value)return;if(a.end&&pd(a.end)<=pd(el.value)){badF(el,"Začiatok musí byť pred koncom.");return}a.start=el.value}
 else if(cl.contains("eg")){var g=parseInt(v,10);a.goal=g>0?g:0}
 else if(cl.contains("eb"))a.base=Math.max(0,parseInt(v,10)||0);
 else if(cl.contains("ec"))a.cat=v;
@@ -691,29 +706,21 @@ else if(cl.contains("efrequency")){a.frequency=v==="custom"?"custom":"daily";if(
 else if(cl.contains("efday")){a.frequency="custom";a.frequencyDays=[].slice.call(c.querySelectorAll(".efday:checked")).map(function(x){return Number(x.value)});if(!a.frequencyDays.length){el.checked=true;a.frequencyDays=[Number(el.value)];toast("Aktivita musí mať aspoň jeden naplánovaný deň.")}var freqSel=c.querySelector(".efrequency");if(freqSel)freqSel.value="custom";c.querySelectorAll(".e-frequency-toggle button").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-frequency")==="custom")})}
 dirty[id]=(cl.contains("ec")||dirty[id]==="cat")?"cat":true;save()}
 list.addEventListener("input",editField);list.addEventListener("change",editField);
-function commitDateEdit(id){
-  var cc=list.querySelector('[data-id="'+id+'"]');
-  if(!cc||dirty[id]!=="date")return;
-  var a=items.filter(function(x){return x.id===id})[0],startInput=cc.querySelector(".es"),endInput=cc.querySelector(".ee");
-  if(!a||!startInput||!endInput)return;
-  var nextStart=startInput.value,nextEnd=endInput.value||null;
-  if(!nextStart){badF(startInput,"Zadaj dátum začiatku.");return}
-  if(nextEnd&&pd(nextEnd)<=pd(nextStart)){
-    badF(endInput,"Dátum konca musí byť po dátume začiatku.");
-    return
-  }
-  a.start=nextStart;a.end=nextEnd;
-  delete dirty[id];
-  save();
-  renderOne(id);
-  toast("Uložené");
-}
 list.addEventListener("focusout",function(ev){
-  var field=ev.target,c=field.closest&&field.closest("[data-id]");if(!c)return;
-  var id=c.getAttribute("data-id"),isDate=field.classList&&(field.classList.contains("es")||field.classList.contains("ee"));
-  if(isDate){dirty[id]="date";setTimeout(function(){commitDateEdit(id)},250);return}
-  if(!dirty[id])return;
-  setTimeout(function(){var cc=list.querySelector('[data-id="'+id+'"]');if(!cc||!dirty[id]||cc.contains(document.activeElement))return;var f=dirty[id]==="cat";delete dirty[id];if(f)render();else renderOne(id);toast("Uložené")},150)
+  var target=ev.target;
+  // Safari can commit a cleared native date input on blur without delivering
+  // the same input/change sequence as desktop browsers. Read the final value.
+  if(target&&target.matches&&target.matches(".es,.ee"))editField({target:target,type:"change"});
+  var c=target.closest&&target.closest("[data-id]");if(!c)return;
+  var id=c.getAttribute("data-id");if(!dirty[id])return;
+  setTimeout(function(){
+    var cc=list.querySelector('[data-id="'+id+'"]');
+    if(!cc||!dirty[id]||cc.contains(document.activeElement))return;
+    if(dirty[id]==="dates"){delete dirty[id];toast("Dátumy uložené");return}
+    var f=dirty[id]==="cat";delete dirty[id];
+    if(f)render();else renderOne(id);
+    toast("Uložené")
+  },250)
 });
 list.addEventListener("click",function(ev){
 var tab=ev.target.closest("[data-detail-tab]");if(tab){var wrap=tab.closest(".sw"),aid=wrap&&wrap.getAttribute("data-id"),which=tab.getAttribute("data-detail-tab");if(aid){detailTabs[aid]=which;wrap.querySelectorAll("[data-detail-tab]").forEach(function(b){b.classList.toggle("on",b===tab)});wrap.querySelectorAll("[data-detail-panel]").forEach(function(p){p.hidden=p.getAttribute("data-detail-panel")!==which})}return}
