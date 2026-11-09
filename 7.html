@@ -114,7 +114,7 @@ details.n[open]{border-color:#2c2c2c}
 .sw .card{cursor:pointer;-webkit-tap-highlight-color:transparent}
 .top{align-items:center;gap:12px}
 .chips button{white-space:nowrap}
-.chips button.cm{max-width:none;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.chips button.cm{max-width:none;min-width:0;flex:0 0 auto;overflow:hidden;text-overflow:ellipsis}
 .ck{flex:none;width:36px;height:36px;border-radius:11px;background:#111;border:1.5px solid #2c2c2c;display:grid;place-items:center;padding:0;transition:transform .15s,box-shadow .3s,background .25s,border-color .25s;-webkit-tap-highlight-color:transparent}
 .ck svg{width:20px;height:20px;fill:none;stroke:#444;stroke-width:2.8;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:24;transition:stroke .25s}
 button.ck:not(:disabled):active{transform:scale(.88)}
@@ -251,14 +251,6 @@ body{overscroll-behavior-y:auto}
 .orow{min-height:42px}
 .drop-before,.drop-after{transition:box-shadow .1s ease;}
 
-
-#pageLoader{position:fixed;inset:0;z-index:10000;display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;background:rgba(0,0,0,.94);color:#fff}
-#pageLoader.show{display:flex}
-#pageLoader .spinner{width:34px;height:34px;border:3px solid #444;border-top-color:#fff;border-radius:50%;animation:pageSpin .75s linear infinite}
-#pageLoader .loader-text{font-size:13px;color:#ddd;font-weight:600}
-@keyframes pageSpin{to{transform:rotate(360deg)}}
-@media(prefers-reduced-motion:reduce){#pageLoader .spinner{animation:none;border-top-color:#fff}}
-
 </style>
 </head>
 <body>
@@ -298,7 +290,6 @@ body{overscroll-behavior-y:auto}
 </div>
 </main>
 <div id="toast"></div>
-<div id="pageLoader" aria-live="polite" aria-label="Načítavam menu"><div class="spinner"></div><div class="loader-text">Načítavam menu…</div></div>
 <script src="./config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
@@ -313,7 +304,7 @@ function pack(map){var T=[],F=[];Object.keys(map).sort().forEach(function(k){(ma
 function norm(a){var d=a.done;
 if(Array.isArray(d)){var o={};d.forEach(function(x){o[x]=""});a.done=o}
 else if(d&&Array.isArray(d.t)&&Array.isArray(d.f)){var m={};unr(d.t,m,"");unr(d.f,m,false);a.done=m}
-if(!a.done||typeof a.done!=="object")a.done={};if(!a.notes||typeof a.notes!=="object")a.notes={};
+if(!a.done||typeof a.done!=="object")a.done={};if(!a.notes||typeof a.notes!=="object")a.notes={};a.note=typeof a.note==="string"?a.note:"";
 if(!Array.isArray(a.history))a.history=[];a.cat=a.cat||"";a.base=Math.max(0,parseInt(a.base,10)||0);return a}
 function load(){try{var r=localStorage.getItem(KEY);items=r?JSON.parse(r):[]}catch(x){items=[]}
 if(!Array.isArray(items))items=[];items=items.filter(function(a){return a&&a.id&&a.name&&a.start}).map(norm)}
@@ -366,7 +357,7 @@ var cd=COLORS.map(function(c){return '<button type="button" class="dot'+(c===a.c
 var op=function(k){return openIds[k]?" open":""};
 var G=function(k,title,body){return '<details class="n" data-k="'+id+k+'"'+op(id+k)+'><summary>'+title+'</summary><div class="in">'+body+'</div></details>'};
 var set='<div class="sm">Začiatok: <b>'+fmt(a.start)+'</b>'+(a.end?' · Koniec: <b>'+fmt(a.end)+'</b>':'')+'</div><div class="sm">Splnených dní: <b>'+(conf(a,now)+a.base)+'</b> · Séria: <b>'+st+'</b></div>'
-+G("u",'<span class="st">'+ICN.u+'Údaje aktivity</span>','<div class="col"><label>Názov<span class="fld"><input type="text" class="en" maxlength="60" value="'+esc(a.name)+'"></span></label><label>Začiatok<span class="fld"><input type="date" class="es" value="'+a.start+'"></span></label><label>Do kedy (nepovinné)<span class="fld"><input type="date" class="ee" value="'+(a.end||"")+'"></span></label><label>Kategória (nepovinné)<span class="fld"><input type="text" class="ec" maxlength="24" list="cats" value="'+esc(a.cat||"")+'"></span></label><label>Poznámka (nepovinné)<span class="fld"><textarea class="ea" rows="3" maxlength="1000" placeholder="Doplň poznámku k aktivite…">'+esc(a.note||"")+'</textarea></span></label><label>Počet dní trvania (nepovinné)<span class="fld"><input type="number" class="eg" min="1" inputmode="numeric" value="'+(a.goal||"")+'"></span></label><label>Koľkokrát som už splnil/a (spätne)<span class="fld"><input type="number" class="eb" min="0" inputmode="numeric" value="'+a.base+'"></span></label><div><div class="cl">Farba</div><div class="dots">'+cd+'</div></div>'+'</div>')
++G("u",'<span class="st">'+ICN.u+'Údaje aktivity</span>','<div class="col"><label>Názov<span class="fld"><input type="text" class="en" maxlength="60" value="'+esc(a.name)+'"></span></label><label>Začiatok<span class="fld"><input type="date" class="es" value="'+a.start+'"></span></label><label>Do kedy (nepovinné)<span class="fld"><input type="date" class="ee" value="'+(a.end||"")+'"></span></label><label>Kategória (nepovinné)<span class="fld"><input type="text" class="ec" maxlength="24" list="cats" value="'+esc(a.cat||"")+'"></span></label><label>Poznámka (nepovinné)<span class="fld"><input type="text" class="an" maxlength="140" placeholder="Poznámka k aktivite" value="'+esc(a.note||'')+'"></span></label><label>Počet dní trvania (nepovinné)<span class="fld"><input type="number" class="eg" min="1" inputmode="numeric" value="'+(a.goal||"")+'"></span></label><label>Koľkokrát som už splnil/a (spätne)<span class="fld"><input type="number" class="eb" min="0" inputmode="numeric" value="'+a.base+'"></span></label><div><div class="cl">Farba</div><div class="dots">'+cd+'</div></div>'+'</div>')
 +G("c",'<span class="st">'+ICN.c+'Splnené dni</span>',cal(a,now))
 +G("z",'<span class="st">'+ICN.z+'Ďalšie nastavenia</span>',acts);
 return '<div class="sw'+(pd?' pd':'')+'" data-id="'+id+'"><div class="del">'+(pd?'<button data-a="yes">Áno</button><button data-a="no">Nie</button>':TRASH)+'</div><div class="card'+(flash===id?' flash':'')+'" style="--c:'+a.color+'"><div class="top"><button type="button" class="drag-handle" data-drag="activity" aria-label="Zmeniť poradie aktivity">⠿</button><div style="flex:1;min-width:0"><div class="name">'+esc(a.name)+'</div><div class="meta">'+(a.cat?esc(a.cat):'')+(now<a.start?' · ešte nezačala':'')+(st?' · 🔥 '+st:'')+'</div></div><div class="r day-count"><div class="big'+(isDone(a,now,now)?'':' muted')+'">'+d+'<small>'+dni(d)+'</small></div>'+CK(a,now)+'</div></div>'+bar+today
@@ -526,9 +517,10 @@ function sTo(y){y=Math.max(0,y);try{window.scrollTo({top:y,behavior:RM()?"auto":
 function topOf(el){return el.getBoundingClientRect().top+window.scrollY}
 function stickyTopOffset(){var h=document.querySelector(".hd"),t=document.querySelector(".tabs");return (h?h.getBoundingClientRect().height:0)+(t?t.getBoundingClientRect().height:0)+10}
 var supClick=0,dirty={};
-function editField(ev){var el=ev.target;if(!el.matches||!el.matches(".en,.es,.ee,.eg,.eb,.ec,.ea,.nt"))return;
+function editField(ev){var el=ev.target;if(!el.matches||!el.matches(".en,.es,.ee,.eg,.eb,.ec,.an,.nt"))return;
 var c=el.closest("[data-id]"),id=c&&c.getAttribute("data-id"),a=items.filter(function(x){return x.id===id})[0];if(!a)return;
 var v=el.value.trim(),ch=ev.type==="change",cl=el.classList;okF(el);
+if(cl.contains("an")){a.note=v;save();return}
 if(cl.contains("nt")){var nd=el.getAttribute("data-d");if(v)a.notes[nd]=v;else delete a.notes[nd];var ce=c.querySelector('.cal [data-d="'+nd+'"]');if(ce)ce.classList.toggle("hn",!!v);save();return}
 if(cl.contains("en")){if(!v){badF(el,"Názov nemôže byť prázdny.");return}a.name=v;c.querySelector(".name").textContent=v}
 else if(cl.contains("es")){if(!el.value)return;if(a.end&&pd(a.end)<=pd(el.value)){badF(el,"Začiatok musí byť pred koncom.");return}a.start=el.value}
@@ -536,7 +528,6 @@ else if(cl.contains("ee")){if(!el.value)a.end=null;else if(pd(el.value)<=pd(a.st
 else if(cl.contains("eg")){var g=parseInt(v,10);a.goal=g>0?g:0}
 else if(cl.contains("eb"))a.base=Math.max(0,parseInt(v,10)||0);
 else if(cl.contains("ec"))a.cat=v;
-else if(cl.contains("ea"))a.note=v;
 dirty[id]=(cl.contains("ec")||dirty[id]==="cat")?"cat":true;save()}
 list.addEventListener("input",editField);list.addEventListener("change",editField);
 list.addEventListener("focusout",function(ev){var c=ev.target.closest&&ev.target.closest("[data-id]");if(!c)return;var id=c.getAttribute("data-id");if(!dirty[id])return;
@@ -747,7 +738,7 @@ function scheduleRemoteSave(){
   clearTimeout(REMOTE_TIMER);
   REMOTE_TIMER=setTimeout(function(){
     var snapshot={
-      activities:items.map(function(a,i){return{id:String(a.id),sort_order:i,name:a.name,category:a.cat||"",color:a.color||COLORS[0],start_date:a.start,end_date:a.end||null,goal_days:a.goal||0,auto_count:a.auto!==false,base_count:a.base||0,ended:!!a.ended}}),
+      activities:items.map(function(a,i){return{id:String(a.id),sort_order:i,name:a.name,category:a.cat||"",note:a.note||"",color:a.color||COLORS[0],start_date:a.start,end_date:a.end||null,goal_days:a.goal||0,auto_count:a.auto!==false,base_count:a.base||0,ended:!!a.ended}}),
       activity_days:[],
       activity_history:[],
       wishlist_items:WL.map(function(w,i){return{id:String(w.id),sort_order:i,text:w.text,due_date:w.due||null,created_date:w.created,completed_date:w.done||null,note:w.note||""}})
@@ -795,7 +786,7 @@ async function loadRemoteWorkspace(){
   var aRows=payload.activities||[],dRows=payload.activity_days||[],hRows=payload.activity_history||[],wRows=payload.wishlist_items||[];
   var byId={};
   items=aRows.map(function(r){
-    var a=norm({id:r.id,sort_order:r.sort_order,name:r.name,cat:r.category||"",color:r.color||COLORS[0],start:r.start_date,end:r.end_date||null,goal:r.goal_days||0,auto:r.auto_count,base:r.base_count||0,ended:!!r.ended,done:{},notes:{},history:[]});
+    var a=norm({id:r.id,sort_order:r.sort_order,name:r.name,cat:r.category||"",note:r.note||"",color:r.color||COLORS[0],start:r.start_date,end:r.end_date||null,goal:r.goal_days||0,auto:r.auto_count,base:r.base_count||0,ended:!!r.ended,done:{},notes:{},history:[]});
     byId[a.id]=a;return a;
   }).sort(function(a,b){return (a.sort_order==null?0:a.sort_order)-(b.sort_order==null?0:b.sort_order)});
   items=applySavedOrder(items,KEY+"_order");
@@ -830,8 +821,6 @@ async function boot(){
     }
     document.getElementById("accountName").textContent=session.username||"";
     document.getElementById("logoutBtn").addEventListener("click",function(){
-      var loader=document.getElementById("pageLoader");
-      if(loader)loader.classList.add("show");
       location.replace("./0.html");
     });
     // Browser-local workspace must be isolated per account.
