@@ -684,8 +684,32 @@ else if(cl.contains("ec"))a.cat=v;
 else if(cl.contains("efrequency")){a.frequency=v==="custom"?"custom":"daily";if(a.frequency==="custom"&&!a.frequencyDays.length)a.frequencyDays=[1,2,3,4,5,6,7];var daysWrap=c.querySelector(".e-frequency-days");if(daysWrap)daysWrap.hidden=a.frequency!=="custom";c.querySelectorAll(".e-frequency-toggle button").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-frequency")===a.frequency)})}
 else if(cl.contains("efday")){a.frequency="custom";a.frequencyDays=[].slice.call(c.querySelectorAll(".efday:checked")).map(function(x){return Number(x.value)});if(!a.frequencyDays.length){el.checked=true;a.frequencyDays=[Number(el.value)];toast("Aktivita musí mať aspoň jeden naplánovaný deň.")}var freqSel=c.querySelector(".efrequency");if(freqSel)freqSel.value="custom";c.querySelectorAll(".e-frequency-toggle button").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-frequency")==="custom")})}
 dirty[id]=(cl.contains("ec")||dirty[id]==="cat")?"cat":true;save()}
-list.addEventListener("input",function(ev){if(ev.target.closest(".edit-activity-form"))okF(ev.target);editField(ev)});
-list.addEventListener("change",function(ev){if(ev.target.closest(".edit-activity-form"))okF(ev.target);editField(ev)});
+function syncEditDateInput(el){
+if(!el||!el.matches||!el.matches(".es,.ee"))return false;
+var c=el.closest("[data-id]"),id=c&&c.getAttribute("data-id"),a=items.find(function(x){return x.id===id});if(!a)return false;
+var value=el.value||"",next=el.classList.contains("ee")?(value||null):value;
+var current=el.classList.contains("ee")?(a.end||null):(a.start||"");
+if(current===next)return false;
+if(el.classList.contains("ee")&&value&&a.start&&pd(value)<=pd(a.start)){badF(el,"Dátum konca musí byť po dátume začiatku.");return false;}
+if(el.classList.contains("es")&&value&&a.end&&pd(a.end)<=pd(value)){badF(el,"Začiatok musí byť pred koncom.");return false;}
+if(el.classList.contains("ee"))a.end=next;else a.start=next;
+okF(el);dirty[id]=true;save();return true;
+}
+list.addEventListener("input",function(ev){if(ev.target.closest(".edit-activity-form"))okF(ev.target);if(!syncEditDateInput(ev.target))editField(ev)});
+list.addEventListener("change",function(ev){if(ev.target.closest(".edit-activity-form"))okF(ev.target);if(!syncEditDateInput(ev.target))editField(ev)});
+// Niektoré natívne výbery dátumu (najmä Safari/iOS) po stlačení Reset
+// nezavolajú spoľahlivo input/change. Počas otvoreného poľa preto sledujeme
+// jeho skutočnú DOM hodnotu a každú zmenu okamžite uložíme.
+var editDatePollers=new WeakMap();
+list.addEventListener("focusin",function(ev){
+var el=ev.target;if(!el.matches||!el.matches(".es,.ee")||editDatePollers.has(el))return;
+var timer=setInterval(function(){
+if(!el.isConnected){clearInterval(timer);editDatePollers.delete(el);return;}
+syncEditDateInput(el);
+if(document.activeElement!==el){clearInterval(timer);editDatePollers.delete(el);}
+},120);
+editDatePollers.set(el,timer);
+});
 list.addEventListener("reset",function(ev){
 var form=ev.target;if(!form.matches(".edit-activity-form"))return;
 var c=form.closest("[data-id]"),id=c&&c.getAttribute("data-id"),a=items.find(function(x){return x.id===id});if(!a)return;
@@ -698,14 +722,7 @@ dirty[id]=true;save();
 });
 list.addEventListener("submit",function(ev){if(ev.target.matches(".edit-activity-form"))ev.preventDefault()});
 list.addEventListener("focusout",function(ev){
-var dateInput=ev.target;if(dateInput&&dateInput.matches&&dateInput.matches(".es,.ee")){
-var dateCard=dateInput.closest("[data-id]"),dateId=dateCard&&dateCard.getAttribute("data-id"),dateActivity=items.find(function(x){return x.id===dateId});
-if(dateActivity){
-  if(dateInput.classList.contains("es")){dateActivity.start=dateInput.value||""}
-  else dateActivity.end=dateInput.value||null;
-  dirty[dateId]=true;save();
-}
-}
+var dateInput=ev.target;if(dateInput&&dateInput.matches&&dateInput.matches(".es,.ee"))syncEditDateInput(dateInput);
 var c=ev.target.closest&&ev.target.closest("[data-id]");if(!c)return;var id=c.getAttribute("data-id");if(!dirty[id])return;
 setTimeout(function(){var cc=list.querySelector('[data-id="'+id+'"]');if(!cc||!dirty[id]||cc.contains(document.activeElement))return;var f=dirty[id]==="cat";delete dirty[id];if(f)render();else renderOne(id);toast("Uložené")},150)});
 list.addEventListener("click",function(ev){
