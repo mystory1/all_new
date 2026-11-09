@@ -254,52 +254,22 @@ body{overscroll-behavior-y:auto}
 .drop-before,.drop-after{transition:box-shadow .1s ease;}
 
 
-/* Final mobile alignment fix: center the complete progress block inside each card. */
-#v-act .progress-block.aligned,
-#v-wl .progress-block.aligned{
-  display:block !important;
-  width:calc(100% - 76px) !important;
-  max-width:calc(100% - 76px) !important;
-  min-width:0 !important;
-  margin-left:auto !important;
-  margin-right:auto !important;
-  box-sizing:border-box !important;
-}
-#v-act .progress-block.aligned > .bar,
-#v-wl .progress-block.aligned > .bar{
-  display:block;
-  width:100%;
-  box-sizing:border-box;
-}
-#v-act .progress-block.aligned > .pl{
-  display:flex;
-  justify-content:space-between;
-  align-items:flex-start;
-  gap:10px;
-  width:100%;
-  min-width:0;
-  box-sizing:border-box;
-}
-#v-act .progress-block.aligned > .pl span{min-width:0}
-#v-act .progress-block.aligned > .pl span:last-child{
-  text-align:right;
-  overflow-wrap:anywhere;
-}
 
-/* Match filter chips to the Overview period controls in actual rendered height and typography. */
-#v-act #chips button,
-#v-act #catp button,
-#v-ov .seg button{
-  height:29px !important;
-  min-height:29px !important;
-  max-height:29px !important;
-  padding:0 6px !important;
-  font-size:12.16px !important;
-  line-height:1.2 !important;
-  font-weight:600 !important;
-  box-sizing:border-box !important;
-  border-radius:9px;
+/* Shared horizontal alignment and vertical rhythm: Overview / Activities. */
+#v-act #chips,
+#v-act #catp,
+#v-ov .onav{
+  width:100%;
+  max-width:100%;
+  box-sizing:border-box;
+  margin-left:0;
+  margin-right:0;
 }
+#v-act #chips{margin-top:0;margin-bottom:12px}
+#v-act #catp{margin-top:0;margin-bottom:12px}
+#v-ov .onav{margin-top:2px;margin-bottom:12px}
+#v-act #list > .sw:first-child,
+#v-ov > .card:first-of-type{margin-top:0}
 
 </style>
 </head>
