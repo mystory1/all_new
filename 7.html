@@ -675,7 +675,7 @@ var c=el.closest("[data-id]"),id=c&&c.getAttribute("data-id"),a=items.filter(fun
 var v=el.value.trim(),cl=el.classList;okF(el);
 if(cl.contains("an")){a.note=v;save();return}
 if(cl.contains("nt")){var nd=el.getAttribute("data-d"),note=el.value;if(note.trim())a.notes[nd]=note;else delete a.notes[nd];var ce=c.querySelector('.cal [data-d="'+nd+'"]');if(ce)ce.classList.toggle("hn",!!note.trim());save();return}
-if(cl.contains("es")){if(!el.value)return;if(a.end&&pd(a.end)<=pd(el.value)){badF(el,"Začiatok musí byť pred koncom.");return}a.start=el.value}
+if(cl.contains("es")){if(el.value&&a.end&&pd(a.end)<=pd(el.value)){badF(el,"Začiatok musí byť pred koncom.");return}a.start=el.value||""}
 else if(cl.contains("ee")){if(!el.value)a.end=null;else if(pd(el.value)<=pd(a.start)){badF(el,"Dátum konca musí byť po dátume začiatku.");return}else a.end=el.value}
 if(cl.contains("en")){if(!v){badF(el,"Názov nemôže byť prázdny.");return}a.name=v;c.querySelector(".name").textContent=v}
 else if(cl.contains("eg")){var g=parseInt(v,10);a.goal=g>0?g:0}
@@ -691,7 +691,7 @@ var form=ev.target;if(!form.matches(".edit-activity-form"))return;
 var c=form.closest("[data-id]"),id=c&&c.getAttribute("data-id"),a=items.find(function(x){return x.id===id});if(!a)return;
 setTimeout(function(){
 var start=form.querySelector(".es"),end=form.querySelector(".ee");
-if(start&&start.value){a.start=start.value}
+if(start){a.start=start.value||""}
 if(end){a.end=end.value||null}
 dirty[id]=true;save();
 },0);
@@ -701,7 +701,7 @@ list.addEventListener("focusout",function(ev){
 var dateInput=ev.target;if(dateInput&&dateInput.matches&&dateInput.matches(".es,.ee")){
 var dateCard=dateInput.closest("[data-id]"),dateId=dateCard&&dateCard.getAttribute("data-id"),dateActivity=items.find(function(x){return x.id===dateId});
 if(dateActivity){
-  if(dateInput.classList.contains("es")){if(dateInput.value)dateActivity.start=dateInput.value}
+  if(dateInput.classList.contains("es")){dateActivity.start=dateInput.value||""}
   else dateActivity.end=dateInput.value||null;
   dirty[dateId]=true;save();
 }
