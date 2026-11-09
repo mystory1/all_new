@@ -385,7 +385,7 @@ body{overscroll-behavior-y:auto}
 </head>
 <body>
 <main>
-<div class="hd"><h1>Habits</h1><div class="r"><span id="accountName" class="meta"></span><button class="ghost" id="logoutBtn" type="button">Späť</button><button class="add" id="addb" aria-label="Nová aktivita" style="visibility:hidden">＋</button></div></div>
+<div class="hd"><h1>Habits</h1><div class="r"><span id="accountName" class="meta"></span><button class="ghost" id="logoutBtn" type="button">Späť</button><button class="add" id="addb" aria-label="Nová aktivita">＋</button></div></div>
 <div class="tabs"><button data-t="ov" class="on">Prehľad</button><button data-t="act">Aktivity</button><button data-t="wl">Wishlist</button></div>
 <div id="v-ov"></div>
 <div id="v-act" hidden>
@@ -834,11 +834,14 @@ var needsFull=full||forced.length||(S.cat.indexOf("__")===0&&(act==="go"||act===
 if(needsFull){var oldScroll=window.scrollY;render();if(full)requestAnimationFrame(function(){var max=Math.max(0,document.documentElement.scrollHeight-window.innerHeight);window.scrollTo(0,Math.min(oldScroll,max))})}
 else if(act==="sel"||act==="dyes"||act==="dno"||act==="pm"||act==="nm"){renderOne(id)}
 else{renderOne(id);if(pp&&pp.id!==id&&pend!==pp)renderOne(pp.id)}});
-list.addEventListener("toggle",function(ev){var d=ev.target,k=d.getAttribute&&d.getAttribute("data-k");if(k)openIds[k]=d.open},true);
+list.addEventListener("toggle",function(ev){
+var d=ev.target,k=d.getAttribute&&d.getAttribute("data-k");
+if(k){openIds[k]=d.open;if(d.classList&&d.classList.contains("d")&&!d.open)detailTabs[k]="overview";}
+},true);
 var W=76,sw=null;
 function closeSw(except){list.querySelectorAll(".sw.open,.sw.pd").forEach(function(w){if(w===except)return;if(w.classList.contains("pd")){pend=null;w.querySelector(".del").innerHTML=TRASH}w.classList.remove("open","pd");w.style.removeProperty("--p");w.querySelector(".card").style.transform=""})}
 list.addEventListener("pointerdown",function(ev){if(ev.pointerType==="touch")return;var w=ev.target.closest(".sw");closeSw(w);
-if(!w||w.classList.contains("pd")||ev.target.closest("input,button,summary,label,details"))return;
+if(!w||w.classList.contains("pd")||(w.querySelector("details.d")&&w.querySelector("details.d").open)||ev.target.closest("input,button,summary,label,details"))return;
 sw={w:w,c:w.querySelector(".card"),x:ev.clientX,y:ev.clientY,sx:0,drag:false,was:w.classList.contains("open"),tx:0,lx:ev.clientX,lt:performance.now(),v:0,id:ev.pointerId}});
 list.addEventListener("pointermove",function(ev){if(ev.pointerType==="touch"||!sw)return;
 var dx=ev.clientX-sw.x,dy=ev.clientY-sw.y;
@@ -951,7 +954,7 @@ function beginOrderDrag(data){data.active=true;orderDrag=data;document.body.clas
 // Mobile: normal vertical movement scrolls the page; a stationary long press
 // switches that same gesture into reorder mode without requiring a second touch.
 document.addEventListener("touchstart",function(ev){if(ev.touches.length!==1)return;var found=dragTypeCard(ev.target);if(!found)return;
- if(scrollInertiaFrame){cancelAnimationFrame(scrollInertiaFrame);scrollInertiaFrame=0;}cancelOrderPress();if(orderDrag)finishOrderDrag();var t=ev.touches[0],wishDone=found.type==="wishlist"?getWishDone(found.id):false,blocked=!!ev.target.closest("button,input,textarea,select,summary,details,label,a,.cal,.dp,[data-detail-tab]");
+ if(scrollInertiaFrame){cancelAnimationFrame(scrollInertiaFrame);scrollInertiaFrame=0;}cancelOrderPress();if(orderDrag)finishOrderDrag();var t=ev.touches[0],wishDone=found.type==="wishlist"?getWishDone(found.id):false,activityDetailOpen=found.type==="activity"&&!!(found.card.querySelector("details.d")&&found.card.querySelector("details.d").open),blocked=activityDetailOpen||!!ev.target.closest("button,input,textarea,select,summary,details,label,a,.cal,.dp,[data-detail-tab]");
  var data={type:found.type,card:found.card,id:found.id,doneState:wishDone,blocked:blocked,dragAllowed:!blocked&&!wishDone,pointerId:"touch",x:t.clientX,y:t.clientY,lastY:t.clientY,lastX:t.clientX,lastTime:performance.now(),velocity:0,moved:false,scrollMode:false,swipeMode:false,swipeTx:0,swipeVelocity:0,active:false,target:null,after:false,scrollStart:window.scrollY,wasOpen:!!(found.type==="wishlist"?found.card.closest(".w-sw").classList.contains("open"):found.card.classList.contains("open")),swipeCard:found.type==="wishlist"?found.card:found.card.querySelector(":scope>.card")};orderPressData=data;
  if(data.dragAllowed)orderPress=setTimeout(function(){orderPress=null;if(orderPressData===data&&!data.moved){beginOrderDrag(data);}},360);
 },{passive:true});
