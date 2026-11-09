@@ -518,6 +518,12 @@ button { max-width: 100%; }
   .row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
+
+/* Detail tabs: explicit hit targets and no parent overlay interception. */
+.detail-tabs{position:relative;z-index:3;pointer-events:auto}
+.detail-tabs button{position:relative;z-index:4;pointer-events:auto;touch-action:manipulation;cursor:pointer}
+.detail-panel[hidden]{display:none!important}
+
 </style>
 </head>
 <body>
@@ -911,7 +917,22 @@ var dateInput=ev.target;if(dateInput&&dateInput.matches&&dateInput.matches(".es,
 var c=ev.target.closest&&ev.target.closest("[data-id]");if(!c)return;var id=c.getAttribute("data-id");if(!dirty[id]){if(ev.target.matches&&ev.target.matches(".an,.nt"))toast("Uložené");return;}
 setTimeout(function(){var cc=list.querySelector('[data-id="'+id+'"]');if(!cc||!dirty[id]||cc.contains(document.activeElement))return;var f=dirty[id]==="cat";delete dirty[id];if(f)render();else renderOne(id);toast("Uložené")},150)});
 list.addEventListener("click",function(ev){
-var tab=ev.target.closest("[data-detail-tab]");if(tab){var wrap=tab.closest(".sw"),aid=wrap&&wrap.getAttribute("data-id"),which=tab.getAttribute("data-detail-tab");if(aid){detailTabs[aid]=which;if(which==="overview"){renderOne(aid)}else{wrap.querySelectorAll("[data-detail-tab]").forEach(function(b){b.classList.toggle("on",b===tab)});wrap.querySelectorAll("[data-detail-panel]").forEach(function(p){p.hidden=p.getAttribute("data-detail-panel")!==which})}}return}
+var tab=ev.target.closest("[data-detail-tab]");
+if(tab){
+  var wrap=tab.closest(".sw"),aid=wrap&&wrap.getAttribute("data-id"),which=tab.getAttribute("data-detail-tab");
+  if(aid){
+    detailTabs[aid]=which;
+    wrap.querySelectorAll("[data-detail-tab]").forEach(function(b){
+      b.classList.toggle("on",b.getAttribute("data-detail-tab")===which);
+    });
+    wrap.querySelectorAll("[data-detail-panel]").forEach(function(p){
+      p.hidden=p.getAttribute("data-detail-panel")!==which;
+    });
+  }
+  ev.preventDefault();
+  ev.stopPropagation();
+  return;
+}
 var freq=ev.target.closest(".e-frequency-toggle button[data-frequency]");if(freq){
 var fw=freq.closest(".freq-box"),freqSelect=fw&&fw.querySelector(".efrequency"),card=freq.closest("[data-id]"),act=card&&items.find(function(x){return String(x.id)===String(card.getAttribute("data-id"))});
 if(freqSelect&&act){
@@ -974,16 +995,21 @@ else if(act==="sel"||act==="dyes"||act==="dno"||act==="pm"||act==="nm"){renderOn
 else{renderOne(id);if(pp&&pp.id!==id&&pend!==pp)renderOne(pp.id)}});
 list.addEventListener("toggle",function(ev){
 var d=ev.target,k=d.getAttribute&&d.getAttribute("data-k");
-if(k){
-  openIds[k]=d.open;
-  if(d.classList&&d.classList.contains("d")){
-    if(d.open){
-      detailTabs[k]="overview";
-      // Rebuild the opened detail so the Info panel is guaranteed to be the
-      // first visible panel, including when Safari opens via the summary row.
-      renderOne(k);
-    }else{
-      detailTabs[k]="overview";
+if(!k)return;
+openIds[k]=d.open;
+if(d.classList&&d.classList.contains("d")){
+  // Reset the selected tab in place. Replacing the card from a toggle
+  // listener detaches the clicked controls and breaks tab interaction.
+  detailTabs[k]="overview";
+  if(d.open){
+    var wrap=d.closest(".sw");
+    if(wrap){
+      wrap.querySelectorAll("[data-detail-tab]").forEach(function(b){
+        b.classList.toggle("on",b.getAttribute("data-detail-tab")==="overview");
+      });
+      wrap.querySelectorAll("[data-detail-panel]").forEach(function(p){
+        p.hidden=p.getAttribute("data-detail-panel")!=="overview";
+      });
     }
   }
 }
