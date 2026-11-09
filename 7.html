@@ -169,7 +169,7 @@ body{overflow-anchor:none}
 .ic{width:19px;height:19px;fill:none;stroke:var(--c,#fff);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
 .seg{padding:2px;gap:2px}
 .seg button{padding:5px 6px;font-size:.76rem}
-.chips button,.catp button{border-radius:10px;padding:6px 10px;font-size:.76rem}
+.chips button,.catp button{border-radius:9px;padding:5px 6px;font-size:.76rem;min-height:29px;font-weight:600}
 .chips{margin:0 0 10px}
 #v-ov .card{margin-bottom:10px}
 .ovfold{padding:0;overflow:hidden}.ovfold>summary{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 14px;cursor:pointer;list-style:none;font-size:.9rem;font-weight:600}.ovfold>summary::-webkit-details-marker{display:none}.ovfold>summary::after{content:"›";font-size:1.3rem;line-height:1;color:var(--mut);transition:transform .2s}.ovfold[open]>summary::after{transform:rotate(90deg)}.ovfold-body{padding:0 14px 12px}
@@ -219,9 +219,8 @@ body{overflow-anchor:none}
 .w-sw .wc{z-index:1}
 .w-done-actions{display:flex;justify-content:flex-end;margin-top:10px;padding-top:9px;border-top:1px solid #1d1d1d;}
 .w-sw.is-done .wc{touch-action:pan-y;}
-.wc .note-fld{height:auto;min-height:76px;overflow:hidden;display:block;width:100%;max-width:100%;padding:0}
-.wc textarea{display:block;box-sizing:border-box;width:100%;max-width:100%;min-width:0;min-height:76px;resize:vertical;background:transparent;color:var(--txt);border:0;border-radius:10px;padding:10px;font:inherit;font-size:16px;outline:none}
-.wc textarea:focus{outline:2px solid #777;outline-offset:-2px}
+.wc .note-fld{height:38px;min-height:38px;overflow:hidden;display:block;width:100%;max-width:100%;padding:0}
+.wc .note-fld input{height:100%}
 .dragging-order{opacity:.42;outline:1px dashed #777}
 .drop-before{box-shadow:0 -2px 0 #fff}
 .drop-after{box-shadow:0 2px 0 #fff}
@@ -243,6 +242,11 @@ body{overscroll-behavior-y:auto}
 .orow .ck{margin-left:auto;flex:none}
 .ovsum-copy{flex:1;min-width:0}.ovs .ot{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ovs .meta,.ovs .cm{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;min-height:1.2em}
 .ovs .cm{line-height:1.2;margin-top:3px}
+/* Consistent progress alignment and compact category/filter controls. */
+.progress-block.aligned{margin-left:38px}
+.progress-block .pl{align-items:flex-start}
+.wc .note-fld{height:38px;min-height:38px;padding:0}
+.wc .note-fld input{height:100%}
 /* Keep sticky layers opaque and dragged cards out of hit-testing. */
 .sw.dragging-order,.w-sw.dragging-order,.wc.dragging-order{pointer-events:none}
 .dragging-order{will-change:transform,opacity;transition:opacity .12s ease,outline-color .12s ease}
@@ -347,7 +351,7 @@ return '<button class="ck" data-a="go"'+(now<a.start?' disabled':'')+' aria-labe
 function card(a,now){
 var id=a.id,d=cnt(a,now),p=pct(a,now),st=streak(a,now),h=a.history;
 var rt="";if(a.goal>0){var gl=a.goal-d;rt=(gl>0?'zostáva '+gl+' '+dni(gl):'cieľ splnený 🎉')+(a.end?' · do '+fmt(a.end):'')}else if(a.end){var left=diff(now,a.end);rt=(left>0?'zostáva '+left+' '+dni(left):'termín uplynul')+' · do '+fmt(a.end)}
-var bar=p===null?"":'<div class="bar"><i style="width:'+p+'%"></i></div><div class="pl"><span>'+p+' %</span><span>'+rt+'</span></div>';
+var bar=p===null?"":'<div class="progress-block'+((a.goal>0||a.end)?" aligned":"")+'"><div class="bar"><i style="width:'+p+'%"></i></div><div class="pl"><span>'+p+' %</span><span>'+rt+'</span></div></div>';
 var today="";
 var isP=function(k){return pend&&pend.id===id&&pend.act===k};
 var pd=isP("del")&&pend.src==="sw";
@@ -360,7 +364,7 @@ var set='<div class="sm">Začiatok: <b>'+fmt(a.start)+'</b>'+(a.end?' · Koniec:
 +G("u",'<span class="st">'+ICN.u+'Údaje aktivity</span>','<div class="col"><label>Názov<span class="fld"><input type="text" class="en" maxlength="60" value="'+esc(a.name)+'"></span></label><label>Začiatok<span class="fld"><input type="date" class="es" value="'+a.start+'"></span></label><label>Do kedy (nepovinné)<span class="fld"><input type="date" class="ee" value="'+(a.end||"")+'"></span></label><label>Kategória (nepovinné)<span class="fld"><input type="text" class="ec" maxlength="24" list="cats" value="'+esc(a.cat||"")+'"></span></label><label>Počet dní trvania (nepovinné)<span class="fld"><input type="number" class="eg" min="1" inputmode="numeric" value="'+(a.goal||"")+'"></span></label><label>Koľkokrát som už splnil/a (spätne)<span class="fld"><input type="number" class="eb" min="0" inputmode="numeric" value="'+a.base+'"></span></label><div><div class="cl">Farba</div><div class="dots">'+cd+'</div></div>'+'</div>')
 +G("c",'<span class="st">'+ICN.c+'Splnené dni</span>',cal(a,now))
 +G("z",'<span class="st">'+ICN.z+'Ďalšie nastavenia</span>',acts);
-return '<div class="sw'+(pd?' pd':'')+'" data-id="'+id+'"><div class="del">'+(pd?'<button data-a="yes">Áno</button><button data-a="no">Nie</button>':TRASH)+'</div><div class="card'+(flash===id?' flash':'')+'" style="--c:'+a.color+'"><div class="top"><button type="button" class="drag-handle" data-drag="activity" aria-label="Zmeniť poradie aktivity">⠿</button><div style="flex:1;min-width:0"><div class="name">'+esc(a.name)+'</div><div class="meta">'+(a.cat?esc(a.cat):'')+(now<a.start?' · ešte nezačala':'')+(st?' · 🔥 '+st:'')+'</div></div><div class="r day-count"><div class="big'+(isDone(a,now,now)?'':' muted')+'">'+d+'<small>'+dni(d)+'</small></div>'+CK(a,now)+'</div></div>'+bar+today
+return '<div class="sw'+(pd?' pd':'')+'" data-id="'+id+'"><div class="del">'+(pd?'<button data-a="yes">Áno</button><button data-a="no">Nie</button>':TRASH)+'</div><div class="card'+(flash===id?' flash':'')+'" style="--c:'+a.color+'"><div class="top"><button type="button" class="drag-handle" data-drag="activity" aria-label="Zmeniť poradie aktivity">⠿</button><div style="flex:1;min-width:0"><div class="name">'+esc(a.name)+'</div><div class="meta">'+[a.cat?esc(a.cat):"",now<a.start?"Ešte nezačala":"",st?"🔥 "+st:""].filter(Boolean).join(" · ")+'</div></div><div class="r day-count"><div class="big'+(isDone(a,now,now)?'':' muted')+'">'+d+'<small>'+dni(d)+'</small></div>'+CK(a,now)+'</div></div>'+bar+today
 +'<details class="d" data-k="'+id+'"'+op(id)+'><summary>⚙ Nastavenia</summary><div class="dc">'+set+'</div></details></div></div>'}
 function render(){
 var now=todayStr(),box=document.getElementById("list");
@@ -442,7 +446,7 @@ var MS=["Jan","Feb","Mar","Apr","Máj","Jún","Júl","Aug","Sep","Okt","Nov","De
 var bars=MS.map(function(l,i){var p=me[i]?Math.round(mn[i]/me[i]*100):0;return '<div class="bc"><div class="bt"><div class="bb'+(me[i]&&mn[i]?'':' z')+'" style="height:'+Math.max(4,p)+'%'+(me[i]&&mn[i]?';background:'+pc(p):'')+'"></div></div><span>'+l+'</span><span>'+(me[i]?p+"%":"–")+'</span></div>'}).join("");
 var rows=items.filter(function(a){return inP(a,a1,a2)}).map(function(a){var st=astat(a,a1,a2,now);if(!st.e)return"";var p=Math.round(st.n/st.e*100);
 return '<div class="am" style="--c:'+a.color+'"><div class="t2"><span>'+esc(a.name)+'</span><b>'+st.n+'/'+st.e+' dní</b></div><div class="bar"><i style="width:'+p+'%"></i></div></div>'}).join("");
-return nav(String(yy),OV.o<0)+sumCard(R,"Splnené "+R.n+" z "+R.e,R.e?"splnení v roku":"V roku zatiaľ nič",cmp(R,range((yy-1)+"-01-01",(yy-1)+"-12-31",now),"minulému roku"))+'<div class="card"><div class="sh">Po mesiacoch</div><div class="bars y">'+bars+'</div></div>'+catCard(a1,a2,now)+(rows?'<div class="card"><div class="sh">Podľa aktivít</div>'+rows+'</div>':'')}
+return nav(String(yy),OV.o<0)+sumCard(R,"Splnené "+R.n+" z "+R.e,R.e?"splnení v roku":"V roku zatiaľ nič",cmp(R,range((yy-1)+"-01-01",(yy-1)+"-12-31",now),"minulému roku"))+'<div class="card"><div class="sh">Po mesiacoch</div><div class="bars y">'+bars+'</div></div>'+catCard(a1,a2,now)+(rows?'<details class="card ovfold"><summary>Podľa aktivít</summary><div class="ovfold-body">'+rows+'</div></details>':'')}
 function renderOv(){var now=todayStr(),box=document.getElementById("v-ov");
 var seg='<div class="seg">'+[["day","Deň"],["week","Týždeň"],["month","Mesiac"],["year","Rok"]].map(function(m){return '<button data-m="'+m[0]+'" class="'+(OV.m===m[0]?"on":"")+'">'+m[1]+'</button>'}).join("")+'</div>';
 if(!items.length){box.innerHTML=seg+'<div class="empty">Zatiaľ žiadne aktivity.<br>Pridaj ich v záložke Aktivity.</div>';return}
@@ -537,13 +541,13 @@ if(cd&&!ev.target.closest("button,input,label,details,select,textarea")){
 if(Date.now()-supClick<350)return;
 var dd=cd.querySelector("details.d");
 if(dd){var cid=cd.closest("[data-id]").getAttribute("data-id");
-if(!dd.open){var y0=window.scrollY;closeAddForm(addEl);[].forEach.call(list.querySelectorAll("details[data-k]:not([data-k=ended])"),function(o){if(o!==dd&&!dd.contains(o))o.open=false});origY={};prevY={};origY[cid]=y0;anim(dd,true);sTo(topOf(cd)-stickyTopOffset()-8)}
+if(!dd.open){var y0=window.scrollY;closeAddForm(addEl);[].forEach.call(list.querySelectorAll("details[data-k]:not([data-k=ended])"),function(o){if(o!==dd&&!dd.contains(o))o.open=false});origY={};prevY={};origY[cid]=y0;anim(dd,true);requestAnimationFrame(function(){requestAnimationFrame(function(){var bottom=topOf(dd)+dd.getBoundingClientRect().height,visibleBottom=window.scrollY+window.innerHeight-18;if(bottom>visibleBottom)sTo(bottom-window.innerHeight+18);else sTo(Math.max(0,topOf(cd)-8))})})}
 else{anim(dd,false);if(origY[cid]!==undefined){sTo(origY[cid]);delete origY[cid]}delete prevY[cid]}}
 return}
 var sm=ev.target.closest("summary");
 if(sm){var dt=sm.parentElement;
 if(dt.classList.contains("n")&&dt.getAttribute("data-k")!=="ended"){ev.preventDefault();var cid2=dt.closest("[data-id]").getAttribute("data-id"),sib=dt.parentElement.querySelectorAll("details.n"),any=[].some.call(sib,function(o){return o!==dt&&o.open});
-if(!dt.open){if(!any)prevY[cid2]=window.scrollY;[].forEach.call(sib,function(o){if(o!==dt)o.open=false});anim(dt,true);setTimeout(function(){sTo(topOf(dt)-stickyTopOffset()-8)},30)}
+if(!dt.open){if(!any)prevY[cid2]=window.scrollY;[].forEach.call(sib,function(o){if(o!==dt)o.open=false});anim(dt,true);requestAnimationFrame(function(){requestAnimationFrame(function(){var bottom=topOf(dt)+dt.getBoundingClientRect().height,visibleBottom=window.scrollY+window.innerHeight-18;if(bottom>visibleBottom)sTo(bottom-window.innerHeight+18)})})}
 else{anim(dt,false);if(!any&&prevY[cid2]!==undefined){var py=prevY[cid2];delete prevY[cid2];sTo(py)}}}
 else if(!dt.open&&dt.getAttribute("data-k")!=="ended"){[].forEach.call(list.querySelectorAll("details[data-k]:not([data-k=ended])"),function(o){if(o!==dt)o.open=false})}
 return}
@@ -597,7 +601,7 @@ function wSave(){try{localStorage.setItem(WLK,JSON.stringify(WL))}catch(x){}sche
 function sortWishlistByStatus(){var active=WL.filter(function(w){return !w.done}),done=WL.filter(function(w){return !!w.done});WL=active.concat(done);WL.forEach(function(w,i){w.sort_order=i});persistSavedOrder(WL,WLK+"_order")}
 function wCard(w,now){var left=w.due?diff(now,w.due):null,id=w.id,col,meta,big="",bar="";
 if(w.done){col="#22c55e";meta="Splnené "+fmt(w.done);}
-else if(w.due){col=left<=3?"#ef4444":left<=14?"#f59e0b":"#22c55e";var ab=Math.abs(left);
+else if(w.due){col="#ffffff";var ab=Math.abs(left);
 meta="do "+fmt(w.due)+" · "+(left>0?"zostáva "+left+" "+dni(left):left===0?"dnes je termín":"po termíne o "+ab+" "+dni(ab));
 big='<div class="big">'+(left<0?"−":"")+ab+'<small>'+dni(ab)+'</small></div>';
 var tot=Math.max(1,diff(w.created,w.due)),p=Math.max(0,Math.min(100,Math.round(diff(w.created,now)/tot*100)));bar='<div class="bar"><i style="width:'+p+'%"></i></div>'}
@@ -606,8 +610,8 @@ var ck=w.done?'<span class="ck on" role="img" aria-label="Splnené">'+CHK+'</spa
 var del=wPend===id?'<button type="button" data-w-a="yes">Áno</button><button type="button" data-w-a="no">Nie</button>':'<button type="button" data-w-a="del" aria-label="Odstrániť prianie"><svg viewBox="0 0 24 24" width="27" height="27" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5h6v2m-8 0 1 13h8l1-13M10 11v5m4-5v5"/></svg></button>';
 var dragHandle=!w.done?'<button type="button" class="drag-handle" data-drag="wishlist" aria-label="Zmeniť poradie priania">⠿</button>':'';
 var detail='';
-if(!w.done){detail='<details class="d" data-wk="'+id+'"'+(wOpen[id]?" open":"")+'><summary>⚙</summary><div class="dc"><div class="col"><label>Prianie<span class="fld"><input type="text" class="wt" maxlength="80" value="'+esc(w.text)+'"></span></label><label>Do kedy (nepovinné)<span class="fld"><input type="date" class="wdd" value="'+(w.due||"")+'"></span></label>'+(w.due?'':'<div class="meta">Bez termínu</div>')+'<label>Poznámka (nepovinné)<span class="fld note-fld"><textarea class="wnote" maxlength="1000" placeholder="Doplň poznámku...">'+esc(w.note||"")+'</textarea></span></label><div class="meta">Pridané '+fmt(w.created)+'</div><button class="ghost danger" data-w-a="del">Odstrániť</button></div></div></details>'}
-else{detail='<details class="d" data-wk="'+id+'"'+(wOpen[id]?" open":"")+'><summary>⚙ Detail priania</summary><div class="dc"><div class="col"><div class="meta">Splnené '+fmt(w.done)+'</div>'+(!w.due?'<div class="meta">Bez termínu</div>':'<div class="meta">Termín: '+fmt(w.due)+'</div>')+(w.note?'<div class="sm">'+esc(w.note)+'</div>':'')+'<div class="w-done-actions"><button class="ghost" data-w-a="undone">Vrátiť medzi nesplnené</button><button class="ghost danger" data-w-a="del">Odstrániť</button></div></div></div></details>'}
+if(!w.done){detail='<details class="d" data-wk="'+id+'"'+(wOpen[id]?" open":"")+'><summary>⚙</summary><div class="dc"><div class="col"><label>Prianie<span class="fld"><input type="text" class="wt" maxlength="80" value="'+esc(w.text)+'"></span></label><label>Do kedy (nepovinné)<span class="fld"><input type="date" class="wdd" value="'+(w.due||"")+'"></span></label>'+(w.due?'':'<div class="meta">Bez termínu</div>')+'<label>Poznámka (nepovinné)<span class="fld"><input type="text" class="wnote" maxlength="140" placeholder="Doplň poznámku..." value="'+esc(w.note||"")+'"></span></label><div class="meta">Pridané '+fmt(w.created)+'</div><button class="ghost danger" data-w-a="del">Odstrániť</button></div></div></details>'}
+else{detail='<details class="d" data-wk="'+id+'"'+(wOpen[id]?" open":"")+'><summary>⚙ Detail priania</summary><div class="dc"><div class="col"><div class="meta">Splnené '+fmt(w.done)+'</div>'+(w.due?'<div class="meta">Termín: '+fmt(w.due)+'</div>':'')+(w.note?'<div class="sm">'+esc(w.note)+'</div>':'')+'<div class="w-done-actions"><button class="ghost" data-w-a="undone">Vrátiť medzi nesplnené</button><button class="ghost danger" data-w-a="del">Odstrániť</button></div></div></div></details>'}
 return '<div class="w-sw'+(wPend===id?' open pd':'')+(w.done?' is-done':'')+'" data-wsw="'+id+'"><div class="w-del">'+del+'</div><div class="card wc" data-w="'+id+'" style="--c:'+col+'"><div class="top">'+dragHandle+'<div style="flex:1;min-width:0"><div class="name">'+esc(w.text)+'</div><div class="meta">'+meta+'</div></div><div class="r day-count">'+big+ck+'</div></div>'+bar+detail+'</div></div>'}
 
 function renderWl(){var now=todayStr(),box=document.getElementById("wlist");
