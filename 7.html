@@ -695,44 +695,46 @@ if(el.classList.contains("es")&&value&&a.end&&pd(a.end)<=pd(value)){badF(el,"Za�
 if(el.classList.contains("ee"))a.end=next;else a.start=next;
 okF(el);dirty[id]=true;save();return true;
 }
-list.addEventListener("input",function(ev){
-if(ev.target.closest(".edit-activity-form"))okF(ev.target);
-if(ev.target.matches&&ev.target.matches(".es,.ee")){syncEditDateInput(ev.target);return;}
-editField(ev);
-});
-list.addEventListener("change",function(ev){
-if(ev.target.closest(".edit-activity-form"))okF(ev.target);
-if(ev.target.matches&&ev.target.matches(".es,.ee")){syncEditDateInput(ev.target);return;}
-editField(ev);
-});
-// iOS Safari can update a native date input after the picker closes,
-// without reliably emitting input/change. Keep checking the DOM value
-// for a short window after the user opens the date field.
+list.addEventListener("input",function(ev){if(ev.target.closest(".edit-activity-form"))okF(ev.target);if(!syncEditDateInput(ev.target))editField(ev)});
+list.addEventListener("change",function(ev){if(ev.target.closest(".edit-activity-form"))okF(ev.target);if(!syncEditDateInput(ev.target))editField(ev)});
+// Niektoré natívne výbery dátumu (najmä Safari/iOS) po stlačení Reset
+// nezavolajú spoľahlivo input/change. Počas otvoreného poľa preto sledujeme
+// jeho skutočnú DOM hodnotu a každú zmenu okamžite uložíme.
 var editDatePollers=new WeakMap();
-function watchEditDateInput(el){
-if(!el||!el.matches||!el.matches(".es,.ee"))return;
-var previous=editDatePollers.get(el);
-if(previous)clearInterval(previous);
-var started=Date.now();
+list.addEventListener("focusin",function(ev){
+var el=ev.target;if(!el.matches||!el.matches(".es,.ee"))return;
+// iOS Safari's native date picker Clear/Reset can restore the input's
+// HTML defaultValue (the original value attribute) instead of clearing it.
+// Make the default empty, then restore the currently displayed value.
+// This preserves the selected date while making the native Reset truly clear it.
+if(el.classList.contains("ee")){
+  var currentValue=el.value;
+  el.defaultValue="";
+  el.value=currentValue;
+}
+if(editDatePollers.has(el))return;
 var timer=setInterval(function(){
 if(!el.isConnected){clearInterval(timer);editDatePollers.delete(el);return;}
 syncEditDateInput(el);
-if(Date.now()-started>12000){clearInterval(timer);editDatePollers.delete(el);syncEditDateInput(el);}
-},80);
+if(document.activeElement!==el){clearInterval(timer);editDatePollers.delete(el);}
+},120);
 editDatePollers.set(el,timer);
-}
-list.addEventListener("pointerdown",function(ev){watchEditDateInput(ev.target)},true);
-list.addEventListener("touchstart",function(ev){watchEditDateInput(ev.target)},true);
-list.addEventListener("focusin",function(ev){watchEditDateInput(ev.target)});
-list.addEventListener("submit",function(ev){if(ev.target.matches(".edit-activity-form"))ev.preventDefault();});
-
+});
+list.addEventListener("reset",function(ev){
+var form=ev.target;if(!form.matches(".edit-activity-form"))return;
+var c=form.closest("[data-id]"),id=c&&c.getAttribute("data-id"),a=items.find(function(x){return x.id===id});if(!a)return;
+setTimeout(function(){
+var start=form.querySelector(".es"),end=form.querySelector(".ee");
+if(start){a.start=start.value||""}
+if(end){a.end=end.value||null}
+dirty[id]=true;save();
+},0);
+});
+list.addEventListener("submit",function(ev){if(ev.target.matches(".edit-activity-form"))ev.preventDefault()});
 list.addEventListener("focusout",function(ev){
-var dateInput=ev.target;
-if(dateInput&&dateInput.matches&&dateInput.matches(".es,.ee")){
-[0,120,350,700].forEach(function(delay){setTimeout(function(){if(dateInput.isConnected)syncEditDateInput(dateInput)},delay)});
-}
+var dateInput=ev.target;if(dateInput&&dateInput.matches&&dateInput.matches(".es,.ee"))syncEditDateInput(dateInput);
 var c=ev.target.closest&&ev.target.closest("[data-id]");if(!c)return;var id=c.getAttribute("data-id");if(!dirty[id])return;
-setTimeout(function(){var cc=list.querySelector('[data-id="'+id+'"]');if(!cc||!dirty[id]||cc.contains(document.activeElement))return;var f=dirty[id]==="cat";delete dirty[id];if(f)render();else renderOne(id);toast("Uložené")},850)});
+setTimeout(function(){var cc=list.querySelector('[data-id="'+id+'"]');if(!cc||!dirty[id]||cc.contains(document.activeElement))return;var f=dirty[id]==="cat";delete dirty[id];if(f)render();else renderOne(id);toast("Uložené")},150)});
 list.addEventListener("click",function(ev){
 var tab=ev.target.closest("[data-detail-tab]");if(tab){var wrap=tab.closest(".sw"),aid=wrap&&wrap.getAttribute("data-id"),which=tab.getAttribute("data-detail-tab");if(aid){detailTabs[aid]=which;wrap.querySelectorAll("[data-detail-tab]").forEach(function(b){b.classList.toggle("on",b===tab)});wrap.querySelectorAll("[data-detail-panel]").forEach(function(p){p.hidden=p.getAttribute("data-detail-panel")!==which})}return}
 var freq=ev.target.closest(".e-frequency-toggle button[data-frequency]");if(freq){var fw=freq.closest(".freq-box"),freqSelect=fw&&fw.querySelector(".efrequency");if(freqSelect){freqSelect.value=freq.getAttribute("data-frequency");freqSelect.dispatchEvent(new Event("change",{bubbles:true}));fw.querySelectorAll(".e-frequency-toggle button").forEach(function(b){b.classList.toggle("on",b===freq)})}return}
