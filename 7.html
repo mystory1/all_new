@@ -237,7 +237,9 @@ main{position:relative;isolation:auto;min-height:100vh;min-height:100dvh;padding
 #chips,#catp,#v-wl .seg{position:static;box-shadow:none}
 html,body{max-width:100%;overflow-x:hidden}
 body{overscroll-behavior-y:auto}
-#chips{padding:0;margin:0 0 8px;flex-wrap:wrap;overflow:visible;}
+#chips{padding:0;margin:0 0 8px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;overflow:visible;}
+#chips button{display:inline-flex;align-items:center;justify-content:center;width:100%;min-width:0;height:32px;min-height:32px;margin:0;padding:0 8px;box-sizing:border-box;font-size:.76rem;line-height:1;font-weight:600;white-space:nowrap;border-radius:10px;overflow:hidden;text-overflow:ellipsis;}
+#chips button.cm{max-width:none;flex:none;font-size:.76rem;margin:0;padding:0 8px;height:32px;min-height:32px;line-height:1;}
 #chips::-webkit-scrollbar{display:none}
 .orow .nm{flex:1;min-width:0}
 .orow .ck{margin-left:auto;flex:none}
