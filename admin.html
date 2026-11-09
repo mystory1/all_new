@@ -3,89 +3,291 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin</title>
+  <meta name="theme-color" content="#0b1020" />
+  <title>Admin panel</title>
   <style>
-    *{box-sizing:border-box} body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:#0d0d0d;color:#e5e7eb}.wrap{min-height:100vh;display:grid;grid-template-columns:260px 1fr}.side{background:#111;border-right:1px solid #2a2a2a;padding:18px;display:flex;flex-direction:column;gap:12px}.brand{font-size:24px;font-weight:900;color:#fff}.badge{padding:8px 12px;border-radius:999px;background:#1f2937;border:1px solid #374151;width:max-content;font-weight:800}.main{padding:18px;display:flex;flex-direction:column;gap:16px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;border-bottom:1px solid #2a2a2a;padding-bottom:12px}.title{font-size:28px;font-weight:900}.card{background:#161616;border:1px solid #333;border-radius:18px;padding:18px;box-shadow:0 20px 40px rgba(0,0,0,.25)}.grid{display:grid;grid-template-columns:1.2fr .8fr;gap:16px}.field{display:flex;flex-direction:column;gap:6px;margin-bottom:12px} label{color:#cbd5e1;font-size:14px} input,select{width:100%;padding:12px;border-radius:12px;border:1px solid #444;background:#0f0f0f;color:#e5e7eb;font:inherit} button{border:0;border-radius:12px;padding:11px 14px;font:inherit;font-weight:800;cursor:pointer}.primary{background:#2563eb;color:#fff}.secondary{background:#2b2b2b;color:#e5e7eb}.danger{background:#ef4444;color:#fff}.list{display:flex;flex-direction:column;gap:8px;max-height:540px;overflow:auto}.user{border:1px solid #333;background:#111;padding:12px;border-radius:14px;display:grid;gap:8px;cursor:pointer}.user.active{border-color:#2563eb}.muted{color:#9ca3af;font-size:13px}.pagechips{display:flex;gap:8px;flex-wrap:wrap}.chip{padding:8px 10px;border-radius:999px;background:#262626;border:1px solid #444;color:#e5e7eb;font-size:13px;cursor:pointer;user-select:none}.chip.on{background:#2563eb;border-color:#2563eb}.status{padding:6px 10px;border-radius:999px;font-size:12px;font-weight:800;width:max-content}.pending{background:#7c2d12;color:#fdba74}.approved{background:#14532d;color:#86efac}.toolbar{display:flex;gap:10px;flex-wrap:wrap}.notice{background:#111827;border:1px solid #374151;color:#93c5fd;padding:10px 12px;border-radius:12px;margin-top:10px}.hidden{display:none}@media(max-width:900px){.wrap{grid-template-columns:1fr}.side{border-right:0;border-bottom:1px solid #2a2a2a}.grid{grid-template-columns:1fr}}
+    :root{color-scheme:dark;--bg:#0b1020;--panel:#111a2d;--panel2:#0f1728;--line:#26344d;--text:#e8eef9;--muted:#93a4bd;--blue:#4f8cff;--blue2:#2563eb;--green:#22c55e;--amber:#f59e0b;--red:#ef4444}
+    *{box-sizing:border-box}
+    body{margin:0;background:radial-gradient(ellipse at 10% 0%,#172544 0,transparent 38%),var(--bg);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif;min-height:100vh}
+    button,input,select{font:inherit}
+    button{cursor:pointer}
+    button:focus-visible,input:focus-visible,select:focus-visible,.user:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+    .layout{min-height:100vh;display:grid;grid-template-columns:248px minmax(0,1fr)}
+    .sidebar{padding:24px 18px;background:rgba(10,16,30,.88);border-right:1px solid var(--line);display:flex;flex-direction:column;gap:14px}
+    .brand{font-size:21px;font-weight:850;letter-spacing:-.5px;color:#fff;padding:3px 5px 12px}
+    .admin-badge{display:flex;align-items:center;gap:9px;padding:11px 12px;border:1px solid var(--line);border-radius:13px;background:#121e33;font-size:13px;font-weight:700;overflow-wrap:anywhere}
+    .dot{width:8px;height:8px;flex:0 0 8px;border-radius:50%;background:var(--green);box-shadow:0 0 12px #22c55e66}
+    .side-actions{display:grid;gap:8px}
+    .side-spacer{flex:1}
+    .main{min-width:0;padding:30px clamp(18px,3vw,42px);display:flex;flex-direction:column;gap:22px;max-width:1600px;width:100%;margin:0 auto}
+    .top{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;padding-bottom:19px;border-bottom:1px solid var(--line)}
+    .eyebrow{color:#8ea8d1;text-transform:uppercase;letter-spacing:1.4px;font-size:11px;font-weight:800;margin-bottom:7px}
+    h1{font-size:clamp(25px,3vw,34px);line-height:1.1;letter-spacing:-1px;margin:0;color:#fff}
+    .subtitle{color:var(--muted);font-size:14px;margin-top:8px}
+    .grid{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(340px,.92fr);gap:18px;align-items:start}
+    .panel{background:linear-gradient(180deg,rgba(20,31,52,.96),rgba(15,24,41,.96));border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 16px 40px #0003;min-width:0}
+    .panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:17px}
+    h2{font-size:17px;margin:0;color:#f5f8ff;letter-spacing:-.2px}
+    .count{font-size:12px;color:#b7c7df;background:#1a2942;border:1px solid #314563;border-radius:999px;padding:5px 9px;white-space:nowrap}
+    .field{display:flex;flex-direction:column;gap:7px;margin-bottom:14px}
+    label{font-size:12px;color:#b7c6dc;font-weight:700}
+    input,select{width:100%;min-height:43px;padding:10px 12px;border:1px solid #34445f;border-radius:11px;background:#0b1425;color:var(--text)}
+    input::placeholder{color:#71829d}
+    input:disabled{opacity:.8}
+    .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+    .btn{border:1px solid transparent;border-radius:10px;padding:10px 13px;font-size:13px;font-weight:750;transition:background .15s,border-color .15s,transform .15s}
+    .btn:hover:not(:disabled){transform:translateY(-1px)}
+    .btn:disabled{opacity:.5;cursor:not-allowed}
+    .primary{background:var(--blue2);color:#fff}.primary:hover:not(:disabled){background:#3478f6}
+    .secondary{background:#1b2940;color:#dce7f8;border-color:#31435f}.secondary:hover:not(:disabled){background:#263956}
+    .danger{background:#3a1d2a;color:#ffc4c4;border-color:#673044}.danger:hover:not(:disabled){background:#542334}
+    .filter.active{background:#243f6b;border-color:#4f8cff;color:#fff}
+    .user-list{display:flex;flex-direction:column;gap:8px;max-height:min(62vh,680px);overflow:auto;padding:1px 4px 1px 1px}
+    .user{width:100%;text-align:left;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px 12px;padding:13px;border:1px solid #2b3b55;border-radius:13px;background:#101a2c;color:var(--text)}
+    .user:hover{border-color:#5275a8;background:#14213a}
+    .user.active{border-color:var(--blue);background:#162847;box-shadow:inset 3px 0 var(--blue)}
+    .user-name{font-size:14px;font-weight:800;overflow-wrap:anywhere}
+    .user-email,.user-meta{font-size:12px;color:var(--muted);overflow-wrap:anywhere}
+    .user-email,.user-meta{grid-column:1/-1}
+    .status{align-self:start;border-radius:999px;padding:5px 8px;font-size:10px;font-weight:850;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
+    .pending{background:#4a3215;color:#ffd18a}.approved{background:#123b2c;color:#8aefbd}
+    .empty{padding:24px 14px;text-align:center;border:1px dashed #34445f;border-radius:13px;color:var(--muted);font-size:13px}
+    .details-empty{padding:34px 12px;text-align:center;color:var(--muted);font-size:13px;border:1px dashed #34445f;border-radius:13px}
+    .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+    .pagechips{display:flex;flex-wrap:wrap;gap:8px}
+    .chip{border:1px solid #34445f;background:#101a2c;color:#bdcbe0;border-radius:9px;padding:8px 10px;font-size:12px;font-weight:700}
+    .chip.on{background:#1d427a;border-color:#4f8cff;color:#fff}
+    .chip:disabled{opacity:.55;cursor:not-allowed}
+    .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px;padding-top:17px;border-top:1px solid var(--line)}
+    .notice{padding:11px 13px;border:1px solid #314563;background:#101d32;color:#b8d1f6;border-radius:12px;font-size:12px;line-height:1.45;overflow-wrap:anywhere}
+    .notice.error{border-color:#713b45;background:#2a1720;color:#ffb9c0}
+    .notice.success{border-color:#285b49;background:#10271f;color:#a7f3c8}
+    .dirty{display:none;color:#ffd18a;font-size:11px;font-weight:800}
+    .dirty.show{display:inline}
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    @media(max-width:1050px){.layout{grid-template-columns:210px minmax(0,1fr)}.grid{grid-template-columns:1fr}.user-list{max-height:420px}}
+    @media(max-width:700px){.layout{grid-template-columns:1fr}.sidebar{padding:13px 16px;border-right:0;border-bottom:1px solid var(--line);display:grid;grid-template-columns:1fr auto;align-items:center;gap:9px}.brand{padding:0;font-size:18px}.admin-badge{grid-column:1/-1;grid-row:2}.side-actions{grid-column:1/-1;display:flex;flex-wrap:wrap}.side-actions .btn{flex:1}.side-spacer{display:none}.main{padding:21px 14px}.panel{padding:16px}.top{align-items:flex-start}.detail-grid{grid-template-columns:1fr}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}
   </style>
 </head>
 <body>
-<div class="wrap">
-  <aside class="side"><div class="brand">Admin panel</div><div class="badge" id="meBadge">Načítavam...</div><button class="secondary" id="backBtn">Späť do menu</button><button class="secondary" id="refreshBtn">Obnoviť</button><button class="danger" id="logoutBtn">Odhlásiť sa</button><div class="notice" id="cacheNotice">Načítavam dáta...</div></aside>
-  <main class="main"><div class="top"><div><div class="title">Správa oprávnení</div><div class="muted">Admin schvaľuje používateľov a priraďuje stránky</div></div></div><div class="grid"><section class="card"><h3 style="margin:0 0 14px;color:#fff">Používatelia</h3><div class="field"><label>Vyhľadať</label><input id="searchInput" placeholder="username alebo email" /></div><div class="toolbar"><button class="secondary" id="showPendingBtn">Čakať na schválenie</button><button class="secondary" id="showAllBtn">Všetci</button><button class="secondary" id="loadDbBtn">Načítať z DB</button></div><div id="usersList" class="list"></div></section><section class="card"><h3 style="margin:0 0 14px;color:#fff">Vybraný používateľ</h3><div id="detailsEmpty" class="muted">Vyber používateľa zo zoznamu.</div><div id="detailsWrap" style="display:none"><div class="field"><label>Username</label><input id="detailUsername" disabled /></div><div class="field"><label>Email</label><input id="detailEmail" disabled /></div><div class="field"><label>Stav</label><div id="detailStatus" class="status pending">pending</div></div><div class="field"><label>Rola</label><select id="detailRole"><option value="user">user</option><option value="admin">admin</option></select></div><div class="field"><label>Prístup k stránkam</label><div class="pagechips" id="pageChips"></div></div><div style="display:flex;gap:10px;flex-wrap:wrap"><button class="primary" id="saveBtn">Uložiť</button><button class="secondary" id="approveBtn">Schváliť</button><button class="secondary" id="resetBtn">Zrušiť zmeny</button></div></div></section></div></main>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand">Admin panel</div>
+    <div class="admin-badge"><span class="dot"></span><span id="meBadge">Overujem prístup…</span></div>
+    <div class="side-actions">
+      <button class="btn secondary" id="backBtn" type="button">Späť do menu</button>
+      <button class="btn secondary" id="refreshBtn" type="button">Obnoviť dáta</button>
+      <button class="btn danger" id="logoutBtn" type="button">Odhlásiť sa</button>
+    </div>
+    <div class="side-spacer"></div>
+    <div class="notice" id="cacheNotice" role="status" aria-live="polite">Pripájam sa…</div>
+  </aside>
+
+  <main class="main">
+    <header class="top">
+      <div><div class="eyebrow">Administrácia</div><h1>Správa oprávnení</h1><div class="subtitle">Schvaľovanie účtov, správa rolí a prístupov k stránkam.</div></div>
+    </header>
+
+    <div class="grid">
+      <section class="panel" aria-labelledby="usersHeading">
+        <div class="panel-head"><h2 id="usersHeading">Používatelia</h2><span class="count" id="usersCount">0 používateľov</span></div>
+        <div class="field"><label for="searchInput">Vyhľadávanie</label><input id="searchInput" type="search" autocomplete="off" placeholder="Username alebo email…" /></div>
+        <div class="toolbar" aria-label="Filter používateľov">
+          <button class="btn secondary filter" id="showPendingBtn" type="button">Čakajúci</button>
+          <button class="btn secondary filter active" id="showAllBtn" type="button">Všetci</button>
+          <button class="btn secondary" id="loadDbBtn" type="button">Načítať z DB</button>
+        </div>
+        <div id="usersList" class="user-list" aria-live="polite"><div class="empty">Načítavam používateľov…</div></div>
+      </section>
+
+      <section class="panel" aria-labelledby="detailHeading">
+        <div class="panel-head"><h2 id="detailHeading">Vybraný používateľ</h2><span class="dirty" id="dirtyLabel">Neuložené zmeny</span></div>
+        <div id="detailsEmpty" class="details-empty">Vyber používateľa zo zoznamu.</div>
+        <div id="detailsWrap" hidden>
+          <div class="detail-grid">
+            <div class="field"><label for="detailUsername">Username</label><input id="detailUsername" disabled /></div>
+            <div class="field"><label for="detailEmail">Email</label><input id="detailEmail" disabled /></div>
+          </div>
+          <div class="field"><label>Stav účtu</label><div id="detailStatus" class="status pending">Čaká na schválenie</div></div>
+          <div class="field"><label for="detailRole">Rola</label><select id="detailRole"><option value="user">Používateľ</option><option value="admin">Administrátor</option></select></div>
+          <div class="field"><label>Prístup k stránkam</label><div class="muted" style="margin-bottom:8px">Vyber stránky, ku ktorým má mať používateľ prístup.</div><div class="pagechips" id="pageChips"></div></div>
+          <div class="actions">
+            <button class="btn primary" id="saveBtn" type="button">Uložiť zmeny</button>
+            <button class="btn secondary" id="approveBtn" type="button">Schváliť účet</button>
+            <button class="btn secondary" id="resetBtn" type="button">Zrušiť zmeny</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
 </div>
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
 (function(){
+  'use strict';
   const PAGES=['1.html','2.html','3.html','4.html','5.html','6.html','7.html','admin.html'];
   const $=id=>document.getElementById(id);
-  const state={users:[],selected:null,original:null,view:'all',client:null,session:null};
-  const notice=t=>{$('cacheNotice').textContent=t};
+  const state={users:[],selectedId:null,draft:null,original:null,view:'all',client:null,session:null,loading:false,saving:false};
   const token=()=>state.session&&(state.session.habits_token||state.session.token);
-  const rpc=async(name,args)=>{const {data,error}=await state.client.rpc(name,args);if(error)throw error;return data};
+  const rpc=async(name,args)=>{
+    if(!state.client)throw new Error('Supabase klient nie je inicializovaný.');
+    const {data,error}=await state.client.rpc(name,args);
+    if(error)throw error;
+    return data;
+  };
+  const setNotice=(message,type='')=>{
+    const el=$('cacheNotice');el.textContent=message;el.className='notice'+(type?' '+type:'');
+  };
+  const setBusy=busy=>{
+    state.loading=busy;
+    ['refreshBtn','loadDbBtn','showPendingBtn','showAllBtn'].forEach(id=>$(id).disabled=busy);
+    $('saveBtn').disabled=busy||state.saving||!state.draft;
+    $('approveBtn').disabled=busy||state.saving||!state.draft||!!(state.draft&&state.draft.approved);
+    $('resetBtn').disabled=busy||state.saving||!state.draft;
+  };
+  const clone=obj=>JSON.parse(JSON.stringify(obj));
+  const normalizeUser=u=>({...u,role:u.role||'user',approved:!!u.approved,allowed_pages:Array.isArray(u.allowed_pages)?u.allowed_pages.filter(p=>PAGES.includes(p)):[]});
+  const isDirty=()=>{
+    if(!state.draft||!state.original)return false;
+    return JSON.stringify({role:state.draft.role,approved:state.draft.approved,allowed_pages:[...state.draft.allowed_pages].sort()})!==JSON.stringify({role:state.original.role,approved:state.original.approved,allowed_pages:[...state.original.allowed_pages].sort()});
+  };
+  const updateDirty=()=>{
+    $('dirtyLabel').classList.toggle('show',isDirty());
+    $('saveBtn').disabled=state.loading||state.saving||!state.draft||!isDirty();
+    $('approveBtn').disabled=state.loading||state.saving||!state.draft||state.draft.approved;
+    $('resetBtn').disabled=state.loading||state.saving||!state.draft||!isDirty();
+  };
+  const updateCounts=visible=>{
+    const pending=state.users.filter(u=>!u.approved).length;
+    $('usersCount').textContent=`${visible} z ${state.users.length} • čaká: ${pending}`;
+  };
   const render=()=>{
-    const q=($('searchInput').value||'').toLowerCase(),list=$('usersList');list.innerHTML='';
-    let arr=state.users.filter(u=>`${u.username||''} ${u.email||''}`.toLowerCase().includes(q));
+    const q=$('searchInput').value.trim().toLocaleLowerCase('sk');
+    const list=$('usersList');list.replaceChildren();
+    let arr=state.users.filter(u=>`${u.username||''} ${u.email||''}`.toLocaleLowerCase('sk').includes(q));
     if(state.view==='pending')arr=arr.filter(u=>!u.approved);
-    if(!arr.length){list.innerHTML='<div class="muted">Žiadni používatelia v tomto zozname.</div>';return;}
-    arr.forEach(u=>{const el=document.createElement('div');el.className='user'+(state.selected&&String(state.selected.id)===String(u.id)?' active':'');
-      const name=document.createElement('strong');name.textContent=u.username||'';
-      const email=document.createElement('div');email.className='muted';email.textContent=u.email||'';
-      const meta=document.createElement('div');meta.className='muted';meta.textContent=`rola: ${u.role||'user'} • stránky: ${(u.allowed_pages||[]).join(', ')||'žiadne'}`;
-      const status=document.createElement('div');status.className='status '+(u.approved?'approved':'pending');status.textContent=u.approved?'approved':'pending';
-      el.append(name,email,meta,status);el.onclick=()=>selectUser(u.id);list.appendChild(el);
+    updateCounts(arr.length);
+    $('showPendingBtn').classList.toggle('active',state.view==='pending');
+    $('showAllBtn').classList.toggle('active',state.view==='all');
+    if(!arr.length){const empty=document.createElement('div');empty.className='empty';empty.textContent=state.users.length?'Nenašli sa používatelia podľa zadaného filtra.':'Zatiaľ tu nie sú žiadni používatelia.';list.appendChild(empty);return;}
+    arr.forEach(u=>{
+      const el=document.createElement('button');el.type='button';el.className='user'+(String(state.selectedId)===String(u.id)?' active':'');el.setAttribute('aria-pressed',String(String(state.selectedId)===String(u.id)));
+      const name=document.createElement('span');name.className='user-name';name.textContent=u.username||'(bez username)';
+      const status=document.createElement('span');status.className='status '+(u.approved?'approved':'pending');status.textContent=u.approved?'Schválený':'Čaká';
+      const email=document.createElement('span');email.className='user-email';email.textContent=u.email||'Bez emailu';
+      const meta=document.createElement('span');meta.className='user-meta';meta.textContent=`Rola: ${u.role} · Stránky: ${u.allowed_pages.length?u.allowed_pages.join(', '):'žiadne'}`;
+      el.append(name,status,email,meta);el.addEventListener('click',()=>selectUser(u.id));list.appendChild(el);
     });
   };
   const renderChips=()=>{
-    const wrap=$('pageChips');wrap.innerHTML='';
-    PAGES.forEach(p=>{const b=document.createElement('button');b.type='button';b.className='chip'+((state.selected.allowed_pages||[]).includes(p)?' on':'');b.textContent=p;
-      b.onclick=()=>{const set=new Set(state.selected.allowed_pages||[]);set.has(p)?set.delete(p):set.add(p);state.selected.allowed_pages=[...set];b.classList.toggle('on');};wrap.appendChild(b);});
+    const wrap=$('pageChips');wrap.replaceChildren();
+    PAGES.forEach(page=>{
+      const b=document.createElement('button');b.type='button';b.className='chip'+(state.draft.allowed_pages.includes(page)?' on':'');b.textContent=page;b.setAttribute('aria-pressed',String(state.draft.allowed_pages.includes(page)));
+      b.addEventListener('click',()=>{
+        const set=new Set(state.draft.allowed_pages);set.has(page)?set.delete(page):set.add(page);
+        state.draft.allowed_pages=[...set];renderChips();updateDirty();
+      });
+      wrap.appendChild(b);
+    });
   };
   const selectUser=id=>{
-    state.selected=state.users.find(u=>String(u.id)===String(id));if(!state.selected)return;
-    state.original=JSON.parse(JSON.stringify(state.selected));$('detailsEmpty').style.display='none';$('detailsWrap').style.display='block';
-    $('detailUsername').value=state.selected.username||'';$('detailEmail').value=state.selected.email||'';
-    $('detailRole').value=state.selected.role||'user';$('detailStatus').textContent=state.selected.approved?'approved':'pending';
-    $('detailStatus').className='status '+(state.selected.approved?'approved':'pending');renderChips();render();
+    if(state.draft&&String(state.selectedId)!==String(id)&&isDirty()&&!confirm('Máš neuložené zmeny. Naozaj chceš prejsť na iného používateľa a zahodiť ich?'))return;
+    const user=state.users.find(u=>String(u.id)===String(id));if(!user)return;
+    state.selectedId=user.id;state.original=normalizeUser(clone(user));state.draft=normalizeUser(clone(user));
+    $('detailsEmpty').hidden=true;$('detailsWrap').hidden=false;
+    $('detailUsername').value=state.draft.username||'';$('detailEmail').value=state.draft.email||'';
+    $('detailRole').value=state.draft.role;
+    renderStatus();renderChips();render();updateDirty();
   };
-  const loadDb=async()=>{
-    try{notice('Načítavam z DB...');const data=await rpc('habits_legacy_admin_list_users',{p_token:token()});
-      state.users=Array.isArray(data)?data:(data&&data.users)||[];notice('Načítané z DB: '+state.users.length);render();
-      if(state.selected){const found=state.users.find(u=>String(u.id)===String(state.selected.id));if(found)selectUser(found.id);else{state.selected=null;$('detailsWrap').style.display='none';$('detailsEmpty').style.display='block';}}
-    }catch(err){console.error(err);notice('DB error: '+(err.message||err));}
+  const renderStatus=()=>{
+    const approved=!!state.draft.approved;$('detailStatus').textContent=approved?'Schválený':'Čaká na schválenie';$('detailStatus').className='status '+(approved?'approved':'pending');
+    $('approveBtn').textContent=approved?'Účet je schválený':'Schváliť účet';
   };
-  const saveToDb=async u=>{
-    notice('Ukladám do DB...');
-    const data=await rpc('habits_legacy_admin_update_user',{p_token:token(),p_user_id:u.id,p_role:u.role||'user',p_approved:!!u.approved,p_allowed_pages:u.allowed_pages||[]});
-    if(!data||data.ok!==true)throw new Error(data&&data.message?data.message:'Uloženie sa nepodarilo.');
-    notice('Uložené do DB pre '+u.username);await loadDb();
+  const clearSelection=()=>{
+    state.selectedId=null;state.draft=null;state.original=null;$('detailsWrap').hidden=true;$('detailsEmpty').hidden=false;$('dirtyLabel').classList.remove('show');render();
   };
-  const logout=async()=>{try{if(token())await state.client.rpc('habits_legacy_logout',{p_token:token()});}catch(e){console.warn(e);}localStorage.removeItem('session_user');localStorage.removeItem('profiles_cache');localStorage.removeItem('profiles_cache_updated_at');location.replace('index.html');};
+  const loadDb=async(discardChanges=false)=>{
+    if(state.loading||state.saving)return;
+    if(!discardChanges&&state.draft&&isDirty()&&!confirm('Máš neuložené zmeny. Obnovením dát ich zahodíš. Pokračovať?'))return;
+    setBusy(true);setNotice('Načítavam používateľov z databázy…');
+    try{
+      const data=await rpc('habits_legacy_admin_list_users',{p_token:token()});
+      const rows=Array.isArray(data)?data:(data&&Array.isArray(data.users)?data.users:null);
+      if(!rows)throw new Error('Databáza vrátila neočakávaný formát používateľov.');
+      state.users=rows.map(normalizeUser);
+      if(state.selectedId!==null){
+        const found=state.users.find(u=>String(u.id)===String(state.selectedId));
+        if(found)selectUser(found.id);else clearSelection();
+      }else render();
+      setNotice(`Dáta načítané. Používateľov: ${state.users.length}.`,'success');
+    }catch(err){
+      console.error(err);setNotice('Chyba pri načítaní: '+(err.message||String(err)),'error');
+      throw err;
+    }finally{setBusy(false);updateDirty();}
+  };
+  const saveToDb=async()=>{
+    if(!state.draft||!isDirty()||state.saving)return;
+    state.saving=true;setBusy(true);setNotice('Ukladám zmeny…');
+    const payload=clone(state.draft);
+    try{
+      const data=await rpc('habits_legacy_admin_update_user',{
+        p_token:token(),p_user_id:payload.id,p_role:payload.role,p_approved:!!payload.approved,p_allowed_pages:payload.allowed_pages
+      });
+      if(!data||data.ok!==true)throw new Error(data&&data.message?data.message:'Databáza nepotvrdila uloženie.');
+      setNotice('Zmeny boli uložené. Obnovujem zoznam…','success');
+      state.original=normalizeUser(clone(payload));
+      state.draft=normalizeUser(clone(payload));
+      state.saving=false;
+      await loadDb(true);
+      setNotice('Zmeny boli úspešne uložené.','success');
+    }catch(err){
+      console.error(err);setNotice('Uloženie zlyhalo: '+(err.message||String(err)),'error');
+    }finally{state.saving=false;setBusy(false);updateDirty();}
+  };
+  const logout=async()=>{
+    $('logoutBtn').disabled=true;
+    try{if(token())await rpc('habits_legacy_logout',{p_token:token()});}
+    catch(e){console.warn('Odhlásenie na serveri zlyhalo:',e);}
+    localStorage.removeItem('session_user');localStorage.removeItem('profiles_cache');localStorage.removeItem('profiles_cache_updated_at');
+    location.replace('index.html');
+  };
   const init=async()=>{
     try{
-      const cfg=window.APP_CONFIG||{};if(!cfg.SUPABASE_URL||!cfg.SUPABASE_ANON_KEY)throw new Error('Chýba config.js alebo Supabase kľúč');
+      const cfg=window.APP_CONFIG||{};
+      if(!cfg.SUPABASE_URL||!cfg.SUPABASE_ANON_KEY)throw new Error('Chýba config.js alebo Supabase konfigurácia.');
+      if(!window.supabase||typeof window.supabase.createClient!=='function')throw new Error('Supabase knižnica sa nenačítala.');
       state.client=window.supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY);
-      state.session=JSON.parse(localStorage.getItem('session_user')||'null');
-      if(!state.session)return location.replace('index.html');
-      const t=token();if(!t)return location.replace('index.html');
-      const valid=await rpc('habits_legacy_validate_session',{p_token:t});
-      if(!valid||valid.ok!==true||!valid.is_admin)return location.replace('0.html');
-      $('meBadge').textContent=`${valid.username} • ${valid.role||'user'}`;
+      try{state.session=JSON.parse(localStorage.getItem('session_user')||'null');}catch(_){state.session=null;}
+      if(!state.session||!token()){location.replace('index.html');return;}
+      const valid=await rpc('habits_legacy_validate_session',{p_token:token()});
+      if(!valid||valid.ok!==true||!valid.is_admin){location.replace('0.html');return;}
+      $('meBadge').textContent=`${valid.username||'Admin'} · ${valid.role||'admin'}`;
       if(!state.session.habits_token&&state.session.token){state.session.habits_token=state.session.token;localStorage.setItem('session_user',JSON.stringify(state.session));}
       await loadDb();
-    }catch(e){console.error(e);notice('Init error: '+(e.message||e));}
+    }catch(err){console.error(err);setNotice('Inicializácia zlyhala: '+(err.message||String(err)),'error');}
   };
+
   $('searchInput').addEventListener('input',render);
   $('showPendingBtn').addEventListener('click',()=>{state.view='pending';render();});
   $('showAllBtn').addEventListener('click',()=>{state.view='all';render();});
-  $('loadDbBtn').addEventListener('click',loadDb);
-  $('refreshBtn').addEventListener('click',loadDb);
+  $('loadDbBtn').addEventListener('click',()=>loadDb(false).catch(()=>{}));
+  $('refreshBtn').addEventListener('click',()=>loadDb(false).catch(()=>{}));
   $('backBtn').addEventListener('click',()=>location.href='0.html');
   $('logoutBtn').addEventListener('click',logout);
-  $('saveBtn').addEventListener('click',async e=>{e.preventDefault();if(!state.selected)return;state.selected.role=$('detailRole').value;try{await saveToDb(state.selected);alert('Uložené');}catch(err){console.error(err);notice('DB update error: '+(err.message||err));}});
-  $('approveBtn').addEventListener('click',async e=>{e.preventDefault();if(!state.selected)return;state.selected.approved=true;try{await saveToDb(state.selected);alert('Schválené');}catch(err){console.error(err);notice('DB update error: '+(err.message||err));}});
-  $('resetBtn').addEventListener('click',e=>{e.preventDefault();if(state.original)selectUser(state.original.id);});
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+  $('detailRole').addEventListener('change',e=>{if(state.draft){state.draft.role=e.target.value;updateDirty();}});
+  $('saveBtn').addEventListener('click',saveToDb);
+  $('approveBtn').addEventListener('click',()=>{
+    if(!state.draft||state.draft.approved)return;
+    state.draft.approved=true;renderStatus();updateDirty();
+    saveToDb();
+  });
+  $('resetBtn').addEventListener('click',()=>{
+    if(!state.original)return;
+    state.draft=normalizeUser(clone(state.original));$('detailRole').value=state.draft.role;renderStatus();renderChips();updateDirty();
+  });
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
 </script>
 </body>
