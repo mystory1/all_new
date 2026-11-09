@@ -253,6 +253,41 @@ body{overscroll-behavior-y:auto}
 .orow{min-height:42px}
 .drop-before,.drop-after{transition:box-shadow .1s ease;}
 
+/* Final mobile alignment fix: center the complete progress block inside each card. */
+#v-act .progress-block.aligned,
+#v-wl .progress-block.aligned{
+  display:block !important;
+  width:calc(100% - 76px) !important;
+  max-width:calc(100% - 76px) !important;
+  min-width:0 !important;
+  margin-left:auto !important;
+  margin-right:auto !important;
+  box-sizing:border-box !important;
+}
+
+#v-act .progress-block.aligned > .bar,
+#v-wl .progress-block.aligned > .bar{
+  display:block;
+  width:100%;
+  box-sizing:border-box;
+}
+
+#v-act .progress-block.aligned > .pl{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:10px;
+  width:100%;
+  min-width:0;
+  box-sizing:border-box;
+}
+
+#v-act .progress-block.aligned > .pl span{min-width:0}
+
+#v-act .progress-block.aligned > .pl span:last-child{
+  text-align:right;
+  overflow-wrap:anywhere;
+}
 </style>
 </head>
 <body>
@@ -349,7 +384,7 @@ return '<button class="ck" data-a="go"'+(now<a.start?' disabled':'')+' aria-labe
 function card(a,now){
 var id=a.id,d=cnt(a,now),p=pct(a,now),st=streak(a,now),h=a.history;
 var rt="";if(a.goal>0){var gl=a.goal-d;rt=(gl>0?'zostáva '+gl+' '+dni(gl):'cieľ splnený 🎉')+(a.end?' · do '+fmt(a.end):'')}else if(a.end){var left=diff(now,a.end);rt=(left>0?'zostáva '+left+' '+dni(left):'termín uplynul')+' · do '+fmt(a.end)}
-var bar=p===null?"":'<div class="bar"><i style="width:'+p+'%"></i></div><div class="pl"><span>'+p+' %</span><span>'+rt+'</span></div>';
+var bar=p===null?"":'<div class="progress-block'+((a.goal>0||a.end)?" aligned":"")+'"><div class="bar"><i style="width:'+p+'%"></i></div><div class="pl"><span>'+p+' %</span><span>'+rt+'</span></div></div>';
 var today="";
 var isP=function(k){return pend&&pend.id===id&&pend.act===k};
 var pd=isP("del")&&pend.src==="sw";
@@ -603,7 +638,7 @@ if(w.done){col="#22c55e";meta="Splnené "+fmt(w.done);}
 else if(w.due){col=left<=3?"#ef4444":left<=14?"#f59e0b":"#22c55e";var ab=Math.abs(left);
 meta="do "+fmt(w.due)+" · "+(left>0?"zostáva "+left+" "+dni(left):left===0?"dnes je termín":"po termíne o "+ab+" "+dni(ab));
 big='<div class="big">'+(left<0?"−":"")+ab+'<small>'+dni(ab)+'</small></div>';
-var tot=Math.max(1,diff(w.created,w.due)),p=Math.max(0,Math.min(100,Math.round(diff(w.created,now)/tot*100)));bar='<div class="bar"><i style="width:'+p+'%"></i></div>'}
+var tot=Math.max(1,diff(w.created,w.due)),p=Math.max(0,Math.min(100,Math.round(diff(w.created,now)/tot*100)));bar='<div class="progress-block aligned"><div class="bar"><i style="width:'+p+'%"></i></div></div>'}
 else{col="#3b82f6";meta=""}
 var ck=w.done?'<span class="ck on" role="img" aria-label="Splnené">'+CHK+'</span>':'<button class="ck" data-w-a="done" aria-label="Označiť ako splnené">'+CHK+'</button>';
 var del=wPend===id?'<button type="button" data-w-a="yes">Áno</button><button type="button" data-w-a="no">Nie</button>':'<button type="button" data-w-a="del" aria-label="Odstrániť prianie"><svg viewBox="0 0 24 24" width="27" height="27" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5h6v2m-8 0 1 13h8l1-13M10 11v5m4-5v5"/></svg></button>';
