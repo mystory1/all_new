@@ -730,8 +730,8 @@ var acts=isP("reset")?cfm("Resetovať? Aktuálny priebeh sa uloží do histórie
 var cd=COLORS.map(function(c){return '<button type="button" class="dot'+(c===a.color?" on":"")+'" style="--c:'+c+'" data-a="col" data-c="'+c+'" aria-label="farba"></button>'}).join("");
 var op=function(k){return openIds[k]?" open":""};
 var G=function(k,title,body){return '<details class="n" data-k="'+id+k+'"'+op(id+k)+'><summary>'+title+'</summary><div class="in">'+body+'</div></details>'};
-var freqLabel=a.frequency==="custom"?a.frequencyDays.map(function(v){return ["","Po","Ut","St","Št","Pi","So","Ne"][v]}).join(", "):"Denne";
-var editPanel='<form class="col edit-activity-form" data-edit-form novalidate><label>Názov<span class="fld"><input type="text" class="en" maxlength="60" value="'+esc(a.name)+'"></span></label><div class="row"><label>Začiatok<span class="fld"><input type="date" class="es" value="'+a.start+'"></span></label><label>Koniec<span class="fld"><input type="date" class="ee" value="'+(a.end||"")+'" aria-label="Dátum konca"></span><span class="date-hint">Dátum konca musí byť po dátume začiatku.</span></label></div><div class="freq-box"><div class="freq-label">Opakovanie</div><div class="freq-toggle e-frequency-toggle"><button type="button" data-frequency="daily" class="'+(a.frequency!=="custom"?"on":"")+'">Denne</button><button type="button" data-frequency="custom" class="'+(a.frequency==="custom"?"on":"")+'">Vybrané dni</button><button type="button" data-frequency="manual" class="'+(a.frequency==="manual"?"on":"")+'">Vlastná</button></div><select class="efrequency" hidden><option value="daily"'+(a.frequency==="daily"?" selected":"")+'>Denne</option><option value="custom"'+(a.frequency==="custom"?" selected":"")+'>Vybrané dni</option><option value="manual"'+(a.frequency==="manual"?" selected":"")+'>Vlastná</option></select><div class="freq-days e-frequency-days"'+(a.frequency==="custom"?"":" hidden")+'>'+["Po","Ut","St","Št","Pi","So","Ne"].map(function(day,i){var v=i+1;return '<label><input type="checkbox" class="efday" value="'+v+'"'+(a.frequencyDays.indexOf(v)>=0?" checked":"")+'><span>'+day+'</span></label>'}).join("")+'</div></div><label>Kategória<span class="fld"><input type="text" class="ec" maxlength="24" list="cats" value="'+esc(a.cat||"")+'"></span></label><label>Poznámka<span class="fld"><input type="text" class="an" maxlength="140" placeholder="Poznámka k aktivite" value="'+esc(a.note||"")+'"></span></label><label>Cieľ (počet dní)<span class="fld"><input type="number" class="eg" min="1" inputmode="numeric" value="'+(a.goal||"")+'"></span></label><label class="tg"><input type="checkbox" class="eauto"'+(a.auto!==false&&a.frequency!=="manual"?" checked":"")+(a.frequency==="manual"?" disabled":"")+'> Automaticky započítavať plánované dni (bez odkliknutia)</label><div><div class="cl">Farba</div><div class="dots">'+cd+'</div></div></form>';
+var freqLabel=a.frequency==="custom"?a.frequencyDays.map(function(v){return ["","Po","Ut","St","Št","Pi","So","Ne"][v]}).join(", "):(a.frequency==="manual"?"Vlastná":"Denne");
+var editPanel='<form class="col edit-activity-form" data-edit-form novalidate><label>Názov<span class="fld"><input type="text" class="en" maxlength="60" value="'+esc(a.name)+'"></span></label><div class="row"><label>Začiatok<span class="fld"><input type="date" class="es" value="'+a.start+'"></span></label><label>Koniec<span class="fld"><input type="date" class="ee" value="'+(a.end||"")+'" aria-label="Dátum konca"></span><span class="date-hint">Dátum konca musí byť po dátume začiatku.</span></label></div><div class="freq-box"><div class="freq-label">Opakovanie</div><div class="freq-toggle e-frequency-toggle"><button type="button" data-frequency="daily" class="'+(a.frequency==="daily"?"on":"")+'">Denne</button><button type="button" data-frequency="custom" class="'+(a.frequency==="custom"?"on":"")+'">Vybrané dni</button><button type="button" data-frequency="manual" class="'+(a.frequency==="manual"?"on":"")+'">Vlastná</button></div><select class="efrequency" hidden><option value="daily"'+(a.frequency==="daily"?" selected":"")+'>Denne</option><option value="custom"'+(a.frequency==="custom"?" selected":"")+'>Vybrané dni</option><option value="manual"'+(a.frequency==="manual"?" selected":"")+'>Vlastná</option></select><div class="freq-days e-frequency-days"'+(a.frequency==="custom"?"":" hidden")+'>'+["Po","Ut","St","Št","Pi","So","Ne"].map(function(day,i){var v=i+1;return '<label><input type="checkbox" class="efday" value="'+v+'"'+(a.frequencyDays.indexOf(v)>=0?" checked":"")+'><span>'+day+'</span></label>'}).join("")+'</div></div><label>Kategória<span class="fld"><input type="text" class="ec" maxlength="24" list="cats" value="'+esc(a.cat||"")+'"></span></label><label>Poznámka<span class="fld"><input type="text" class="an" maxlength="140" placeholder="Poznámka k aktivite" value="'+esc(a.note||"")+'"></span></label><label>Cieľ (počet dní)<span class="fld"><input type="number" class="eg" min="1" inputmode="numeric" value="'+(a.goal||"")+'"></span></label><label class="tg"><input type="checkbox" class="eauto"'+(a.auto!==false&&a.frequency!=="manual"?" checked":"")+(a.frequency==="manual"?" disabled":"")+'> Automaticky započítavať plánované dni (bez odkliknutia)</label><div><div class="cl">Farba</div><div class="dots">'+cd+'</div></div></form>';
 var overviewPanel=activityProgressDetail(a,now)+'<div class="detail-summary"><div class="detail-stat"><b>'+freqLabel+'</b><span>Frekvencia</span></div><div class="detail-stat"><b>'+fmt(a.start)+'</b><span>Začiatok</span></div></div>'+(a.note?'<div class="detail-note"><div class="meta">Poznámka k aktivite</div><div class="sm">'+esc(a.note)+'</div></div>':'');
 var detailTab=detailTabs[id]||"overview";
 var detail='<div class="detail-tabs"><button type="button" data-detail-tab="overview" class="'+(detailTab==="overview"?"on":"")+'">Info</button><button type="button" data-detail-tab="calendar" class="'+(detailTab==="calendar"?"on":"")+'">Kalendár</button><button type="button" data-detail-tab="edit" class="'+(detailTab==="edit"?"on":"")+'">Upraviť</button></div><div class="detail-panel" data-detail-panel="overview"'+(detailTab==="overview"?"":" hidden")+'>'+overviewPanel+'</div><div class="detail-panel" data-detail-panel="calendar"'+(detailTab==="calendar"?"":" hidden")+'>'+cal(a,now)+'</div><div class="detail-panel" data-detail-panel="edit"'+(detailTab==="edit"?"":" hidden")+'>'+editPanel+'<div class="sec">'+acts+'</div></div>';
@@ -943,7 +943,7 @@ else if(cl.contains("ec"))a.cat=v;
 else if(cl.contains("eauto"))a.auto=el.checked;
 else if(cl.contains("efrequency")){a.frequency=v==="custom"?"custom":(v==="manual"?"manual":"daily");if(a.frequency==="manual")a.auto=false;var daysWrap=c.querySelector(".e-frequency-days"),autoBox=c.querySelector(".eauto");if(daysWrap)daysWrap.hidden=a.frequency!=="custom";if(autoBox){autoBox.disabled=a.frequency==="manual";autoBox.checked=a.frequency!=="manual"&&a.auto!==false;}if(a.frequency==="custom"&&!c.querySelector(".efday:checked"))groupError(c.querySelector(".freq-box"),"Vyber aspoň jeden deň v týždni.");else groupError(c.querySelector(".freq-box"),"");if(a.frequency==="custom"&&!c.querySelector(".efday:checked")){return;}c.querySelectorAll(".e-frequency-toggle button").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-frequency")===a.frequency)})}
 else if(cl.contains("efday")){var days=[].slice.call(c.querySelectorAll(".efday:checked")).map(function(x){return Number(x.value)});if(!days.length){el.checked=true;groupError(c.querySelector(".freq-box"),"Vyber aspoň jeden deň v týždni.");return}a.frequency="custom";a.frequencyDays=days;var fs=c.querySelector(".efrequency");if(fs)fs.value="custom";groupError(c.querySelector(".freq-box"),"");c.querySelectorAll(".e-frequency-toggle button").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-frequency")==="custom")})}
-dirty[id]=(cl.contains("ec")||dirty[id]==="cat")?"cat":true;save();refreshActivityInfo(c,a)}
+dirty[id]=(cl.contains("ec")||dirty[id]==="cat")?"cat":true;save();if(cl.contains("efday")){toast("Uložené");renderOne(id);return}refreshActivityInfo(c,a)}
 function syncEditDateInput(el){
 if(!el||!el.matches||!el.matches(".es,.ee"))return false;
 var c=el.closest("[data-id]"),id=c&&c.getAttribute("data-id"),a=items.find(function(x){return x.id===id});if(!a)return false;
@@ -1031,21 +1031,24 @@ var fw=freq.closest(".freq-box"),freqSelect=fw&&fw.querySelector(".efrequency"),
 if(freqSelect&&act){
   var next=freq.getAttribute("data-frequency"),daysWrap=fw.querySelector(".e-frequency-days"),autoBox=fw.querySelector(".eauto");
   if(next==="custom"){
-    if(act.frequency!=="custom")fw.querySelectorAll(".efday").forEach(function(x){x.checked=false});
+    if(act.frequency!=="custom"){
+      fw.querySelectorAll(".efday").forEach(function(x){x.checked=false});
+      act.frequencyDays=[];
+    }
     freqSelect.value="custom";daysWrap.hidden=false;
     groupError(fw,!fw.querySelector(".efday:checked")?"Vyber aspoň jeden deň v týždni.":"");
-  }else{
-    freqSelect.value=next;daysWrap.hidden=true;act.frequency=next;
-    if(next==="manual"){act.auto=false;if(autoBox){autoBox.checked=false;autoBox.disabled=true;}}
-    else{act.frequencyDays=[1,2,3,4,5,6,7];if(autoBox)autoBox.disabled=false;}
-    groupError(fw,"");dirty[act.id]=true;save();refreshActivityInfo(card,act);toast("Uložené");
+    fw.querySelectorAll(".e-frequency-toggle button").forEach(function(b){b.classList.toggle("on",b===freq)});
+    return;
   }
-  fw.querySelectorAll(".e-frequency-toggle button").forEach(function(b){b.classList.toggle("on",b===freq)});
+  freqSelect.value=next;daysWrap.hidden=true;act.frequency=next;
+  if(next==="manual"){act.auto=false;if(autoBox){autoBox.checked=false;autoBox.disabled=true;}}
+  else{act.frequencyDays=[1,2,3,4,5,6,7];if(autoBox)autoBox.disabled=false;}
+  groupError(fw,"");dirty[act.id]=true;save();toast("Uložené");renderOne(act.id);
 }
 return;
 }
 var cd=ev.target.closest(".sw .card");
-if(cd&&!cd.closest(".sw.open")&&!ev.target.closest("button,input,label,details,select,textarea,[data-a],.cal,.dp")){
+if(cd&&!cd.closest(".sw.open,.sw.pd")&&!ev.target.closest("button,input,label,details,select,textarea,[data-a],.cal,.dp")){
 if(Date.now()-supClick<350)return;
 var dd=cd.querySelector("details.d");
 if(dd){var cid=cd.closest("[data-id]").getAttribute("data-id");
@@ -1122,20 +1125,22 @@ if(d.classList&&d.classList.contains("d")){
 var W=76,sw=null;
 function closeSw(except){list.querySelectorAll(".sw.open,.sw.pd").forEach(function(w){if(w===except)return;if(w.classList.contains("pd")){pend=null;w.querySelector(".del").innerHTML=TRASH}w.classList.remove("open","pd");w.style.removeProperty("--p");w.querySelector(".card").style.transform=""})}
 list.addEventListener("pointerdown",function(ev){if(ev.pointerType==="touch")return;var w=ev.target.closest(".sw");closeSw(w);
-if(!w||w.classList.contains("pd")||w.classList.contains("open")||(w.querySelector("details.d")&&w.querySelector("details.d").open)||ev.target.closest("input,button,summary,label,details"))return;
-sw={w:w,c:w.querySelector(".card"),x:ev.clientX,y:ev.clientY,sx:0,drag:false,was:w.classList.contains("open"),tx:0,lx:ev.clientX,lt:performance.now(),v:0,id:ev.pointerId}});
+if(!w||(w.querySelector("details.d")&&w.querySelector("details.d").open)||ev.target.closest("input,button,summary,label,details"))return;
+var isConfirm=w.classList.contains("pd"),isOpen=w.classList.contains("open")||isConfirm;
+sw={w:w,c:w.querySelector(".card"),x:ev.clientX,y:ev.clientY,sx:0,drag:false,was:isOpen,base:isConfirm?-160:(isOpen?-W:0),width:isConfirm?160:W,confirm:isConfirm,tx:isConfirm?-160:(isOpen?-W:0),lx:ev.clientX,lt:performance.now(),v:0,id:ev.pointerId}});
 list.addEventListener("pointermove",function(ev){if(ev.pointerType==="touch"||!sw)return;
 var dx=ev.clientX-sw.x,dy=ev.clientY-sw.y;
 if(!sw.drag){if(Math.abs(dx)>8&&Math.abs(dx)>Math.abs(dy)*1.2){sw.drag=true;sw.sx=sw.x+(dx>0?8:-8);sw.c.style.transition="none";try{sw.c.setPointerCapture(sw.id)}catch(e){}}else return}
 var t=performance.now(),dt=t-sw.lt;if(dt>0)sw.v=.7*sw.v+.3*((ev.clientX-sw.lx)/dt);sw.lx=ev.clientX;sw.lt=t;
-var raw=(sw.was?-W:0)+(ev.clientX-sw.sx);
-sw.tx=raw<-W?-W+(raw+W)*.25:(raw>0?raw*.2:raw);
+var raw=sw.base+(ev.clientX-sw.sx);
+sw.tx=raw<-sw.width?-sw.width+(raw+sw.width)*.25:(raw>0?raw*.2:raw);
 sw.c.style.transform="translateX("+sw.tx+"px)";sw.w.style.setProperty("--p",Math.min(1,Math.max(0,-sw.tx/W)))});
 function endSw(ev){if(ev&&ev.pointerType==="touch")return;if(!sw)return;var s=sw;sw=null;s.c.style.transition="";
 if(s.drag){supClick=Date.now();try{s.c.releasePointerCapture(s.id)}catch(e){}
-var o=(s.v<-.4&&s.tx<-14)?true:s.v>.4?false:s.tx<-W*.4;
-s.w.classList.toggle("open",o);s.c.style.transform=o?"translateX("+(-W)+"px)":"";s.w.style.setProperty("--p",o?1:0)}
-else if(s.was){supClick=Date.now();s.w.classList.remove("open");s.c.style.transform="";s.w.style.removeProperty("--p")}}
+var o=(s.v<-.4&&s.tx<-14)?true:s.v>.4?false:s.tx<-s.width*.4;
+if(s.confirm&&!o){pend=null;renderOne(s.w.getAttribute("data-id"));return}
+s.w.classList.toggle("open",o);s.c.style.transform=o?"translateX("+(-s.width)+"px)":"";s.w.style.setProperty("--p",o?1:0)}
+else if(s.was){supClick=Date.now();if(s.confirm){pend=null;renderOne(s.w.getAttribute("data-id"));return}s.w.classList.remove("open");s.c.style.transform="";s.w.style.removeProperty("--p")}}
 list.addEventListener("pointerup",endSw);list.addEventListener("pointercancel",endSw);
 document.addEventListener("visibilitychange",function(){if(!document.hidden){render();if(T==="ov")renderOv();if(T==="wl")renderWl()}});
 
@@ -1341,7 +1346,7 @@ function beginOrderDrag(data){data.active=true;orderDrag=data;document.body.clas
 // switches that same gesture into reorder mode without requiring a second touch.
 document.addEventListener("touchstart",function(ev){if(ev.touches.length!==1)return;var found=dragTypeCard(ev.target);if(!found)return;
  if(scrollInertiaFrame){cancelAnimationFrame(scrollInertiaFrame);scrollInertiaFrame=0;}cancelOrderPress();if(orderDrag)finishOrderDrag();var t=ev.touches[0],wishDone=found.type==="wishlist"?getWishDone(found.id):false,activityDetailOpen=found.type==="activity"&&!!(found.card.querySelector("details.d")&&found.card.querySelector("details.d").open),blocked=activityDetailOpen||!!ev.target.closest("button,input,textarea,select,summary,details,label,a,.cal,.dp,[data-detail-tab]");
- var data={type:found.type,card:found.card,id:found.id,doneState:wishDone,blocked:blocked,dragAllowed:!blocked&&!wishDone&&!(found.type==="activity"&&found.card.classList.contains("open")),pointerId:"touch",x:t.clientX,y:t.clientY,lastY:t.clientY,lastX:t.clientX,lastTime:performance.now(),velocity:0,moved:false,scrollMode:false,swipeMode:false,swipeTx:0,swipeVelocity:0,active:false,target:null,after:false,scrollStart:window.scrollY,wasOpen:!!(found.type==="wishlist"?found.card.closest(".w-sw").classList.contains("open"):found.card.classList.contains("open")),swipeCard:found.type==="wishlist"?found.card:found.card.querySelector(":scope>.card")};orderPressData=data;
+ var data={type:found.type,card:found.card,id:found.id,doneState:wishDone,blocked:blocked,dragAllowed:!blocked&&!wishDone&&!(found.type==="activity"&&(found.card.classList.contains("open")||found.card.classList.contains("pd"))),pointerId:"touch",x:t.clientX,y:t.clientY,lastY:t.clientY,lastX:t.clientX,lastTime:performance.now(),velocity:0,moved:false,scrollMode:false,swipeMode:false,swipeTx:0,swipeVelocity:0,active:false,target:null,after:false,scrollStart:window.scrollY,wasOpen:!!(found.type==="wishlist"?found.card.closest(".w-sw").classList.contains("open"):(found.card.classList.contains("open")||found.card.classList.contains("pd"))),isConfirm:found.type==="activity"&&found.card.classList.contains("pd"),swipeWidth:found.type==="activity"&&found.card.classList.contains("pd")?160:76,swipeCard:found.type==="wishlist"?found.card:found.card.querySelector(":scope>.card")};orderPressData=data;
  if(data.dragAllowed)orderPress=setTimeout(function(){orderPress=null;if(orderPressData===data&&!data.moved){beginOrderDrag(data);}},360);
 },{passive:true});
 document.addEventListener("touchmove",function(ev){if(ev.touches.length!==1)return;var t=ev.touches[0],now=performance.now();
@@ -1353,8 +1358,8 @@ document.addEventListener("touchmove",function(ev){if(ev.touches.length!==1)retu
  }
  if(data.swipeMode){
   ev.preventDefault();
-  var raw=(data.wasOpen?-76:0)+dx;
-  data.swipeTx=raw<-76?-76+(raw+76)*.25:(raw>0?raw*.2:raw);
+  var raw=(data.wasOpen?-data.swipeWidth:0)+dx;
+  data.swipeTx=raw<-data.swipeWidth?-data.swipeWidth+(raw+data.swipeWidth)*.25:(raw>0?raw*.2:raw);
   data.swipeCard.style.transform="translateX("+data.swipeTx+"px)";
   var swipeWrap=data.type==="wishlist"?data.card.closest(".w-sw"):data.card;
   if(data.type==="activity")swipeWrap.style.setProperty("--p",Math.min(1,Math.max(0,-data.swipeTx/76)));
@@ -1364,7 +1369,7 @@ document.addEventListener("touchmove",function(ev){if(ev.touches.length!==1)retu
  else if(data.scrollMode){ev.preventDefault();var dt=Math.max(1,now-data.lastTime);var delta=data.lastY-t.clientY;window.scrollBy(0,delta);data.velocity=delta/dt;}
  data.lastX=t.clientX;data.lastY=t.clientY;data.lastTime=now;
 },{passive:false});
-document.addEventListener("touchend",function(){if(orderDrag){finishOrderDrag();orderPressData=null;return;}var data=orderPressData;cancelOrderPress();if(data&&data.swipeMode){var wrap=data.type==="wishlist"?data.card.closest(".w-sw"):data.card,card=data.swipeCard,open=(data.swipeVelocity<-.35&&data.swipeTx<-12)?true:(data.swipeVelocity>.35?false:data.swipeTx<-30);card.style.transition="transform .28s cubic-bezier(.22,1,.36,1)";if(data.type==="activity")wrap.style.setProperty("--p",open?"1":"0");wrap.classList.toggle("open",open);if(data.type==="wishlist")card.style.removeProperty("transform");else card.style.transform=open?"translateX(-76px)":"";setTimeout(function(){if(card.isConnected){card.style.transition="";if(!open&&data.type==="activity")wrap.style.removeProperty("--p")}},300);supClick=Date.now();}else if(data&&data.scrollMode)startScrollInertia(data.velocity);},{passive:true});
+document.addEventListener("touchend",function(){if(orderDrag){finishOrderDrag();orderPressData=null;return;}var data=orderPressData;cancelOrderPress();if(data&&data.swipeMode){var wrap=data.type==="wishlist"?data.card.closest(".w-sw"):data.card,card=data.swipeCard,width=data.swipeWidth||76,open=(data.swipeVelocity<-.35&&data.swipeTx<-12)?true:(data.swipeVelocity>.35?false:data.swipeTx<-width*.4);card.style.transition="transform .28s cubic-bezier(.22,1,.36,1)";if(data.type==="activity")wrap.style.setProperty("--p",open?"1":"0");if(data.type==="activity"&&data.isConfirm&&!open){pend=null;renderOne(data.id);supClick=Date.now();return;}wrap.classList.toggle("open",open);if(data.type==="wishlist")card.style.removeProperty("transform");else card.style.transform=open?"translateX("+(-width)+"px)":"";setTimeout(function(){if(card.isConnected){card.style.transition="";if(!open&&data.type==="activity")wrap.style.removeProperty("--p")}},300);supClick=Date.now();}else if(data&&data.scrollMode)startScrollInertia(data.velocity);},{passive:true});
 document.addEventListener("touchcancel",function(){cancelOrderPress();orderDrag=null;clearDropMarks();clearDragState();},{passive:true});
 // Desktop mouse/pen uses the same insertion algorithm.
 document.addEventListener("pointerdown",function(ev){if(ev.pointerType==="touch")return;var found=dragTypeCard(ev.target);if(!found||ev.target.closest("button,input,textarea,select,summary,details,label,a"))return;
