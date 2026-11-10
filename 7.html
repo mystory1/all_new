@@ -560,7 +560,7 @@ button { max-width: 100%; }
 .lists-title{font-size:1.12rem;font-weight:700;overflow-wrap:anywhere}
 .list-swipe,.item-swipe{position:relative;margin-bottom:9px;overflow:hidden;border-radius:16px;--p:1}
 .list-swipe-actions,.item-swipe-actions{position:absolute;right:0;top:0;bottom:0;width:76px;background:linear-gradient(90deg,#b91c1c,#ef4444);display:flex;align-items:center;justify-content:center;border-radius:0 16px 16px 0}
-.list-swipe-actions button,.item-swipe-actions button{width:76px;height:100%;display:grid;place-items:center;background:transparent;color:#fff;border-radius:0}
+.list-swipe-actions button,.item-swipe-actions button{width:76px;height:100%;display:grid;place-items:center;background:transparent;color:#fff;border-radius:0}.list-delete-confirm{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#fff;font-size:.68rem;font-weight:700}.list-delete-confirm button{width:auto!important;height:auto!important;min-height:22px;padding:1px 8px!important;border:1px solid rgba(255,255,255,.55)!important;border-radius:6px!important;font-size:.68rem!important;font-weight:700;background:rgba(0,0,0,.12)!important}.list-delete-confirm span{white-space:nowrap}.list-delete-inline{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;font-size:.82rem}.list-delete-inline .actions{display:flex;gap:6px;flex:none}.list-delete-inline button{width:auto;height:auto;min-height:30px;padding:5px 10px;border-radius:8px;font-size:.78rem}.list-delete-inline button.confirm{background:#b91c1c;color:#fff}
 .list-swipe-actions svg,.item-swipe-actions svg{width:26px;height:26px}
 .list-card,.list-item-card{position:relative;z-index:1;width:100%;text-align:left;display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--card);color:var(--txt);transition:transform .28s cubic-bezier(.22,1,.36,1);touch-action:pan-y}
 .list-card{padding:14px}
@@ -569,18 +569,17 @@ button { max-width: 100%; }
 .list-card-copy small,.list-item-copy small{font-size:.75rem;color:var(--mut)}
 .list-chevron{font-size:1.5rem;color:var(--mut)}
 .list-item-card{display:block;padding:12px 14px}
-.list-item-main{display:flex;align-items:center;gap:10px;min-width:0}
-.list-item-copy{display:grid;gap:3px;flex:1;min-width:0}
-.list-item-copy strong{font-size:.94rem;overflow-wrap:anywhere}
+.list-item-main{display:flex;align-items:center;gap:9px;min-width:0;min-height:30px}
+.list-item-copy{display:flex;align-items:center;gap:8px;flex:1;min-width:0;overflow:hidden}
+.list-item-copy strong{font-size:.94rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:1}.list-item-copy small{flex:none;max-width:38%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.list-edit-toggle,.list-rename-toggle{width:34px;height:34px;min-width:34px;padding:0;display:grid;place-items:center;border-radius:10px}.list-edit-toggle svg,.list-rename-toggle svg{width:17px;height:17px}
 .list-item-copy strong.is-complete{text-decoration:line-through;color:var(--mut)}
 .list-edit-toggle{flex:none}
 .list-item-editor{display:grid;gap:12px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
 .list-item-editor-actions{display:flex;justify-content:flex-end}
 .note-fld{height:auto;min-height:88px;overflow:visible}
 .note-fld textarea{display:block;width:100%;min-height:88px;resize:vertical;background:transparent;border:0;color:var(--txt);padding:10px 12px;font:inherit;font-size:16px;outline:none}
-#listCreateType{width:100%;height:100%;background:transparent;border:0;color:var(--txt);padding:0 12px;font:inherit;font-size:16px}
 #listItemFields{display:grid;gap:12px}
-@media(max-width:480px){.lists-title-row{align-items:flex-start;flex-direction:column}.list-edit-toggle{padding:7px 9px}}
+@media(max-width:480px){.lists-title-row{align-items:center;flex-direction:row}.list-edit-toggle,.list-rename-toggle{padding:0}}
 
 </style>
 </head>
@@ -626,7 +625,6 @@ button { max-width: 100%; }
 <div id="v-wl" hidden>
 <div class="card" id="listCreateCard" hidden style="margin-bottom:12px">
 <form id="listCreateForm" novalidate>
-<label>Typ zoznamu<span class="fld"><select id="listCreateType"><option value="wishlist">Wishlist</option><option value="todo">To do list</option><option value="notes">Notes</option></select></span></label>
 <label>Názov zoznamu<span class="fld"><input id="listCreateTitle" maxlength="80" placeholder="napr. Veci na kúpu"></span></label>
 <button class="primary" type="submit">Vytvoriť zoznam</button>
 </form>
@@ -1138,11 +1136,12 @@ else if(s.was){supClick=Date.now();s.w.classList.remove("open");s.c.style.transf
 list.addEventListener("pointerup",endSw);list.addEventListener("pointercancel",endSw);
 document.addEventListener("visibilitychange",function(){if(!document.hidden){render();if(T==="ov")renderOv();if(T==="wl")renderWl()}});
 
-var WLK="aktivity_lists_v1",LISTS=[],LIST_ITEMS=[],LIST_FILTER="all",activeListId=null,WL=[],wPend=null;
+var EDIT_ICON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg>';
+var WLK="aktivity_lists_v1",LISTS=[],LIST_ITEMS=[],LIST_FILTER="todo",activeListId=null,WL=[],wPend=null;
 var wlEl=document.getElementById("v-wl"),listCreateCard=document.getElementById("listCreateCard");
 var listItemCreateCard=document.getElementById("listItemCreateCard"),listCreateForm=document.getElementById("listCreateForm");
 var listItemCreateForm=document.getElementById("listItemCreateForm"),listItemFields=document.getElementById("listItemFields");
-var listCreateType=document.getElementById("listCreateType"),listCreateTitle=document.getElementById("listCreateTitle");
+var listCreateTitle=document.getElementById("listCreateTitle");
 var listSwipeState=null,listDeletePending=null,itemDeletePending=null;
 function listLoad(){
  try{var raw=localStorage.getItem(WLK);var data=raw?JSON.parse(raw):null;
@@ -1168,7 +1167,7 @@ function toggleListsAddForm(){
  if(!other.hidden)closeAddForm(other);
  if(form.hidden){
   if(activeListId)prepareListItemForm(currentList());
-  else{listCreateType.value="wishlist";listCreateTitle.value="";}
+  else{listCreateTitle.value="";}
   openAddForm(form,activeListId?"listItemTitle":"listCreateTitle");
  }else closeAddForm(form);
 }
@@ -1192,18 +1191,21 @@ function renderLists(){
  var box=document.getElementById("listsView"),list=currentList();
  if(list){
   var its=listItemsFor(list.id),body=its.map(function(it){return renderListItem(it,list)}).join("");
-  box.innerHTML='<div class="lists-back"><button class="ghost" type="button" data-list-action="back">‹ Všetky zoznamy</button></div>'+
-   '<div class="lists-title-card card"><div class="lists-title-row"><div><div class="lists-type">'+listTypeName(list.type)+'</div><div class="lists-title">'+esc(list.title)+'</div><div class="meta">'+its.length+(list.type==="notes"?" poznámok":list.type==="todo"?" úloh":" položiek")+'</div></div><button class="ghost" type="button" data-list-action="rename">Upraviť názov</button></div></div>'+
+  box.innerHTML='<div class="lists-back"><button class="ghost" type="button" data-list-action="back">‹ '+(list.type==="todo"?"To Do":list.type==="notes"?"Notes":"Wishlist")+'</button></div>'+ 
+   '<div class="lists-title-card card"><div class="lists-title-row"><div class="list-card-copy"><div class="lists-title">'+esc(list.title)+'</div><div class="meta">'+its.length+(list.type==="notes"?" poznámok":list.type==="todo"?" úloh":" položiek")+(list.type==="todo"&&its.length?" · "+its.filter(function(x){return x.done}).length+" dokončených":"")+'</div></div><button type="button" class="ghost list-rename-toggle" data-list-action="rename" aria-label="Upraviť názov zoznamu" title="Upraviť názov">'+EDIT_ICON+'</button></div></div>'+ 
    (body||'<div class="empty">'+(list.type==="notes"?"Zatiaľ žiadne poznámky.":list.type==="todo"?"Zatiaľ žiadne úlohy.":"Zoznam je zatiaľ prázdny.")+'<br>Pridaj prvú položku tlačidlom ＋.</div>');
   return;
  }
- var filtered=LIST_FILTER==="all"?LISTS:LISTS.filter(function(l){return l.type===LIST_FILTER});
- var filters=[["all","Všetky"],["wishlist","Wishlist"],["todo","To do"],["notes","Notes"]];
- box.innerHTML='<div class="seg lists-filter">'+filters.map(function(f){return '<button type="button" data-list-filter="'+f[0]+'" class="'+(LIST_FILTER===f[0]?"on":"")+'">'+f[1]+'</button>'}).join("")+'</div>'+
+ var filtered=LISTS.filter(function(l){return l.type===LIST_FILTER});
+ var filters=[["todo","To Do"],["notes","Notes"],["wishlist","Wishlist"]];
+ box.innerHTML='<div class="seg lists-filter">'+filters.map(function(f){return '<button type="button" data-list-filter="'+f[0]+'" class="'+(LIST_FILTER===f[0]?"on":"")+'">'+f[1]+'</button>'}).join("")+'</div>'+ 
   (filtered.length?filtered.sort(function(a,b){return (a.sort_order||0)-(b.sort_order||0)}).map(function(l){
    var n=listCount(l.id),done=listItemsFor(l.id).filter(function(x){return x.done}).length;
-   return '<div class="list-swipe" data-list-swipe="'+esc(l.id)+'"><div class="list-swipe-actions"><button type="button" data-list-action="delete-list" data-id="'+esc(l.id)+'" aria-label="Odstrániť zoznam">'+TRASH.replace(/^<button[^>]*>/,"").replace(/<\/button>$/,"")+'</button></div><div class="card list-card" data-list-open="'+esc(l.id)+'" role="button" tabindex="0"><span class="list-card-copy"><span class="lists-type">'+listTypeName(l.type)+'</span><strong>'+esc(l.title)+'</strong><small>'+(l.type==="todo"?done+" / "+n+" dokončených":n+(l.type==="notes"?" poznámok":" položiek"))+'</small></span><span class="list-chevron">›</span></div></div>';
-  }).join(""):'<div class="empty">Zatiaľ nemáš žiadne zoznamy.<br>Vytvor Wishlist, To do list alebo Notes tlačidlom ＋.</div>');
+   var confirmDelete=listDeletePending===l.id;
+   var actions='<button type="button" data-list-action="delete-list" data-id="'+esc(l.id)+'" aria-label="Odstrániť zoznam">'+TRASH.replace(/^<button[^>]*>/,"").replace(/<\/button>$/ ,"")+'</button>';
+   var listContent=confirmDelete?'<div class="list-delete-inline"><span>Naozaj odstrániť tento zoznam?</span><span class="actions"><button type="button" class="confirm" data-list-action="confirm-delete-list" data-id="'+esc(l.id)+'">Áno</button><button type="button" class="ghost" data-list-action="cancel-delete">Nie</button></span></div>':'<span class="list-card-copy"><strong>'+esc(l.title)+'</strong><small>'+(l.type==="todo"?done+" / "+n+" dokončených":n+(l.type==="notes"?" poznámok":" položiek"))+'</small></span><span class="list-chevron">›</span>';
+   return '<div class="list-swipe" data-list-swipe="'+esc(l.id)+'"><div class="list-swipe-actions">'+actions+'</div><div class="card list-card" data-list-open="'+esc(l.id)+'" role="button" tabindex="0">'+listContent+'</div></div>';
+  }).join(""):'<div class="empty">V tejto sekcii zatiaľ nemáš žiadne zoznamy.<br>Vytvor nový tlačidlom ＋.</div>');
 }
 function renderListItem(it,list){
  var edit=list.type==="wishlist"
@@ -1211,8 +1213,9 @@ function renderListItem(it,list){
   :list.type==="notes"?'<label>Poznámka<span class="fld note-fld"><textarea class="list-edit-note" data-id="'+esc(it.id)+'" maxlength="5000">'+esc(it.note||"")+'</textarea></span></label>':'';
  var titleEdit='<label>Názov položky<span class="fld"><input class="list-edit-title" data-id="'+esc(it.id)+'" maxlength="100" value="'+esc(it.title)+'"></span></label>';
  var done=list.type==="todo"?'<button type="button" class="ck'+(it.done?" on":"")+'" data-list-action="toggle-done" data-id="'+esc(it.id)+'" aria-label="'+(it.done?"Označiť ako nesplnené":"Označiť ako splnené")+'">'+CHK+'</button>':'';
- var summary='<div class="list-item-main">'+done+'<div class="list-item-copy"><strong class="'+(it.done?"is-complete":"")+'">'+esc(it.title)+'</strong>'+(list.type==="wishlist"&&it.amount!=null&&it.amount!==""?'<small>'+esc(String(it.amount))+'</small>':list.type==="notes"&&it.note?'<small>'+esc(it.note.slice(0,100))+'</small>':'')+'</div><button type="button" class="ghost list-edit-toggle" data-list-action="edit-item" data-id="'+esc(it.id)+'">Upraviť</button></div>';
- return '<div class="item-swipe" data-item-swipe="'+esc(it.id)+'"><div class="item-swipe-actions"><button type="button" data-list-action="delete-item" data-id="'+esc(it.id)+'" aria-label="Odstrániť položku">'+TRASH.replace(/^<button[^>]*>/,"").replace(/<\/button>$/,"")+'</button></div><div class="card list-item-card" data-item-card="'+esc(it.id)+'">'+summary+'<div class="list-item-editor" data-editor="'+esc(it.id)+'" hidden>'+titleEdit+edit+'<div class="list-item-editor-actions"><button type="button" class="ghost" data-list-action="close-editor" data-id="'+esc(it.id)+'">Hotovo</button></div></div></div></div>';
+ var summary=itemDeletePending===it.id?'<div class="list-delete-inline"><span>Naozaj odstrániť túto položku?</span><span class="actions"><button type="button" class="confirm" data-list-action="confirm-delete-item" data-id="'+esc(it.id)+'">Áno</button><button type="button" class="ghost" data-list-action="cancel-delete">Nie</button></span></div>':'<div class="list-item-main">'+done+'<div class="list-item-copy"><strong class="'+(it.done?"is-complete":"")+'">'+esc(it.title)+'</strong>'+(list.type==="wishlist"&&it.amount!=null&&it.amount!==""?'<small>'+esc(String(it.amount))+'</small>':list.type==="notes"&&it.note?'<small>'+esc(it.note.slice(0,100))+'</small>':'')+'</div><button type="button" class="ghost list-edit-toggle" data-list-action="edit-item" data-id="'+esc(it.id)+'" aria-label="Upraviť položku" title="Upraviť">'+EDIT_ICON+'</button></div>';
+ var itemActions='<button type="button" data-list-action="delete-item" data-id="'+esc(it.id)+'" aria-label="Odstrániť položku">'+TRASH.replace(/^<button[^>]*>/,"").replace(/<\/button>$/,"")+'</button>';
+ return '<div class="item-swipe" data-item-swipe="'+esc(it.id)+'"><div class="item-swipe-actions">'+itemActions+'</div><div class="card list-item-card" data-item-card="'+esc(it.id)+'">'+summary+'<div class="list-item-editor" data-editor="'+esc(it.id)+'" hidden>'+titleEdit+edit+'<div class="list-item-editor-actions"><button type="button" class="ghost" data-list-action="close-editor" data-id="'+esc(it.id)+'">Hotovo</button></div></div></div></div>';
 }
 function listToastSaved(){toast("Uložené")}
 function deleteList(id){
@@ -1227,8 +1230,8 @@ listCreateForm.addEventListener("submit",function(ev){
  if(!title){badF(listCreateTitle,"Zadaj názov zoznamu.");return}
  okF(listCreateTitle);
  var id="l"+Date.now()+Math.floor(Math.random()*1000);
- LISTS.push({id:id,type:listCreateType.value,title:title,created:todayStr(),sort_order:LISTS.length});
- listSave();listCreateForm.reset();listCreateCard.hidden=true;LIST_FILTER=listCreateType.value;activeListId=id;renderLists();addBtn();toast("Zoznam vytvorený");
+ var createdType=LIST_FILTER;LISTS.push({id:id,type:createdType,title:title,created:todayStr(),sort_order:LISTS.filter(function(x){return x.type===createdType}).length});
+ listSave();listCreateForm.reset();listCreateCard.hidden=true;activeListId=id;renderLists();addBtn();toast("Zoznam vytvorený");
 });
 listItemCreateForm.addEventListener("submit",function(ev){
  ev.preventDefault();var list=currentList();if(!list)return;
@@ -1243,19 +1246,22 @@ listItemCreateForm.addEventListener("submit",function(ev){
  LIST_ITEMS.push({id:"i"+Date.now()+Math.floor(Math.random()*1000),list_id:list.id,title:value,note:noteEl?noteEl.value.trim():"",amount:amount,done:false,created:todayStr(),sort_order:listItemsFor(list.id).length});
  listSave();listItemCreateForm.reset();listItemCreateCard.hidden=true;renderLists();addBtn();toast(list.type==="notes"?"Poznámka pridaná":"Položka pridaná");
 });
-wlEl.addEventListener("keydown",function(ev){if((ev.key==="Enter"||ev.key===" ")&&ev.target.closest("[data-list-open]")){ev.preventDefault();ev.target.closest("[data-list-open]").click()}});
+wlEl.addEventListener("keydown",function(ev){if((ev.key==="Enter"||ev.key===" ")&&ev.target.closest("[data-list-open]")&&!ev.target.closest("[data-list-action]")){ev.preventDefault();ev.target.closest("[data-list-open]").click()}});
 wlEl.addEventListener("click",function(ev){
  if(Date.now()-supClick<550&&ev.target.closest(".list-card,.list-item-card")){ev.preventDefault();ev.stopPropagation();return}
- var filter=ev.target.closest("[data-list-filter]");if(filter){LIST_FILTER=filter.getAttribute("data-list-filter");renderLists();return}
- var open=ev.target.closest("[data-list-open]");if(open){activeListId=open.getAttribute("data-list-open");closeListsForms();renderLists();addBtn();return}
+ var filter=ev.target.closest("[data-list-filter]");if(filter){LIST_FILTER=filter.getAttribute("data-list-filter");listDeletePending=null;itemDeletePending=null;renderLists();return}
+ var open=ev.target.closest("[data-list-open]");if(open&&!ev.target.closest("[data-list-action]")){activeListId=open.getAttribute("data-list-open");listDeletePending=null;itemDeletePending=null;closeListsForms();renderLists();addBtn();return}
  var action=ev.target.closest("[data-list-action]");if(!action)return;
  var a=action.getAttribute("data-list-action"),id=action.getAttribute("data-id");
- if(a==="back"){activeListId=null;closeListsForms();renderLists();addBtn();return}
+ if(a==="back"){activeListId=null;listDeletePending=null;itemDeletePending=null;closeListsForms();renderLists();addBtn();return}
  if(a==="rename"){
   var list=currentList();if(!list)return;var v=window.prompt("Nový názov zoznamu",list.title);if(v===null)return;v=v.trim();if(!v){toast("Názov nemôže byť prázdny.");return}list.title=v;listSave();renderLists();toast("Uložené");return;
  }
- if(a==="delete-list"){if(listDeletePending===id){deleteList(id);return}listDeletePending=id;action.textContent="Naozaj odstrániť?";return}
- if(a==="delete-item"){if(itemDeletePending===id){deleteListItem(id);return}itemDeletePending=id;action.textContent="Naozaj odstrániť?";return}
+ if(a==="delete-list"){listDeletePending=id;renderLists();return}
+ if(a==="confirm-delete-list"){if(listDeletePending===id)deleteList(id);return}
+ if(a==="delete-item"){itemDeletePending=id;renderLists();return}
+ if(a==="confirm-delete-item"){if(itemDeletePending===id)deleteListItem(id);return}
+ if(a==="cancel-delete"){listDeletePending=null;itemDeletePending=null;renderLists();return}
  if(a==="toggle-done"){var it=LIST_ITEMS.find(function(x){return x.id===id});if(it){it.done=!it.done;listSave();renderLists()}return}
  if(a==="edit-item"){var editor=wlEl.querySelector('[data-editor="'+CSS.escape(id)+'"]');if(editor)editor.hidden=!editor.hidden;return}
  if(a==="close-editor"){var ed=wlEl.querySelector('[data-editor="'+CSS.escape(id)+'"]');if(ed)ed.hidden=true;listSave();toast("Uložené");return}
