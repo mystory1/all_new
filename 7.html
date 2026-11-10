@@ -304,6 +304,15 @@ body{overscroll-behavior-y:auto}
 .detail-tabs button.on{background:#fff;color:#000;border-color:#fff}
 .detail-panel[hidden]{display:none!important}
 .detail-panel>.col{gap:10px}
+
+/* Progress is shown at the top of activity Info, not in the compact list row. */
+.detail-progress{display:grid;gap:7px;margin:2px 0 12px;padding:11px 12px;background:#0a0a0a;border:1px solid #242424;border-radius:11px;min-width:0}
+.detail-progress-head{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:.78rem;color:var(--mut)}
+.detail-progress-head b{font-size:1rem;color:var(--txt);font-variant-numeric:tabular-nums}
+.detail-progress-track{height:7px;width:100%;border-radius:99px;background:#252525;overflow:hidden}
+.detail-progress-track i{display:block;height:100%;border-radius:99px;background:var(--c)}
+.detail-progress-meta{font-size:.74rem;color:var(--mut);line-height:1.3;overflow-wrap:anywhere}
+
 .detail-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:4px 0 10px}
 .detail-stat{padding:10px;background:#0a0a0a;border:1px solid #1d1d1d;border-radius:10px}
 .detail-stat b{display:block;font-size:1.05rem;color:var(--txt)}
@@ -655,10 +664,24 @@ var ICN={u:IC('<path d="M4 20h4L19 9a2.1 2.1 0 0 0-3-3L5 17v3z"/><path d="M13.5 
 function CK(a,now){var sv='<svg viewBox="0 0 24 24"><path d="M5.5 12.5l4.2 4.2L18.5 7.5"/></svg>';
 if(!isScheduled(a,now)||now<a.start||(a.end&&now>a.end)||isDone(a,now,now))return "";
 return '<button class="ck" data-a="go" aria-label="Označiť ako splnené dnes">'+sv+'</button>'}
+
+function activityProgressDetail(a,now){
+var p=pct(a,now),d=cnt(a,now),rt="";
+if(p===null)return "";
+if(a.goal>0){
+ var gl=a.goal-d;
+ rt=gl>0?"Zostáva "+gl+" "+dni(gl):"Cieľ splnený";
+ if(a.end)rt+=" · do "+fmt(a.end);
+}else if(a.end){
+ var left=diff(now,a.end);
+ rt=(left>0?"Zostáva "+left+" "+dni(left):"Termín uplynul")+" · do "+fmt(a.end);
+}
+return '<div class="detail-progress"><div class="detail-progress-head"><span>Priebeh</span><b>'+p+' %</b></div><div class="detail-progress-track"><i style="width:'+p+'%"></i></div>'+(rt?'<div class="detail-progress-meta">'+esc(rt)+'</div>':'')+'</div>';
+}
+
 function card(a,now){
 var id=a.id,d=cnt(a,now),p=pct(a,now),st=streak(a,now),h=a.history;
 var rt="";if(a.goal>0){var gl=a.goal-d;rt=(gl>0?'zostáva '+gl+' '+dni(gl):'cieľ splnený 🎉')+(a.end?' · do '+fmt(a.end):'')}else if(a.end){var left=diff(now,a.end);rt=(left>0?'zostáva '+left+' '+dni(left):'termín uplynul')+' · do '+fmt(a.end)}
-var bar=p===null?"":'<span class="mini-progress" aria-label="Priebeh '+p+'%"><span class="mini-progress-track"><i style="width:'+p+'%"></i></span><span class="mini-progress-info">'+p+'%'+(rt?' · '+esc(rt):'')+'</span></span>';
 var today="";
 var isP=function(k){return pend&&pend.id===id&&pend.act===k};
 var pd=isP("del")&&pend.src==="sw";
@@ -669,11 +692,11 @@ var op=function(k){return openIds[k]?" open":""};
 var G=function(k,title,body){return '<details class="n" data-k="'+id+k+'"'+op(id+k)+'><summary>'+title+'</summary><div class="in">'+body+'</div></details>'};
 var freqLabel=a.frequency==="custom"?a.frequencyDays.map(function(v){return ["","Po","Ut","St","Št","Pi","So","Ne"][v]}).join(", "):"Denne";
 var editPanel='<form class="col edit-activity-form" data-edit-form novalidate><label>Názov<span class="fld"><input type="text" class="en" maxlength="60" value="'+esc(a.name)+'"></span></label><div class="row"><label>Začiatok<span class="fld"><input type="date" class="es" value="'+a.start+'"></span></label><label>Koniec<span class="fld"><input type="date" class="ee" value="'+(a.end||"")+'" aria-label="Dátum konca"></span><span class="date-hint">Dátum konca musí byť po dátume začiatku.</span></label></div><div class="freq-box"><div class="freq-label">Opakovanie</div><div class="freq-toggle e-frequency-toggle"><button type="button" data-frequency="daily" class="'+(a.frequency!=="custom"?"on":"")+'">Denne</button><button type="button" data-frequency="custom" class="'+(a.frequency==="custom"?"on":"")+'">Vybrané dni</button></div><select class="efrequency" hidden><option value="daily"'+(a.frequency!=="custom"?" selected":"")+'>Denne</option><option value="custom"'+(a.frequency==="custom"?" selected":"")+'>Vybrané dni</option></select><div class="freq-days e-frequency-days"'+(a.frequency==="custom"?"":" hidden")+'>'+["Po","Ut","St","Št","Pi","So","Ne"].map(function(day,i){var v=i+1;return '<label><input type="checkbox" class="efday" value="'+v+'"'+(a.frequencyDays.indexOf(v)>=0?" checked":"")+'><span>'+day+'</span></label>'}).join("")+'</div></div><label>Kategória<span class="fld"><input type="text" class="ec" maxlength="24" list="cats" value="'+esc(a.cat||"")+'"></span></label><label>Poznámka<span class="fld"><input type="text" class="an" maxlength="140" placeholder="Poznámka k aktivite" value="'+esc(a.note||"")+'"></span></label><label>Cieľ (počet dní)<span class="fld"><input type="number" class="eg" min="1" inputmode="numeric" value="'+(a.goal||"")+'"></span></label><div><div class="cl">Farba</div><div class="dots">'+cd+'</div></div></form>';
-var overviewPanel='<div class="detail-summary"><div class="detail-stat"><b>'+freqLabel+'</b><span>Frekvencia</span></div><div class="detail-stat"><b>'+fmt(a.start)+'</b><span>Začiatok</span></div></div>'+(a.note?'<div class="detail-note"><div class="meta">Poznámka k aktivite</div><div class="sm">'+esc(a.note)+'</div></div>':'');
+var overviewPanel=activityProgressDetail(a,now)+'<div class="detail-summary"><div class="detail-stat"><b>'+freqLabel+'</b><span>Frekvencia</span></div><div class="detail-stat"><b>'+fmt(a.start)+'</b><span>Začiatok</span></div></div>'+(a.note?'<div class="detail-note"><div class="meta">Poznámka k aktivite</div><div class="sm">'+esc(a.note)+'</div></div>':'');
 var detailTab=detailTabs[id]||"overview";
 var detail='<div class="detail-tabs"><button type="button" data-detail-tab="overview" class="'+(detailTab==="overview"?"on":"")+'">Info</button><button type="button" data-detail-tab="calendar" class="'+(detailTab==="calendar"?"on":"")+'">Kalendár</button><button type="button" data-detail-tab="edit" class="'+(detailTab==="edit"?"on":"")+'">Upraviť</button></div><div class="detail-panel" data-detail-panel="overview"'+(detailTab==="overview"?"":" hidden")+'>'+overviewPanel+'</div><div class="detail-panel" data-detail-panel="calendar"'+(detailTab==="calendar"?"":" hidden")+'>'+cal(a,now)+'</div><div class="detail-panel" data-detail-panel="edit"'+(detailTab==="edit"?"":" hidden")+'>'+editPanel+'<div class="sec">'+acts+'</div></div>';
 
-return '<div class="sw'+(pd?' pd':'')+'" data-id="'+id+'"><div class="del">'+(pd?'<button data-a="yes">Áno</button><button data-a="no">Nie</button>':TRASH)+'</div><div class="card'+(flash===id?' flash':'')+'" style="--c:'+a.color+'"><div class="top"><button type="button" class="drag-handle" data-drag="activity" aria-label="Zmeniť poradie aktivity">⠿</button><div style="flex:1;min-width:0"><div class="name">'+esc(a.name)+'</div><div class="meta activity-meta"><span class="activity-category">'+(a.cat?esc(a.cat):'')+(now<a.start?' · ešte nezačala':'')+(st?' · 🔥 '+st:'')+'</span>'+bar+'</div></div><div class="r day-count"><div class="big'+(isDone(a,now,now)?'':' muted')+'">'+d+'<small>'+dni(d)+'</small></div>'+CK(a,now)+'</div></div>'+today
+return '<div class="sw'+(pd?' pd':'')+'" data-id="'+id+'"><div class="del">'+(pd?'<button data-a="yes">Áno</button><button data-a="no">Nie</button>':TRASH)+'</div><div class="card'+(flash===id?' flash':'')+'" style="--c:'+a.color+'"><div class="top"><button type="button" class="drag-handle" data-drag="activity" aria-label="Zmeniť poradie aktivity">⠿</button><div style="flex:1;min-width:0"><div class="name">'+esc(a.name)+'</div><div class="meta activity-meta"><span class="activity-category">'+(a.cat?esc(a.cat):'')+(now<a.start?' · ešte nezačala':'')+(st?' · 🔥 '+st:'')+'</span></div></div><div class="r day-count"><div class="big'+(isDone(a,now,now)?'':' muted')+'">'+d+'<small>'+dni(d)+'</small></div>'+CK(a,now)+'</div></div>'+today
 +'<details class="d" data-k="'+id+'"'+op(id)+'><summary>Detail aktivity</summary><div class="dc">'+detail+'</div></details></div></div>'}
 function render(){
 var now=todayStr(),box=document.getElementById("list");
@@ -859,7 +882,7 @@ if(!panel)return;
 var frequency=activity.frequency==="custom"
  ? activity.frequencyDays.map(function(v){return ["","Po","Ut","St","Št","Pi","So","Ne"][v]}).join(", ")
  : "Denne";
-panel.innerHTML='<div class="detail-summary"><div class="detail-stat"><b>'+esc(frequency)+'</b><span>Frekvencia</span></div><div class="detail-stat"><b>'+fmt(activity.start)+'</b><span>Začiatok</span></div></div>'+(activity.note?'<div class="detail-note"><div class="meta">Poznámka k aktivite</div><div class="sm">'+esc(activity.note)+'</div></div>':'');
+panel.innerHTML=activityProgressDetail(activity,todayStr())+'<div class="detail-summary"><div class="detail-stat"><b>'+esc(frequency)+'</b><span>Frekvencia</span></div><div class="detail-stat"><b>'+fmt(activity.start)+'</b><span>Začiatok</span></div></div>'+(activity.note?'<div class="detail-note"><div class="meta">Poznámka k aktivite</div><div class="sm">'+esc(activity.note)+'</div></div>':'');
 }
 
 function editField(ev){var el=ev.target;if(!el.matches||!el.matches(".en,.es,.ee,.eg,.eb,.ec,.an,.nt,.efrequency,.efday"))return;
