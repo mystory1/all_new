@@ -10,7 +10,7 @@
 *,*::before,*::after{box-sizing:inherit}[hidden]{display:none!important}
 html,body{margin:0;min-height:100%;background:#000;color:var(--txt);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.4;overflow-x:hidden;overscroll-behavior:none}
 main{width:100%;max-width:800px;margin:0 auto;padding:calc(8px + env(safe-area-inset-top,0px)) 14px calc(24px + env(safe-area-inset-bottom,0px));min-height:100vh;min-height:100dvh}
-header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:4px 0 16px}h1{font-size:1.5rem;margin:0;font-weight:700;letter-spacing:-.02em}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:4px 0 16px}.head-left{display:flex;align-items:center;gap:10px;min-width:0}.back-home{display:flex;align-items:center;justify-content:center;gap:6px;flex:none;min-height:40px;padding:0 11px;background:#161616;color:var(--txt);border:1px solid #262626;border-radius:12px;text-decoration:none;font-size:.86rem;font-weight:600}.back-home svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}h1{font-size:1.5rem;margin:0;font-weight:700;letter-spacing:-.02em}
 button{font:inherit;cursor:pointer;border:0;border-radius:12px;touch-action:manipulation}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px}
 .primary{background:#fff;color:#000;padding:12px;font-weight:650;width:100%}
@@ -65,7 +65,7 @@ label{font-size:.78rem;color:var(--mut);display:grid;gap:5px}
 </head>
 <body>
 <main>
-<header><div><h1>Lists</h1><div class="meta" id="accountName"></div></div><button class="add" id="addBtn" type="button" aria-label="Pridať">＋</button></header>
+<header><div class="head-left"><a class="back-home" href="./0.html" aria-label="Späť na hlavnú stránku"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/><path d="M9 12h12"/></svg><span>Späť</span></a><div><h1>Lists</h1><div class="meta" id="accountName"></div></div></div><button class="add" id="addBtn" type="button" aria-label="Pridať">＋</button></header>
 <section id="createCard" class="card" hidden style="margin-bottom:12px"><form id="createForm" novalidate><label>Názov zoznamu<span class="fld"><input id="createTitle" maxlength="80" placeholder="Názov zoznamu"></span></label><button class="primary" type="submit">Vytvoriť zoznam</button></form></section>
 <section id="itemCreateCard" class="card" hidden style="margin-bottom:12px"><form id="itemCreateForm" novalidate><div id="itemFields"></div><button class="primary" id="itemSubmit" type="submit">Pridať položku</button></form></section>
 <div id="listsView"><div id="loading">Načítavam…</div></div>
