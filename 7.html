@@ -943,7 +943,7 @@ else if(cl.contains("ec"))a.cat=v;
 else if(cl.contains("eauto"))a.auto=el.checked;
 else if(cl.contains("efrequency")){a.frequency=v==="custom"?"custom":(v==="manual"?"manual":"daily");if(a.frequency==="manual")a.auto=false;var daysWrap=c.querySelector(".e-frequency-days"),autoBox=c.querySelector(".eauto");if(daysWrap)daysWrap.hidden=a.frequency!=="custom";if(autoBox){autoBox.disabled=a.frequency==="manual";autoBox.checked=a.frequency!=="manual"&&a.auto!==false;}if(a.frequency==="custom"&&!c.querySelector(".efday:checked"))groupError(c.querySelector(".freq-box"),"Vyber aspoň jeden deň v týždni.");else groupError(c.querySelector(".freq-box"),"");if(a.frequency==="custom"&&!c.querySelector(".efday:checked")){return;}c.querySelectorAll(".e-frequency-toggle button").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-frequency")===a.frequency)})}
 else if(cl.contains("efday")){var days=[].slice.call(c.querySelectorAll(".efday:checked")).map(function(x){return Number(x.value)});if(!days.length){el.checked=true;groupError(c.querySelector(".freq-box"),"Vyber aspoň jeden deň v týždni.");return}a.frequency="custom";a.frequencyDays=days;var fs=c.querySelector(".efrequency");if(fs)fs.value="custom";groupError(c.querySelector(".freq-box"),"");c.querySelectorAll(".e-frequency-toggle button").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-frequency")==="custom")})}
-dirty[id]=(cl.contains("ec")||dirty[id]==="cat")?"cat":true;save();if(cl.contains("efday")){toast("Uložené");detailTabs[id]="edit";renderOne(id);return}refreshActivityInfo(c,a)}
+dirty[id]=(cl.contains("ec")||dirty[id]==="cat")?"cat":true;save();if(cl.contains("efday")){detailTabs[id]="edit";toast("Uložené");renderOne(id);return}refreshActivityInfo(c,a)}
 function syncEditDateInput(el){
 if(!el||!el.matches||!el.matches(".es,.ee"))return false;
 var c=el.closest("[data-id]"),id=c&&c.getAttribute("data-id"),a=items.find(function(x){return x.id===id});if(!a)return false;
@@ -1043,7 +1043,7 @@ if(freqSelect&&act){
   freqSelect.value=next;daysWrap.hidden=true;act.frequency=next;
   if(next==="manual"){act.auto=false;if(autoBox){autoBox.checked=false;autoBox.disabled=true;}}
   else{act.frequencyDays=[1,2,3,4,5,6,7];if(autoBox)autoBox.disabled=false;}
-  groupError(fw,"");dirty[act.id]=true;save();toast("Uložené");detailTabs[act.id]="edit";renderOne(act.id);
+  groupError(fw,"");dirty[act.id]=true;save();detailTabs[act.id]="edit";toast("Uložené");renderOne(act.id);
 }
 return;
 }
@@ -1105,22 +1105,10 @@ list.addEventListener("toggle",function(ev){
 var d=ev.target,k=d.getAttribute&&d.getAttribute("data-k");
 if(!k)return;
 openIds[k]=d.open;
-if(d.classList&&d.classList.contains("d")){
-  // Reset the selected tab in place. Replacing the card from a toggle
-  // listener detaches the clicked controls and breaks tab interaction.
-  detailTabs[k]="overview";
-  if(d.open){
-    var wrap=d.closest(".sw");
-    if(wrap){
-      wrap.querySelectorAll("[data-detail-tab]").forEach(function(b){
-        b.classList.toggle("on",b.getAttribute("data-detail-tab")==="overview");
-      });
-      wrap.querySelectorAll("[data-detail-panel]").forEach(function(p){
-        p.hidden=p.getAttribute("data-detail-panel")!=="overview";
-      });
-    }
-  }
-}
+// Do not reset detailTabs here. The toggle event can fire asynchronously
+// after an in-place card refresh and would overwrite the user's current tab.
+// A card opened for the first time already defaults to Info in card().
+if(d.classList&&d.classList.contains("d")&&d.open&&!detailTabs[k])detailTabs[k]="overview";
 },true);
 var W=76,sw=null;
 function closeSw(except){list.querySelectorAll(".sw.open,.sw.pd").forEach(function(w){if(w===except)return;if(w.classList.contains("pd")){pend=null;w.querySelector(".del").innerHTML=TRASH}w.classList.remove("open","pd");w.style.removeProperty("--p");w.querySelector(".card").style.transform=""})}
