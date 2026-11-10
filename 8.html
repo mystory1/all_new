@@ -165,6 +165,10 @@ async function boot(){
   DB=window.supabase.createClient(APP_CONFIG.SUPABASE_URL,APP_CONFIG.SUPABASE_ANON_KEY);
   var auth=await DB.rpc("habits_legacy_validate_session",{p_token:s.habits_token});
   if(auth.error||!auth.data||auth.data.ok!==true){localStorage.removeItem("session_user");location.replace("./index.html");return}
+  // The menu is only navigation; enforce the page permission here as well.
+  if(!Array.isArray(auth.data.allowed_pages)||!auth.data.allowed_pages.includes("8.html")){
+    location.replace("./0.html");return;
+  }
   USER=Object.assign({},s,auth.data,{habits_token:s.habits_token});
   $("accountName").textContent=USER.username||"";
   var key="lists_v1_"+String(USER.id).replace(/[^a-zA-Z0-9_-]/g,"");
