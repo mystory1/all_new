@@ -14,7 +14,7 @@ header{display:flex;justify-content:space-between;align-items:center;gap:12px;ma
 button{font:inherit;cursor:pointer;border:0;border-radius:12px;touch-action:manipulation}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px}
 .primary{background:#fff;color:#000;padding:12px;font-weight:650;width:100%}
-.ghost{background:#161616;color:var(--txt);padding:8px 12px;font-size:.85rem;border:1px solid #262626}
+.ghost{display:inline-flex;align-items:center;justify-content:center;background:#161616;color:var(--txt);padding:8px 12px;font-size:.85rem;line-height:1.4;border:1px solid #262626;text-decoration:none;-webkit-tap-highlight-color:transparent}
 .add{background:#fff;color:#000;width:40px;height:40px;padding:0;border-radius:12px;font-size:1.5rem;display:grid;place-items:center}
 .tabs,.seg{display:flex;background:#101010;border:1px solid #1d1d1d;border-radius:12px;padding:3px;gap:3px;margin-bottom:12px}
 .tabs button,.seg button{flex:1;background:none;color:var(--mut);padding:10px 5px;font-weight:600;min-width:0}
@@ -60,12 +60,12 @@ label{font-size:.78rem;color:var(--mut);display:grid;gap:5px}
 #toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#fff;color:#000;padding:11px 18px;border-radius:99px;font-weight:600;font-size:.88rem;opacity:0;pointer-events:none;z-index:20;transition:opacity .2s;max-width:90vw;text-align:center}
 #toast.show{opacity:1}
 #loading{padding:30px;text-align:center;color:var(--mut)}
-@media(max-width:480px){main{padding-left:12px;padding-right:12px}.header-actions{gap:6px}}
+@media(max-width:480px){main{padding-left:12px;padding-right:12px}.header-actions{gap:6px}}\n.back-link{min-height:40px;white-space:nowrap}
 </style>
 </head>
 <body>
 <main>
-<header><div><h1>Lists</h1><div class="meta" id="accountName"></div></div><div class="header-actions"><a class="ghost" href="./0.html">Späť</a><button class="add" id="addBtn" type="button" aria-label="Pridať">＋</button></div></header>
+<header><div><h1>Lists</h1><div class="meta" id="accountName"></div></div><div class="header-actions"><a class="ghost back-link" href="./0.html">Späť</a><button class="add" id="addBtn" type="button" aria-label="Pridať">＋</button></div></header>
 <section id="createCard" class="card" hidden style="margin-bottom:12px"><form id="createForm" novalidate><label>Názov zoznamu<span class="fld"><input id="createTitle" maxlength="80" placeholder="Názov zoznamu"></span></label><button class="primary" type="submit">Vytvoriť zoznam</button></form></section>
 <section id="itemCreateCard" class="card" hidden style="margin-bottom:12px"><form id="itemCreateForm" novalidate><div id="itemFields"></div><button class="primary" id="itemSubmit" type="submit">Pridať položku</button></form></section>
 <div id="listsView"><div id="loading">Načítavam…</div></div>
