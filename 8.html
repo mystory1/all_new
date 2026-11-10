@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="utf-8">
+<meta name="theme-color" content="#000000">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lists</title>
+<style>
+:root{color-scheme:dark;box-sizing:border-box;--card:#0e0e0e;--line:#222;--txt:#f2f2f2;--mut:#8a8a8a}
+*,*::before,*::after{box-sizing:inherit}[hidden]{display:none!important}
+html,body{margin:0;min-height:100%;background:#000;color:var(--txt);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.4;overflow-x:hidden;overscroll-behavior:none}
+main{width:100%;max-width:800px;margin:0 auto;padding:calc(8px + env(safe-area-inset-top,0px)) 14px calc(24px + env(safe-area-inset-bottom,0px));min-height:100vh;min-height:100dvh}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:4px 0 16px}h1{font-size:1.5rem;margin:0;font-weight:700;letter-spacing:-.02em}
+button{font:inherit;cursor:pointer;border:0;border-radius:12px;touch-action:manipulation}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px}
+.primary{background:#fff;color:#000;padding:12px;font-weight:650;width:100%}
+.ghost{background:#161616;color:var(--txt);padding:8px 12px;font-size:.85rem;border:1px solid #262626}
+.add{background:#fff;color:#000;width:40px;height:40px;padding:0;border-radius:12px;font-size:1.5rem;display:grid;place-items:center}
+.tabs,.seg{display:flex;background:#101010;border:1px solid #1d1d1d;border-radius:12px;padding:3px;gap:3px;margin-bottom:12px}
+.tabs button,.seg button{flex:1;background:none;color:var(--mut);padding:10px 5px;font-weight:600;min-width:0}
+.tabs button.on,.seg button.on{background:#fff;color:#000}
+form{display:grid;gap:12px}
+label{font-size:.78rem;color:var(--mut);display:grid;gap:5px}
+.fld{display:block;width:100%;background:#000;border:1px solid #2a2a2a;border-radius:10px;overflow:hidden}
+.fld input,.fld textarea{display:block;width:100%;min-height:42px;margin:0;border:0;background:transparent;color:var(--txt);padding:10px 12px;font:inherit;font-size:16px;outline:none;resize:vertical}
+.fld textarea{min-height:90px}
+.fld:focus-within{border-color:#aaa}
+.meta,.muted{font-size:.78rem;color:var(--mut)}
+.empty{text-align:center;color:var(--mut);padding:36px 12px}
+.lists-back{margin:0 0 10px}
+.list-swipe,.item-swipe{position:relative;margin-bottom:9px;overflow:hidden;border-radius:16px}
+.list-swipe-actions,.item-swipe-actions{position:absolute;right:0;top:0;bottom:0;width:76px;background:linear-gradient(90deg,#b91c1c,#ef4444);display:flex;align-items:center;justify-content:center;border-radius:0 16px 16px 0}
+.list-swipe-actions button,.item-swipe-actions button{width:100%;height:100%;display:grid;place-items:center;background:transparent;color:#fff;border-radius:0}
+.list-card,.list-item-card{position:relative;z-index:1;width:100%;background:var(--card);color:var(--txt);transition:transform .28s cubic-bezier(.22,1,.36,1);touch-action:pan-y}
+.list-card{padding:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:left}
+.list-card-copy{display:grid;gap:3px;min-width:0}
+.list-card-copy strong{font-size:1rem;overflow-wrap:anywhere}
+.list-card-copy small,.list-item-copy small{font-size:.75rem;color:var(--mut)}
+.list-chevron{font-size:1.5rem;color:var(--mut)}
+.list-title-card{margin-bottom:10px}
+.list-title-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.list-title{font-size:1.12rem;font-weight:700;overflow-wrap:anywhere}
+.list-item-card{display:block;padding:12px 14px}
+.list-item-main{display:flex;align-items:center;gap:9px;min-width:0;min-height:30px}
+.list-item-copy{display:flex;align-items:center;gap:8px;flex:1;min-width:0;overflow:hidden}
+.list-item-copy strong{font-size:.94rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:1}
+.list-item-copy small{flex:none;max-width:38%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.edit-btn{flex:none;width:34px;height:34px;min-width:34px;padding:0;display:grid;place-items:center;border-radius:10px;background:#161616;color:#eee;border:1px solid #262626}
+.edit-btn svg{width:17px;height:17px}
+.ck{flex:none;width:30px;height:30px;border-radius:9px;background:#111;border:1px solid #333;color:#777;display:grid;place-items:center;padding:0}
+.ck.on{background:#fff;color:#000;border-color:#fff}
+.ck svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.5}
+.list-item-copy strong.is-complete{text-decoration:line-through;color:var(--mut)}
+.editor{display:grid;gap:12px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.editor-actions{display:flex;justify-content:flex-end}
+.delete-confirm{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;font-size:.82rem;flex-wrap:wrap}
+.delete-confirm .actions{display:flex;gap:6px}
+.delete-confirm button{min-height:30px;padding:5px 10px;font-size:.78rem}
+.delete-confirm .yes{background:#b91c1c;color:#fff}
+#toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#fff;color:#000;padding:11px 18px;border-radius:99px;font-weight:600;font-size:.88rem;opacity:0;pointer-events:none;z-index:20;transition:opacity .2s;max-width:90vw;text-align:center}
+#toast.show{opacity:1}
+#loading{padding:30px;text-align:center;color:var(--mut)}
+@media(max-width:480px){main{padding-left:12px;padding-right:12px}}
+</style>
+</head>
+<body>
+<main>
+<header><div><h1>Lists</h1><div class="meta" id="accountName"></div></div><button class="add" id="addBtn" type="button" aria-label="Pridať">＋</button></header>
+<section id="createCard" class="card" hidden style="margin-bottom:12px"><form id="createForm" novalidate><label>Názov zoznamu<span class="fld"><input id="createTitle" maxlength="80" placeholder="Názov zoznamu"></span></label><button class="primary" type="submit">Vytvoriť zoznam</button></form></section>
+<section id="itemCreateCard" class="card" hidden style="margin-bottom:12px"><form id="itemCreateForm" novalidate><div id="itemFields"></div><button class="primary" id="itemSubmit" type="submit">Pridať položku</button></form></section>
+<div id="listsView"><div id="loading">Načítavam…</div></div>
+</main><div id="toast"></div>
+<script src="./config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+(function(){
+"use strict";
+var DB=null,USER=null,LISTS=[],ITEMS=[],FILTER="todo",ACTIVE=null,DELETE_LIST=null,DELETE_ITEM=null,SAVE_TIMER=null;
+var $=function(id){return document.getElementById(id)};
+var esc=function(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})};
+var today=function(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
+var toast=function(s){var t=$("toast");t.textContent=s;t.classList.add("show");clearTimeout(t._timer);t._timer=setTimeout(function(){t.classList.remove("show")},2300)};
+var editIcon='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg>';
+var trashIcon='<svg viewBox="0 0 24 24" width="25" height="25" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13M10 11v5M14 11v5"/></svg>';
+var checkIcon='<svg viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg>';
+function current(){return LISTS.find(function(x){return x.id===ACTIVE})||null}
+function itemsFor(id){return ITEMS.filter(function(x){return x.list_id===id}).sort(function(a,b){return (a.sort_order||0)-(b.sort_order||0)})}
+function saveLocal(){try{localStorage.setItem("lists_v1_"+String(USER.id).replace(/[^a-zA-Z0-9_-]/g,""),JSON.stringify({lists:LISTS,items:ITEMS}))}catch(e){}}
+function scheduleSave(){saveLocal();clearTimeout(SAVE_TIMER);SAVE_TIMER=setTimeout(saveRemote,400)}
+async function saveRemote(){
+ try{
+  var lists=LISTS.map(function(l,i){return{id:String(l.id),sort_order:l.sort_order==null?i:l.sort_order,list_type:l.type,title:l.title,created_date:l.created||today()}});
+  var items=ITEMS.map(function(x,i){return{id:String(x.id),list_id:String(x.list_id),sort_order:x.sort_order==null?i:x.sort_order,title:x.title,note:x.note||"",amount:x.amount==null?null:x.amount,is_done:!!x.done,created_date:x.created||today(),due_date:x.due||null}});
+  var r=await DB.rpc("lists_legacy_save_workspace",{p_token:USER.habits_token,p_lists:lists,p_list_items:items});
+  if(r.error)throw r.error;
+ }catch(e){console.error(e);toast("Chyba synchronizácie: "+(e.message||"neznáma chyba"))}
+}
+function renderItem(it,list){
+ var extra=list.type==="wishlist"?'<label>Poznámka (nepovinná)<span class="fld"><textarea class="edit-note" data-id="'+esc(it.id)+'" maxlength="2000">'+esc(it.note||"")+'</textarea></span></label><label>Suma (nepovinná)<span class="fld"><input class="edit-amount" data-id="'+esc(it.id)+'" type="number" min="0" step="0.01" value="'+(it.amount==null?"":esc(it.amount))+'"></span></label>':list.type==="notes"?'<label>Poznámka<span class="fld"><textarea class="edit-note" data-id="'+esc(it.id)+'" maxlength="5000">'+esc(it.note||"")+'</textarea></span></label>':'';
+ var deleting=DELETE_ITEM===it.id;
+ var summary=deleting?'<div class="delete-confirm"><span>Naozaj odstrániť túto položku?</span><span class="actions"><button class="yes" data-action="confirm-item" data-id="'+esc(it.id)+'">Áno</button><button class="ghost" data-action="cancel-delete">Nie</button></span></div>':'<div class="list-item-main">'+(list.type==="todo"?'<button class="ck '+(it.done?"on":"")+'" data-action="done" data-id="'+esc(it.id)+'" aria-label="Zmeniť stav">'+checkIcon+'</button>':'')+'<div class="list-item-copy"><strong class="'+(it.done?"is-complete":"")+'">'+esc(it.title)+'</strong>'+(list.type==="wishlist"&&it.amount!=null?'<small>'+esc(it.amount)+'</small>':list.type==="notes"&&it.note?'<small>'+esc(it.note.slice(0,80))+'</small>':'')+'</div><button class="edit-btn" data-action="edit" data-id="'+esc(it.id)+'" aria-label="Upraviť">'+editIcon+'</button></div>';
+ return '<div class="item-swipe" data-swipe><div class="item-swipe-actions"><button data-action="delete-item" data-id="'+esc(it.id)+'" aria-label="Odstrániť">'+trashIcon+'</button></div><div class="card list-item-card"><div>'+summary+'</div><div class="editor" data-editor="'+esc(it.id)+'" hidden><label>Názov položky<span class="fld"><input class="edit-title" data-id="'+esc(it.id)+'" maxlength="100" value="'+esc(it.title)+'"></span></label>'+extra+'<div class="editor-actions"><button class="ghost" data-action="close-editor" data-id="'+esc(it.id)+'">Hotovo</button></div></div></div></div>';
+}
+function render(){
+ var box=$("listsView"),list=current();
+ if(list){
+  var its=itemsFor(list.id);
+  box.innerHTML='<div class="lists-back"><button class="ghost" data-action="back">‹ '+(list.type==="todo"?"To Do":list.type==="notes"?"Notes":"Wishlist")+'</button></div><div class="card list-title-card"><div class="list-title-row"><div class="list-card-copy"><div class="list-title">'+esc(list.title)+'</div><div class="meta">'+its.length+(list.type==="todo"?" úloh":list.type==="notes"?" poznámok":" položiek")+(list.type==="todo"&&its.length?" · "+its.filter(function(x){return x.done}).length+" dokončených":"")+'</div></div><button class="edit-btn" data-action="rename" aria-label="Upraviť názov">'+editIcon+'</button></div></div>'+(its.length?its.map(function(it){return renderItem(it,list)}).join(""):'<div class="empty">Zoznam je zatiaľ prázdny. Pridaj prvú položku tlačidlom ＋.</div>');
+ }else{
+  var types=[["todo","To Do"],["notes","Notes"],["wishlist","Wishlist"]],filtered=LISTS.filter(function(l){return l.type===FILTER}).sort(function(a,b){return (a.sort_order||0)-(b.sort_order||0)});
+  box.innerHTML='<div class="seg">'+types.map(function(x){return '<button data-filter="'+x[0]+'" class="'+(FILTER===x[0]?"on":"")+'">'+x[1]+'</button>'}).join("")+'</div>'+(filtered.length?filtered.map(function(l){var arr=itemsFor(l.id),done=arr.filter(function(x){return x.done}).length,confirm=DELETE_LIST===l.id;var content=confirm?'<div class="delete-confirm"><span>Naozaj odstrániť tento zoznam?</span><span class="actions"><button class="yes" data-action="confirm-list" data-id="'+esc(l.id)+'">Áno</button><button class="ghost" data-action="cancel-delete">Nie</button></span></div>':'<span class="list-card-copy"><strong>'+esc(l.title)+'</strong><small>'+(l.type==="todo"?done+" / "+arr.length+" dokončených":arr.length+(l.type==="notes"?" poznámok":" položiek"))+'</small></span><span class="list-chevron">›</span>';return '<div class="list-swipe" data-swipe><div class="list-swipe-actions"><button data-action="delete-list" data-id="'+esc(l.id)+'" aria-label="Odstrániť">'+trashIcon+'</button></div><div class="card list-card" data-open="'+esc(l.id)+'" role="button" tabindex="0">'+content+'</div></div>'}).join(""):'<div class="empty">V tejto sekcii zatiaľ nemáš žiadne zoznamy.<br>Vytvor nový tlačidlom ＋.</div>');
+ }
+ $("addBtn").textContent=($("createCard").hidden&&$("itemCreateCard").hidden)?"＋":"×";
+}
+function openAdd(){
+ var form=ACTIVE?$("itemCreateCard"):$("createCard"),other=ACTIVE?$("createCard"):$("itemCreateCard");
+ other.hidden=true;form.hidden=!form.hidden;
+ if(!form.hidden&&ACTIVE){
+  var l=current(),fields='<label>Názov položky<span class="fld"><input id="newItemTitle" maxlength="100" placeholder="Zadaj názov"></span></label>';
+  if(l.type==="wishlist")fields+='<label>Poznámka (nepovinná)<span class="fld"><textarea id="newItemNote" maxlength="2000" placeholder="Doplň poznámku..."></textarea></span></label><label>Suma (nepovinná)<span class="fld"><input id="newItemAmount" type="number" min="0" step="0.01" placeholder="0,00"></span></label>';
+  if(l.type==="notes")fields+='<label>Poznámka<span class="fld"><textarea id="newItemNote" maxlength="5000" placeholder="Napíš poznámku..."></textarea></span></label>';
+  $("itemFields").innerHTML=fields;$("itemSubmit").textContent=l.type==="notes"?"Pridať poznámku":"Pridať položku";
+ }else if(!form.hidden)$("createTitle").value="";
+ render();if(!form.hidden){var focus=form.querySelector("input");if(focus)focus.focus()}
+}
+$("addBtn").addEventListener("click",openAdd);
+$("createForm").addEventListener("submit",function(e){e.preventDefault();var title=$("createTitle").value.trim();if(!title){toast("Zadaj názov zoznamu.");return}var type=FILTER,id="l"+Date.now()+Math.floor(Math.random()*1000);LISTS.push({id:id,type:type,title:title,created:today(),sort_order:LISTS.filter(function(x){return x.type===type}).length});ACTIVE=id;$("createCard").hidden=true;scheduleSave();render();toast("Zoznam vytvorený")});
+$("itemCreateForm").addEventListener("submit",function(e){e.preventDefault();var l=current(),title=$("newItemTitle"),v=title&&title.value.trim();if(!l||!v){toast("Zadaj názov položky.");return}var note=$("newItemNote"),amountEl=$("newItemAmount"),amount=null;if(amountEl&&amountEl.value.trim()){amount=Number(amountEl.value.replace(",","."));if(!Number.isFinite(amount)||amount<0){toast("Zadaj platnú sumu.");return}}ITEMS.push({id:"i"+Date.now()+Math.floor(Math.random()*1000),list_id:l.id,title:v,note:note?note.value.trim():"",amount:amount,done:false,created:today(),sort_order:itemsFor(l.id).length});$("itemCreateCard").hidden=true;scheduleSave();render();toast(l.type==="notes"?"Poznámka pridaná":"Položka pridaná")});
+$("listsView").addEventListener("click",function(e){
+ var f=e.target.closest("[data-filter]");if(f){FILTER=f.dataset.filter;DELETE_LIST=DELETE_ITEM=null;render();return}
+ var o=e.target.closest("[data-open]");if(o&&!e.target.closest("[data-action]")){ACTIVE=o.dataset.open;DELETE_LIST=DELETE_ITEM=null;$("createCard").hidden=$("itemCreateCard").hidden=true;render();return}
+ var b=e.target.closest("[data-action]");if(!b)return;var a=b.dataset.action,id=b.dataset.id;
+ if(a==="back"){ACTIVE=null;DELETE_LIST=DELETE_ITEM=null;$("itemCreateCard").hidden=true;render();return}
+ if(a==="rename"){var l=current(),v=prompt("Nový názov zoznamu",l.title);if(v===null)return;v=v.trim();if(!v){toast("Názov nemôže byť prázdny.");return}l.title=v;scheduleSave();render();toast("Uložené");return}
+ if(a==="delete-list"){DELETE_LIST=id;render();return}
+ if(a==="confirm-list"){if(DELETE_LIST===id){ITEMS=ITEMS.filter(function(x){return x.list_id!==id});LISTS=LISTS.filter(function(x){return x.id!==id});DELETE_LIST=null;if(ACTIVE===id)ACTIVE=null;scheduleSave();render();toast("Zoznam odstránený")}return}
+ if(a==="delete-item"){DELETE_ITEM=id;render();return}
+ if(a==="confirm-item"){if(DELETE_ITEM===id){ITEMS=ITEMS.filter(function(x){return x.id!==id});DELETE_ITEM=null;scheduleSave();render();toast("Položka odstránená")}return}
+ if(a==="cancel-delete"){DELETE_LIST=DELETE_ITEM=null;render();return}
+ if(a==="done"){var it=ITEMS.find(function(x){return x.id===id});if(it){it.done=!it.done;scheduleSave();render()}return}
+ if(a==="edit"){var ed=$("listsView").querySelector('[data-editor="'+CSS.escape(id)+'"]');if(ed)ed.hidden=!ed.hidden;return}
+ if(a==="close-editor"){var ed2=$("listsView").querySelector('[data-editor="'+CSS.escape(id)+'"]');if(ed2)ed2.hidden=true;scheduleSave();toast("Uložené");return}
+});
+$("listsView").addEventListener("input",function(e){var el=e.target,id=el.dataset.id,it=ITEMS.find(function(x){return x.id===id});if(!it)return;if(el.classList.contains("edit-title")){var v=el.value.trim();if(v){it.title=v;var strong=el.closest(".list-item-card").querySelector(".list-item-copy strong");if(strong)strong.textContent=v}}else if(el.classList.contains("edit-note"))it.note=el.value;else if(el.classList.contains("edit-amount")){var n=el.value.trim()===""?null:Number(el.value.replace(",","."));if(n===null||Number.isFinite(n)&&n>=0)it.amount=n;else return}scheduleSave()});
+$("listsView").addEventListener("focusout",function(e){if(e.target.matches(".edit-title,.edit-note,.edit-amount"))setTimeout(function(){if(!$("listsView").contains(document.activeElement)){render();toast("Uložené")}},100)});
+function initSwipe(){
+ var state=null,root=$("listsView");
+ root.addEventListener("pointerdown",function(e){if(e.pointerType==="touch"||e.target.closest("button,input,textarea,label"))return;var w=e.target.closest("[data-swipe]");if(!w)return;var c=w.querySelector(".list-card,.list-item-card");if(c)state={w:w,c:c,x:e.clientX,y:e.clientY,dx:0,id:e.pointerId,drag:false}});
+ root.addEventListener("pointermove",function(e){if(!state||e.pointerId!==state.id)return;var dx=e.clientX-state.x,dy=e.clientY-state.y;if(!state.drag){if(Math.abs(dx)>8&&Math.abs(dx)>Math.abs(dy)*1.2){state.drag=true;state.c.style.transition="none"}else return}state.dx=Math.max(-76,Math.min(0,dx));state.c.style.transform="translateX("+state.dx+"px)";e.preventDefault()},{passive:false});
+ function end(e){if(!state||e&&e.pointerId!==state.id)return;var s=state;state=null;s.c.style.transition="";if(!s.drag)return;s.w.classList.toggle("swipe-open",s.dx<-32);s.c.style.transform=s.dx<-32?"translateX(-76px)":""}
+ root.addEventListener("pointerup",end);root.addEventListener("pointercancel",end);
+ // iOS touch path: horizontal swipe reveal without blocking vertical page scrolling.
+ root.addEventListener("touchstart",function(e){if(e.touches.length!==1||e.target.closest("button,input,textarea,label"))return;var w=e.target.closest("[data-swipe]");if(!w)return;var c=w.querySelector(".list-card,.list-item-card"),t=e.touches[0];state={w:w,c:c,x:t.clientX,y:t.clientY,dx:0,id:"touch",drag:false}},{passive:true});
+ root.addEventListener("touchmove",function(e){if(!state||state.id!=="touch"||e.touches.length!==1)return;var t=e.touches[0],dx=t.clientX-state.x,dy=t.clientY-state.y;if(!state.drag){if(Math.abs(dx)>8&&Math.abs(dx)>Math.abs(dy)*1.2){state.drag=true;state.c.style.transition="none"}else return}e.preventDefault();state.dx=Math.max(-76,Math.min(0,dx));state.c.style.transform="translateX("+state.dx+"px)"},{passive:false});
+ root.addEventListener("touchend",function(){if(!state||state.id!=="touch")return;var s=state;state=null;s.c.style.transition="";s.w.classList.toggle("swipe-open",s.dx<-32);s.c.style.transform=s.dx<-32?"translateX(-76px)":""},{passive:true});
+}
+function mapRows(payload){LISTS=(payload.lists||[]).map(function(r){return{id:r.id,type:r.list_type,title:r.title,created:r.created_date,sort_order:r.sort_order}});ITEMS=(payload.list_items||[]).map(function(r){return{id:r.id,list_id:r.list_id,title:r.title,note:r.note||"",amount:r.amount==null?null:Number(r.amount),done:!!r.is_done,created:r.created_date,due:r.due_date||null,sort_order:r.sort_order}})}
+async function boot(){
+ try{
+  var s=null;try{s=JSON.parse(localStorage.getItem("session_user")||"null")}catch(e){}
+  if(!s){location.replace("./index.html");return}
+  if(!s.habits_token&&s.token){s.habits_token=s.token;localStorage.setItem("session_user",JSON.stringify(s))}
+  if(!s.habits_token){location.replace("./index.html");return}
+  if(!window.APP_CONFIG||!APP_CONFIG.SUPABASE_URL||!APP_CONFIG.SUPABASE_ANON_KEY)throw new Error("Chýba config.js alebo konfigurácia Supabase.");
+  DB=window.supabase.createClient(APP_CONFIG.SUPABASE_URL,APP_CONFIG.SUPABASE_ANON_KEY);
+  var auth=await DB.rpc("habits_legacy_validate_session",{p_token:s.habits_token});
+  if(auth.error||!auth.data||auth.data.ok!==true){localStorage.removeItem("session_user");location.replace("./index.html");return}
+  USER=Object.assign({},s,auth.data,{habits_token:s.habits_token});
+  $("accountName").textContent=USER.username||"";
+  var key="lists_v1_"+String(USER.id).replace(/[^a-zA-Z0-9_-]/g,"");
+  var local=null;try{local=JSON.parse(localStorage.getItem(key)||"null")}catch(e){}
+  var remote=await DB.rpc("lists_legacy_load_workspace",{p_token:USER.habits_token});if(remote.error)throw remote.error;
+  if(remote.data&&(remote.data.lists||remote.data.list_items))mapRows(remote.data);
+  else if(local){LISTS=local.lists||[];ITEMS=local.items||[]}
+  if(!remote.data||(!(remote.data.lists||[]).length&&!(remote.data.list_items||[]).length)){if(local){LISTS=local.lists||[];ITEMS=local.items||[];if(LISTS.length||ITEMS.length)await saveRemote()}}
+  saveLocal();initSwipe();render();
+ }catch(e){console.error(e);$("listsView").innerHTML='<div class="card">Nepodarilo sa načítať Lists: '+esc(e.message||"Neznáma chyba")+'</div>'}
+}
+boot();
+})();
+</script>
+</body></html>
