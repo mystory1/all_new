@@ -1051,7 +1051,11 @@ else{a.history.push({start:a.start,end:now,days:cnt(a,now),pct:pct(a,now),type:"
 pend=null;save()}
 var needsFull=full||forced.length||(S.cat.indexOf("__")===0&&(act==="go"||act==="dyes"||act==="dno"))||!list.querySelector('.sw[data-id="'+id+'"]');
 if(needsFull){var oldScroll=window.scrollY;render();if(full)requestAnimationFrame(function(){var max=Math.max(0,document.documentElement.scrollHeight-window.innerHeight);window.scrollTo(0,Math.min(oldScroll,max))})}
-else if(act==="sel"||act==="dyes"||act==="dno"){renderOne(id)}
+else if(act==="dyes"||act==="dno"){
+var calendarPanel=c.querySelector('[data-detail-panel="calendar"]');
+if(calendarPanel)calendarPanel.innerHTML=cal(a,now);
+return;
+}else if(act==="sel"){renderOne(id)}
 else{renderOne(id);if(pp&&pp.id!==id&&pend!==pp)renderOne(pp.id)}});
 list.addEventListener("toggle",function(ev){
 var d=ev.target,k=d.getAttribute&&d.getAttribute("data-k");
