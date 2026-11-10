@@ -7,8 +7,7 @@
 <title>Menu – Habits</title>
 <style>
 :root{color-scheme:dark;--card:#0e0e0e;--line:#222;--txt:#f2f2f2;--mut:#8a8a8a}
-*{box-sizing:border-box}
-[hidden]{display:none!important}
+*{box-sizing:border-box}[hidden]{display:none!important}
 html,body{width:100%;height:100%;min-height:0;margin:0;background:#000;color:var(--txt)}
 body{height:100vh;height:100svh;display:flex;align-items:flex-start;overflow:hidden;padding:calc(10px + env(safe-area-inset-top,0px)) 12px calc(8px + env(safe-area-inset-bottom,0px));font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.35}
 main{width:100%;max-width:720px;margin:0 auto}
@@ -18,12 +17,9 @@ main{width:100%;max-width:720px;margin:0 auto}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:clamp(10px,2.5vh,14px)}
 .buttons{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .nav-btn{display:flex;align-items:center;justify-content:center;min-height:54px;min-width:0;padding:12px;text-decoration:none;text-align:center;color:var(--txt);background:#111;border:1px solid #242424;border-radius:12px;font-size:.95rem;font-weight:600;transition:background .15s,border-color .15s,transform .15s;overflow-wrap:anywhere}
-.nav-btn:hover{background:#191919;border-color:#444}
-.nav-btn:active{transform:scale(.985)}
+.nav-btn:hover{background:#191919;border-color:#444}.nav-btn:active{transform:scale(.985)}
 .ghost{display:inline-flex;align-items:center;justify-content:center;background:#161616;color:var(--txt);padding:8px 12px;font-size:.82rem;font-weight:600;text-decoration:none;border:1px solid #262626;border-radius:10px;min-height:36px;white-space:nowrap}
-.ghost:hover{background:#202020;border-color:#444}
-.admin-link{color:var(--txt)}
-.logout{color:#ff7777;border-color:#4a2424;cursor:pointer}
+.admin-link{color:var(--txt)}.logout{color:#ff7777;border-color:#4a2424;cursor:pointer}
 .empty{padding:28px 14px;text-align:center;color:var(--mut);font-size:.9rem}
 .loading{min-height:112px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:var(--mut)}
 .spinner{width:32px;height:32px;border:3px solid #383838;border-top-color:#f2f2f2;border-radius:50%;animation:menuSpin .75s linear infinite}
@@ -36,11 +32,11 @@ main{width:100%;max-width:720px;margin:0 auto}
 </head>
 <body>
 <main>
-  <header class="hd">
-    <a class="ghost admin-link" id="adminPortalBtn" href="admin.html" hidden>Admin portal</a>
-    <div class="user"><span class="meta" id="userInfo"></span><button class="ghost logout" id="logoutBtn" type="button">Odhlásiť</button></div>
-  </header>
-  <section class="card" aria-label="Hlavné menu"><div id="menu"><div class="loading" role="status" aria-label="Načítavam menu"><span class="spinner" aria-hidden="true"></span></div></div></section>
+<header class="hd">
+<a class="ghost admin-link" id="adminPortalBtn" href="admin.html" hidden>Admin portal</a>
+<div class="user"><span class="meta" id="userInfo"></span><button class="ghost logout" id="logoutBtn" type="button">Odhlásiť</button></div>
+</header>
+<section class="card" aria-label="Hlavné menu"><div id="menu"><div class="loading" role="status" aria-label="Načítavam menu"><span class="spinner" aria-hidden="true"></span></div></div></section>
 </main>
 <script src="./config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -57,8 +53,7 @@ main{width:100%;max-width:720px;margin:0 auto}
  logoutBtn.addEventListener("click",async()=>{
   logoutBtn.disabled=true;
   try{await db.rpc("habits_legacy_logout",{p_token:token})}catch(e){console.warn("Serverové odhlásenie sa nepodarilo:",e)}
-  localStorage.removeItem("session_user");
-  location.replace("./index.html");
+  localStorage.removeItem("session_user");location.replace("./index.html");
  });
  try{
   const {data,error}=await db.rpc("habits_legacy_validate_session",{p_token:token});
@@ -69,28 +64,15 @@ main{width:100%;max-width:720px;margin:0 auto}
   const adminPortalBtn=document.getElementById("adminPortalBtn");
   adminPortalBtn.hidden=!session.is_admin;
   const all=["1.html","2.html","3.html","4.html","5.html","6.html","7.html","8.html"];
-  // allowed_pages is authoritative for application pages for every account.
-  // Admin status grants access to the admin panel, shown separately in the header.
   const allowed=new Set(Array.isArray(session.allowed_pages)?session.allowed_pages:[]);
   const visible=all.filter(p=>allowed.has(p));
   const menu=document.getElementById("menu");
   if(visible.length){
    const grid=document.createElement("div");grid.className="buttons";
-   visible.forEach(page=>{
-    const a=document.createElement("a");a.className="nav-btn";a.href=page;
-    a.textContent=page.replace(".html","");
-    grid.appendChild(a);
-   });
+   visible.forEach(page=>{const a=document.createElement("a");a.className="nav-btn";a.href=page;a.textContent=page.replace(".html","");grid.appendChild(a)});
    menu.replaceChildren(grid);
-  }else{
-   const empty=document.createElement("div");empty.className="empty";
-   empty.textContent="Nemáš pridelený žiadny prístup k stránkam.";
-   menu.replaceChildren(empty);
-  }
- }catch(e){
-  console.error(e);localStorage.removeItem("session_user");location.replace("./index.html");
- }
+  }else{const empty=document.createElement("div");empty.className="empty";empty.textContent="Nemáš pridelený žiadny prístup k stránkam.";menu.replaceChildren(empty)}
+ }catch(e){console.error(e);localStorage.removeItem("session_user");location.replace("./index.html")}
 })();
 </script>
-</body>
-</html>
+</body></html>
