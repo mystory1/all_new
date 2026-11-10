@@ -385,12 +385,17 @@ body{overscroll-behavior-y:auto}
 
 
 
-/* Unified activity-card geometry: fixed progress slot for dated and undated goals. */
-#v-act .progress-block.aligned{height:42px;min-height:42px;display:flex!important;flex-direction:column;justify-content:flex-start;box-sizing:border-box}
-#v-act .progress-block.aligned>.bar{height:7px;min-height:7px;margin-top:7px}
-#v-act .progress-block.aligned>.pl{height:16px;min-height:16px;margin-top:5px;flex-wrap:nowrap;white-space:nowrap;overflow:hidden}
-#v-act .progress-block.aligned>.pl span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;overflow-wrap:normal}
-#v-act .progress-block.aligned>.pl span:last-child{text-align:right}
+
+/* Compact, consistent activity cards with an optional slim progress indicator. */
+#v-act .sw .card{min-height:104px;box-sizing:border-box}
+#v-act .mini-progress{height:13px;display:flex;align-items:center;gap:8px;margin:7px 0 1px 34px;max-width:calc(100% - 42px);box-sizing:border-box}
+#v-act .mini-progress-track{height:4px;flex:1;min-width:0;border-radius:99px;background:var(--line);overflow:hidden}
+#v-act .mini-progress-track i{display:block;height:100%;border-radius:99px;background:var(--c)}
+#v-act .mini-progress>span{flex:none;font-size:10px;line-height:1;color:var(--muted);font-variant-numeric:tabular-nums}
+@media(max-width:600px){
+ #v-act .sw .card{min-height:96px;padding:10px 11px}
+ #v-act .mini-progress{margin-left:31px;max-width:calc(100% - 36px);margin-top:6px}
+}
 
 /* Responsive layout v6: fluid sizing without CSS zoom or enlarged containers. */
 html, body {
@@ -649,7 +654,7 @@ return '<button class="ck" data-a="go" aria-label="Označiť ako splnené dnes">
 function card(a,now){
 var id=a.id,d=cnt(a,now),p=pct(a,now),st=streak(a,now),h=a.history;
 var rt="";if(a.goal>0){var gl=a.goal-d;rt=(gl>0?'zostáva '+gl+' '+dni(gl):'cieľ splnený 🎉')+(a.end?' · do '+fmt(a.end):'')}else if(a.end){var left=diff(now,a.end);rt=(left>0?'zostáva '+left+' '+dni(left):'termín uplynul')+' · do '+fmt(a.end)}
-var bar='<div class="progress-block aligned"><div class="bar"><i style="width:'+(p===null?0:p)+'%"></i></div><div class="pl"><span>'+(p===null?"—":p+" %")+'</span><span>'+(rt||"&nbsp;")+'</span></div></div>';
+var bar=p===null?"":'<div class="mini-progress" aria-label="Priebeh '+p+'%"><div class="mini-progress-track"><i style="width:'+p+'%"></i></div><span>'+p+'%</span></div>';
 var today="";
 var isP=function(k){return pend&&pend.id===id&&pend.act===k};
 var pd=isP("del")&&pend.src==="sw";
@@ -989,7 +994,6 @@ return}
 var t=ev.target.closest("[data-a]");if(!t)return;
 var c=t.closest("[data-id]"),id=c&&c.getAttribute("data-id"),a=items.filter(function(x){return x.id===id})[0];if(!a)return;
 var act=t.getAttribute("data-a"),now=todayStr(),full=false,pp=pend;
-if(act==="sel"){detailTabs[id]="overview";var detailWrap=c.querySelector("details.d");if(detailWrap){detailWrap.querySelectorAll("[data-detail-tab]").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-detail-tab")==="overview")});detailWrap.querySelectorAll("[data-detail-panel]").forEach(function(p){p.hidden=p.getAttribute("data-detail-panel")!=="overview"})}}
 if(act==="go"){a.done[now]="";flash=id;save()}
 else if(act==="sel")sel[id]=t.getAttribute("data-d");
 else if(act==="dyes"||act==="dno"){var k=t.getAttribute("data-d");sel[id]=k;
