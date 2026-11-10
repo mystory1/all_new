@@ -386,15 +386,19 @@ body{overscroll-behavior-y:auto}
 
 
 
-/* Compact, consistent activity cards with an optional slim progress indicator. */
-#v-act .sw .card{min-height:104px;box-sizing:border-box}
-#v-act .mini-progress{height:13px;display:flex;align-items:center;gap:8px;margin:7px 0 1px 34px;max-width:calc(100% - 42px);box-sizing:border-box}
-#v-act .mini-progress-track{height:4px;flex:1;min-width:0;border-radius:99px;background:var(--line);overflow:hidden}
+/* Compact activity row: category and all progress details share one responsive line. */
+#v-act .sw .card{min-height:0;box-sizing:border-box}
+#v-act .activity-meta{display:flex;align-items:center;gap:7px;min-width:0;width:100%;line-height:1.25}
+#v-act .activity-category{display:block;flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#v-act .mini-progress{display:inline-flex;align-items:center;gap:5px;flex:0 1 auto;min-width:0;max-width:62%;margin:0;white-space:nowrap;vertical-align:middle}
+#v-act .mini-progress-track{display:block;width:36px;min-width:20px;flex:0 1 36px;height:4px;border-radius:99px;background:var(--line);overflow:hidden}
 #v-act .mini-progress-track i{display:block;height:100%;border-radius:99px;background:var(--c)}
-#v-act .mini-progress>span{flex:none;font-size:10px;line-height:1;color:var(--muted);font-variant-numeric:tabular-nums}
-@media(max-width:600px){
- #v-act .sw .card{min-height:96px;padding:10px 11px}
- #v-act .mini-progress{margin-left:31px;max-width:calc(100% - 36px);margin-top:6px}
+#v-act .mini-progress-info{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;line-height:1;color:var(--muted);font-variant-numeric:tabular-nums}
+@media(max-width:380px){
+ #v-act .activity-meta{gap:4px}
+ #v-act .mini-progress{max-width:58%;gap:4px}
+ #v-act .mini-progress-track{width:24px;flex-basis:24px}
+ #v-act .mini-progress-info{font-size:9px}
 }
 
 /* Responsive layout v6: fluid sizing without CSS zoom or enlarged containers. */
@@ -654,7 +658,7 @@ return '<button class="ck" data-a="go" aria-label="Označiť ako splnené dnes">
 function card(a,now){
 var id=a.id,d=cnt(a,now),p=pct(a,now),st=streak(a,now),h=a.history;
 var rt="";if(a.goal>0){var gl=a.goal-d;rt=(gl>0?'zostáva '+gl+' '+dni(gl):'cieľ splnený 🎉')+(a.end?' · do '+fmt(a.end):'')}else if(a.end){var left=diff(now,a.end);rt=(left>0?'zostáva '+left+' '+dni(left):'termín uplynul')+' · do '+fmt(a.end)}
-var bar=p===null?"":'<div class="mini-progress" aria-label="Priebeh '+p+'%"><div class="mini-progress-track"><i style="width:'+p+'%"></i></div><span>'+p+'%</span></div>';
+var bar=p===null?"":'<span class="mini-progress" aria-label="Priebeh '+p+'%"><span class="mini-progress-track"><i style="width:'+p+'%"></i></span><span class="mini-progress-info">'+p+'%'+(rt?' · '+esc(rt):'')+'</span></span>';
 var today="";
 var isP=function(k){return pend&&pend.id===id&&pend.act===k};
 var pd=isP("del")&&pend.src==="sw";
@@ -669,7 +673,7 @@ var overviewPanel='<div class="detail-summary"><div class="detail-stat"><b>'+fre
 var detailTab=detailTabs[id]||"overview";
 var detail='<div class="detail-tabs"><button type="button" data-detail-tab="overview" class="'+(detailTab==="overview"?"on":"")+'">Info</button><button type="button" data-detail-tab="calendar" class="'+(detailTab==="calendar"?"on":"")+'">Kalendár</button><button type="button" data-detail-tab="edit" class="'+(detailTab==="edit"?"on":"")+'">Upraviť</button></div><div class="detail-panel" data-detail-panel="overview"'+(detailTab==="overview"?"":" hidden")+'>'+overviewPanel+'</div><div class="detail-panel" data-detail-panel="calendar"'+(detailTab==="calendar"?"":" hidden")+'>'+cal(a,now)+'</div><div class="detail-panel" data-detail-panel="edit"'+(detailTab==="edit"?"":" hidden")+'>'+editPanel+'<div class="sec">'+acts+'</div></div>';
 
-return '<div class="sw'+(pd?' pd':'')+'" data-id="'+id+'"><div class="del">'+(pd?'<button data-a="yes">Áno</button><button data-a="no">Nie</button>':TRASH)+'</div><div class="card'+(flash===id?' flash':'')+'" style="--c:'+a.color+'"><div class="top"><button type="button" class="drag-handle" data-drag="activity" aria-label="Zmeniť poradie aktivity">⠿</button><div style="flex:1;min-width:0"><div class="name">'+esc(a.name)+'</div><div class="meta">'+(a.cat?esc(a.cat):'')+(now<a.start?' · ešte nezačala':'')+(st?' · 🔥 '+st:'')+'</div></div><div class="r day-count"><div class="big'+(isDone(a,now,now)?'':' muted')+'">'+d+'<small>'+dni(d)+'</small></div>'+CK(a,now)+'</div></div>'+bar+today
+return '<div class="sw'+(pd?' pd':'')+'" data-id="'+id+'"><div class="del">'+(pd?'<button data-a="yes">Áno</button><button data-a="no">Nie</button>':TRASH)+'</div><div class="card'+(flash===id?' flash':'')+'" style="--c:'+a.color+'"><div class="top"><button type="button" class="drag-handle" data-drag="activity" aria-label="Zmeniť poradie aktivity">⠿</button><div style="flex:1;min-width:0"><div class="name">'+esc(a.name)+'</div><div class="meta activity-meta"><span class="activity-category">'+(a.cat?esc(a.cat):'')+(now<a.start?' · ešte nezačala':'')+(st?' · 🔥 '+st:'')+'</span>'+bar+'</div></div><div class="r day-count"><div class="big'+(isDone(a,now,now)?'':' muted')+'">'+d+'<small>'+dni(d)+'</small></div>'+CK(a,now)+'</div></div>'+today
 +'<details class="d" data-k="'+id+'"'+op(id)+'><summary>Detail aktivity</summary><div class="dc">'+detail+'</div></details></div></div>'}
 function render(){
 var now=todayStr(),box=document.getElementById("list");
@@ -995,7 +999,12 @@ var t=ev.target.closest("[data-a]");if(!t)return;
 var c=t.closest("[data-id]"),id=c&&c.getAttribute("data-id"),a=items.filter(function(x){return x.id===id})[0];if(!a)return;
 var act=t.getAttribute("data-a"),now=todayStr(),full=false,pp=pend;
 if(act==="go"){a.done[now]="";flash=id;save()}
-else if(act==="sel")sel[id]=t.getAttribute("data-d");
+else if(act==="sel"){
+sel[id]=t.getAttribute("data-d");
+var calendarPanel=c.querySelector('[data-detail-panel="calendar"]');
+if(calendarPanel)calendarPanel.innerHTML=cal(a,now);
+return;
+}
 else if(act==="dyes"||act==="dno"){var k=t.getAttribute("data-d");sel[id]=k;
 if(act==="dno")a.done[k]=false;
 else{if(k<a.start){if(a.auto!==false){for(var q=addDays(k,1);q<a.start;q=addDays(q,1))a.done[q]=false}a.start=k}a.done[k]="";if(k===now)flash=id}
