@@ -731,7 +731,7 @@ var cd=COLORS.map(function(c){return '<button type="button" class="dot'+(c===a.c
 var op=function(k){return openIds[k]?" open":""};
 var G=function(k,title,body){return '<details class="n" data-k="'+id+k+'"'+op(id+k)+'><summary>'+title+'</summary><div class="in">'+body+'</div></details>'};
 var freqLabel=a.frequency==="custom"?a.frequencyDays.map(function(v){return ["","Po","Ut","St","Št","Pi","So","Ne"][v]}).join(", "):"Denne";
-var editPanel='<form class="col edit-activity-form" data-edit-form novalidate><label>Názov<span class="fld"><input type="text" class="en" maxlength="60" value="'+esc(a.name)+'"></span></label><div class="row"><label>Začiatok<span class="fld"><input type="date" class="es" value="'+a.start+'"></span></label><label>Koniec<span class="fld"><input type="date" class="ee" value="'+(a.end||"")+'" aria-label="Dátum konca"></span><span class="date-hint">Dátum konca musí byť po dátume začiatku.</span></label></div><div class="freq-box"><div class="freq-label">Opakovanie</div><div class="freq-toggle e-frequency-toggle"><button type="button" data-frequency="daily" class="'+(a.frequency==="daily"?"on":"")+'">Denne</button><button type="button" data-frequency="custom" class="'+(a.frequency==="custom"?"on":"")+'">Vybrané dni</button><button type="button" data-frequency="manual" class="'+(a.frequency==="manual"?"on":"")+'">Vlastná</button></div><select class="efrequency" hidden><option value="daily"'+(a.frequency==="daily"?" selected":"")+'>Denne</option><option value="custom"'+(a.frequency==="custom"?" selected":"")+'>Vybrané dni</option><option value="manual"'+(a.frequency==="manual"?" selected":"")+'>Vlastná</option></select><div class="freq-days e-frequency-days"'+(a.frequency==="custom"?"":" hidden")+'>'+["Po","Ut","St","Št","Pi","So","Ne"].map(function(day,i){var v=i+1;return '<label><input type="checkbox" class="efday" value="'+v+'"'+(a.frequencyDays.indexOf(v)>=0?" checked":"")+'><span>'+day+'</span></label>'}).join("")+'</div></div><label>Kategória<span class="fld"><input type="text" class="ec" maxlength="24" list="cats" value="'+esc(a.cat||"")+'"></span></label><label>Poznámka<span class="fld"><input type="text" class="an" maxlength="140" placeholder="Poznámka k aktivite" value="'+esc(a.note||"")+'"></span></label><label>Cieľ (počet dní)<span class="fld"><input type="number" class="eg" min="1" inputmode="numeric" value="'+(a.goal||"")+'"></span></label><label class="tg"><input type="checkbox" class="eauto"'+(a.auto!==false&&a.frequency!=="manual"?" checked":"")+(a.frequency==="manual"?" disabled":"")+'> Automaticky započítavať plánované dni (bez odkliknutia)</label><div><div class="cl">Farba</div><div class="dots">'+cd+'</div></div></form>';
+var editPanel='<form class="col edit-activity-form" data-edit-form novalidate><label>Názov<span class="fld"><input type="text" class="en" maxlength="60" value="'+esc(a.name)+'"></span></label><div class="row"><label>Začiatok<span class="fld"><input type="date" class="es" value="'+a.start+'"></span></label><label>Koniec<span class="fld"><input type="date" class="ee" value="'+(a.end||"")+'" aria-label="Dátum konca"></span><span class="date-hint">Dátum konca musí byť po dátume začiatku.</span></label></div><div class="freq-box"><div class="freq-label">Opakovanie</div><div class="freq-toggle e-frequency-toggle"><button type="button" data-frequency="daily" class="'+(a.frequency!=="custom"?"on":"")+'">Denne</button><button type="button" data-frequency="custom" class="'+(a.frequency==="custom"?"on":"")+'">Vybrané dni</button><button type="button" data-frequency="manual" class="'+(a.frequency==="manual"?"on":"")+'">Vlastná</button></div><select class="efrequency" hidden><option value="daily"'+(a.frequency==="daily"?" selected":"")+'>Denne</option><option value="custom"'+(a.frequency==="custom"?" selected":"")+'>Vybrané dni</option><option value="manual"'+(a.frequency==="manual"?" selected":"")+'>Vlastná</option></select><div class="freq-days e-frequency-days"'+(a.frequency==="custom"?"":" hidden")+'>'+["Po","Ut","St","Št","Pi","So","Ne"].map(function(day,i){var v=i+1;return '<label><input type="checkbox" class="efday" value="'+v+'"'+(a.frequencyDays.indexOf(v)>=0?" checked":"")+'><span>'+day+'</span></label>'}).join("")+'</div></div><label>Kategória<span class="fld"><input type="text" class="ec" maxlength="24" list="cats" value="'+esc(a.cat||"")+'"></span></label><label>Poznámka<span class="fld"><input type="text" class="an" maxlength="140" placeholder="Poznámka k aktivite" value="'+esc(a.note||"")+'"></span></label><label>Cieľ (počet dní)<span class="fld"><input type="number" class="eg" min="1" inputmode="numeric" value="'+(a.goal||"")+'"></span></label><label class="tg"><input type="checkbox" class="eauto"'+(a.auto!==false&&a.frequency!=="manual"?" checked":"")+(a.frequency==="manual"?" disabled":"")+'> Automaticky započítavať plánované dni (bez odkliknutia)</label><div><div class="cl">Farba</div><div class="dots">'+cd+'</div></div></form>';
 var overviewPanel=activityProgressDetail(a,now)+'<div class="detail-summary"><div class="detail-stat"><b>'+freqLabel+'</b><span>Frekvencia</span></div><div class="detail-stat"><b>'+fmt(a.start)+'</b><span>Začiatok</span></div></div>'+(a.note?'<div class="detail-note"><div class="meta">Poznámka k aktivite</div><div class="sm">'+esc(a.note)+'</div></div>':'');
 var detailTab=detailTabs[id]||"overview";
 var detail='<div class="detail-tabs"><button type="button" data-detail-tab="overview" class="'+(detailTab==="overview"?"on":"")+'">Info</button><button type="button" data-detail-tab="calendar" class="'+(detailTab==="calendar"?"on":"")+'">Kalendár</button><button type="button" data-detail-tab="edit" class="'+(detailTab==="edit"?"on":"")+'">Upraviť</button></div><div class="detail-panel" data-detail-panel="overview"'+(detailTab==="overview"?"":" hidden")+'>'+overviewPanel+'</div><div class="detail-panel" data-detail-panel="calendar"'+(detailTab==="calendar"?"":" hidden")+'>'+cal(a,now)+'</div><div class="detail-panel" data-detail-panel="edit"'+(detailTab==="edit"?"":" hidden")+'>'+editPanel+'<div class="sec">'+acts+'</div></div>';
@@ -941,11 +941,9 @@ else if(cl.contains("eg")){var g=v?Number(v):0;if(v&&(!Number.isInteger(g)||g<1|
 else if(cl.contains("eb")){var b=v?Number(v):0;if(v&&(!Number.isInteger(b)||b<0)){badF(el,"Počet splnených dní musí byť celé nezáporné číslo.");return}a.base=b}
 else if(cl.contains("ec"))a.cat=v;
 else if(cl.contains("eauto"))a.auto=el.checked;
-else if(cl.contains("efrequency")){a.frequency=v==="custom"?"custom":(v==="manual"?"manual":"daily");if(a.frequency==="manual")a.auto=false;var daysWrap=c.querySelector(".e-frequency-days"),autoBox=c.querySelector(".eauto");if(daysWrap)daysWrap.hidden=a.frequency!=="custom";if(autoBox){autoBox.disabled=a.frequency==="manual";autoBox.checked=a.frequency!=="manual"&&a.auto!==false;}if(a.frequency==="custom"&&!c.querySelector(".efday:checked"))groupError(c.querySelector(".freq-box"),"Vyber aspoň jeden deň v týždni.");else groupError(c.querySelector(".freq-box"),"");c.querySelectorAll(".e-frequency-toggle button").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-frequency")===a.frequency)})}
-else if(cl.contains("efday")){var days=[].slice.call(c.querySelectorAll(".efday:checked")).map(function(x){return Number(x.value)});a.frequency="custom";a.frequencyDays=days;var fs=c.querySelector(".efrequency");if(fs)fs.value="custom";groupError(c.querySelector(".freq-box"),days.length?"":"Vyber aspoň jeden deň v týždni.");c.querySelectorAll(".e-frequency-toggle button").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-frequency")==="custom")})}
-dirty[id]=(cl.contains("ec")||dirty[id]==="cat")?"cat":true;save();
-if(cl.contains("efday")){renderOne(id);return}
-refreshActivityInfo(c,a)}
+else if(cl.contains("efrequency")){a.frequency=v==="custom"?"custom":(v==="manual"?"manual":"daily");if(a.frequency==="manual")a.auto=false;var daysWrap=c.querySelector(".e-frequency-days"),autoBox=c.querySelector(".eauto");if(daysWrap)daysWrap.hidden=a.frequency!=="custom";if(autoBox){autoBox.disabled=a.frequency==="manual";autoBox.checked=a.frequency!=="manual"&&a.auto!==false;}if(a.frequency==="custom"&&!c.querySelector(".efday:checked"))groupError(c.querySelector(".freq-box"),"Vyber aspoň jeden deň v týždni.");else groupError(c.querySelector(".freq-box"),"");if(a.frequency==="custom"&&!c.querySelector(".efday:checked")){return;}c.querySelectorAll(".e-frequency-toggle button").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-frequency")===a.frequency)})}
+else if(cl.contains("efday")){var days=[].slice.call(c.querySelectorAll(".efday:checked")).map(function(x){return Number(x.value)});if(!days.length){el.checked=true;groupError(c.querySelector(".freq-box"),"Vyber aspoň jeden deň v týždni.");return}a.frequency="custom";a.frequencyDays=days;var fs=c.querySelector(".efrequency");if(fs)fs.value="custom";groupError(c.querySelector(".freq-box"),"");c.querySelectorAll(".e-frequency-toggle button").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-frequency")==="custom")})}
+dirty[id]=(cl.contains("ec")||dirty[id]==="cat")?"cat":true;save();refreshActivityInfo(c,a)}
 function syncEditDateInput(el){
 if(!el||!el.matches||!el.matches(".es,.ee"))return false;
 var c=el.closest("[data-id]"),id=c&&c.getAttribute("data-id"),a=items.find(function(x){return x.id===id});if(!a)return false;
@@ -1033,22 +1031,16 @@ var fw=freq.closest(".freq-box"),freqSelect=fw&&fw.querySelector(".efrequency"),
 if(freqSelect&&act){
   var next=freq.getAttribute("data-frequency"),daysWrap=fw.querySelector(".e-frequency-days"),autoBox=fw.querySelector(".eauto");
   if(next==="custom"){
-    if(act.frequency!=="custom"){
-      fw.querySelectorAll(".efday").forEach(function(x){x.checked=false});
-      act.frequencyDays=[];
-    }
-    act.frequency="custom";
+    if(act.frequency!=="custom")fw.querySelectorAll(".efday").forEach(function(x){x.checked=false});
     freqSelect.value="custom";daysWrap.hidden=false;
     groupError(fw,!fw.querySelector(".efday:checked")?"Vyber aspoň jeden deň v týždni.":"");
   }else{
     freqSelect.value=next;daysWrap.hidden=true;act.frequency=next;
     if(next==="manual"){act.auto=false;if(autoBox){autoBox.checked=false;autoBox.disabled=true;}}
     else{act.frequencyDays=[1,2,3,4,5,6,7];if(autoBox)autoBox.disabled=false;}
-    groupError(fw,"");
+    groupError(fw,"");dirty[act.id]=true;save();refreshActivityInfo(card,act);toast("Uložené");
   }
-  dirty[act.id]=true;save();
   fw.querySelectorAll(".e-frequency-toggle button").forEach(function(b){b.classList.toggle("on",b===freq)});
-  renderOne(act.id);toast("Uložené");
 }
 return;
 }
@@ -1130,8 +1122,8 @@ if(d.classList&&d.classList.contains("d")){
 var W=76,sw=null;
 function closeSw(except){list.querySelectorAll(".sw.open,.sw.pd").forEach(function(w){if(w===except)return;if(w.classList.contains("pd")){pend=null;w.querySelector(".del").innerHTML=TRASH}w.classList.remove("open","pd");w.style.removeProperty("--p");w.querySelector(".card").style.transform=""})}
 list.addEventListener("pointerdown",function(ev){if(ev.pointerType==="touch")return;var w=ev.target.closest(".sw");closeSw(w);
-if(!w||(w.classList.contains("open")&&!w.classList.contains("pd"))||(w.querySelector("details.d")&&w.querySelector("details.d").open)||ev.target.closest("input,button,summary,label,details"))return;
-sw={w:w,c:w.querySelector(".card"),x:ev.clientX,y:ev.clientY,sx:0,drag:false,was:w.classList.contains("open")||w.classList.contains("pd"),pending:w.classList.contains("pd"),tx:w.classList.contains("pd")?-W:0,lx:ev.clientX,lt:performance.now(),v:0,id:ev.pointerId}});
+if(!w||w.classList.contains("pd")||w.classList.contains("open")||(w.querySelector("details.d")&&w.querySelector("details.d").open)||ev.target.closest("input,button,summary,label,details"))return;
+sw={w:w,c:w.querySelector(".card"),x:ev.clientX,y:ev.clientY,sx:0,drag:false,was:w.classList.contains("open"),tx:0,lx:ev.clientX,lt:performance.now(),v:0,id:ev.pointerId}});
 list.addEventListener("pointermove",function(ev){if(ev.pointerType==="touch"||!sw)return;
 var dx=ev.clientX-sw.x,dy=ev.clientY-sw.y;
 if(!sw.drag){if(Math.abs(dx)>8&&Math.abs(dx)>Math.abs(dy)*1.2){sw.drag=true;sw.sx=sw.x+(dx>0?8:-8);sw.c.style.transition="none";try{sw.c.setPointerCapture(sw.id)}catch(e){}}else return}
@@ -1142,10 +1134,6 @@ sw.c.style.transform="translateX("+sw.tx+"px)";sw.w.style.setProperty("--p",Math
 function endSw(ev){if(ev&&ev.pointerType==="touch")return;if(!sw)return;var s=sw;sw=null;s.c.style.transition="";
 if(s.drag){supClick=Date.now();try{s.c.releasePointerCapture(s.id)}catch(e){}
 var o=(s.v<-.4&&s.tx<-14)?true:s.v>.4?false:s.tx<-W*.4;
-if(s.pending&&s.tx>-W*.4){
-  pend=null;s.w.classList.remove("open","pd");s.w.style.removeProperty("--p");
-  renderOne(s.w.getAttribute("data-id"));supClick=Date.now();return;
-}
 s.w.classList.toggle("open",o);s.c.style.transform=o?"translateX("+(-W)+"px)":"";s.w.style.setProperty("--p",o?1:0)}
 else if(s.was){supClick=Date.now();s.w.classList.remove("open");s.c.style.transform="";s.w.style.removeProperty("--p")}}
 list.addEventListener("pointerup",endSw);list.addEventListener("pointercancel",endSw);
@@ -1403,6 +1391,10 @@ wlEl.addEventListener("pointermove",function(ev){if(!wSwipe||ev.pointerId!==wSwi
 function endWishlistSwipe(ev){if(!wSwipe||ev&&ev.pointerId!==wSwipe.id)return;var s=wSwipe;wSwipe=null;s.card.style.transition="";if(!s.drag){if(s.was)s.wrap.classList.remove("open");return}var x=parseFloat((s.card.style.transform.match(/-?[0-9.]+/)||[0])[0]);var open=x<-WW*.4;s.wrap.classList.toggle("open",open);s.card.style.removeProperty("transform");supClick=Date.now();}
 wlEl.addEventListener("pointerup",endWishlistSwipe);wlEl.addEventListener("pointercancel",endWishlistSwipe);
 
+function validFrequencyDays(days){
+  var out=Array.isArray(days)?days.map(Number).filter(function(x,i,v){return Number.isInteger(x)&&x>=1&&x<=7&&v.indexOf(x)===i}).sort():[];
+  return out;
+}
 var DB=null,DB_READY=false,REMOTE_TIMER=null,REMOTE_CHAIN=Promise.resolve(),CURRENT_USER=null;
 function dbError(e){console.error("Supabase:",e);toast("Chyba synchronizácie: "+(e&&e.message?e.message:"neznáma chyba"))}
 function scheduleRemoteSave(){
@@ -1410,7 +1402,7 @@ function scheduleRemoteSave(){
   clearTimeout(REMOTE_TIMER);
   REMOTE_TIMER=setTimeout(function(){
     var snapshot={
-      activities:items.map(function(a,i){return{id:String(a.id),sort_order:i,name:a.name,category:a.cat||"",note:a.note||"",color:a.color||COLORS[0],start_date:a.start,end_date:a.end||null,goal_days:a.goal||0,auto_count:a.auto!==false,base_count:a.base||0,ended:!!a.ended,frequency_type:a.frequency||"daily",frequency_days:a.frequencyDays||[1,2,3,4,5,6,7]}}),
+      activities:items.map(function(a,i){return{id:String(a.id),sort_order:i,name:a.name,category:a.cat||"",note:a.note||"",color:a.color||COLORS[0],start_date:a.start,end_date:a.end||null,goal_days:a.goal||0,auto_count:a.auto!==false,base_count:a.base||0,ended:!!a.ended,frequency_type:a.frequency||"daily",frequency_days:(a.frequency==="custom"?validFrequencyDays(a.frequencyDays):[1,2,3,4,5,6,7])}}),
       activity_days:[],
       activity_history:[],
       lists:LISTS.map(function(l,i){return{id:String(l.id),sort_order:i,list_type:l.type,title:l.title,created_date:l.created||todayStr()}}),
