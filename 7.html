@@ -384,6 +384,14 @@ body{overscroll-behavior-y:auto}
 }
 
 
+
+/* Unified activity-card geometry: fixed progress slot for dated and undated goals. */
+#v-act .progress-block.aligned{height:42px;min-height:42px;display:flex!important;flex-direction:column;justify-content:flex-start;box-sizing:border-box}
+#v-act .progress-block.aligned>.bar{height:7px;min-height:7px;margin-top:7px}
+#v-act .progress-block.aligned>.pl{height:16px;min-height:16px;margin-top:5px;flex-wrap:nowrap;white-space:nowrap;overflow:hidden}
+#v-act .progress-block.aligned>.pl span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;overflow-wrap:normal}
+#v-act .progress-block.aligned>.pl span:last-child{text-align:right}
+
 /* Responsive layout v6: fluid sizing without CSS zoom or enlarged containers. */
 html, body {
   width: 100%;
@@ -641,7 +649,7 @@ return '<button class="ck" data-a="go" aria-label="Označiť ako splnené dnes">
 function card(a,now){
 var id=a.id,d=cnt(a,now),p=pct(a,now),st=streak(a,now),h=a.history;
 var rt="";if(a.goal>0){var gl=a.goal-d;rt=(gl>0?'zostáva '+gl+' '+dni(gl):'cieľ splnený 🎉')+(a.end?' · do '+fmt(a.end):'')}else if(a.end){var left=diff(now,a.end);rt=(left>0?'zostáva '+left+' '+dni(left):'termín uplynul')+' · do '+fmt(a.end)}
-var bar=p===null?"":'<div class="progress-block'+((a.goal>0||a.end)?" aligned":"")+'"><div class="bar"><i style="width:'+p+'%"></i></div><div class="pl"><span>'+p+' %</span><span>'+rt+'</span></div></div>';
+var bar='<div class="progress-block aligned"><div class="bar"><i style="width:'+(p===null?0:p)+'%"></i></div><div class="pl"><span>'+(p===null?"—":p+" %")+'</span><span>'+(rt||"&nbsp;")+'</span></div></div>';
 var today="";
 var isP=function(k){return pend&&pend.id===id&&pend.act===k};
 var pd=isP("del")&&pend.src==="sw";
@@ -834,11 +842,22 @@ function sTo(y){y=Math.max(0,y);try{window.scrollTo({top:y,behavior:RM()?"auto":
 function topOf(el){return el.getBoundingClientRect().top+window.scrollY}
 function stickyTopOffset(){var h=document.querySelector(".hd"),t=document.querySelector(".tabs");return (h?h.getBoundingClientRect().height:0)+(t?t.getBoundingClientRect().height:0)+10}
 var supClick=0,dirty={};
+
+function refreshActivityInfo(cardEl, activity){
+if(!cardEl||!activity)return;
+var panel=cardEl.querySelector('[data-detail-panel="overview"]');
+if(!panel)return;
+var frequency=activity.frequency==="custom"
+ ? activity.frequencyDays.map(function(v){return ["","Po","Ut","St","Št","Pi","So","Ne"][v]}).join(", ")
+ : "Denne";
+panel.innerHTML='<div class="detail-summary"><div class="detail-stat"><b>'+esc(frequency)+'</b><span>Frekvencia</span></div><div class="detail-stat"><b>'+fmt(activity.start)+'</b><span>Začiatok</span></div></div>'+(activity.note?'<div class="detail-note"><div class="meta">Poznámka k aktivite</div><div class="sm">'+esc(activity.note)+'</div></div>':'');
+}
+
 function editField(ev){var el=ev.target;if(!el.matches||!el.matches(".en,.es,.ee,.eg,.eb,.ec,.an,.nt,.efrequency,.efday"))return;
 var c=el.closest("[data-id]"),id=c&&c.getAttribute("data-id"),a=items.find(function(x){return String(x.id)===String(id)});if(!a)return;
 var v=el.value.trim(),cl=el.classList;okF(el);
-if(cl.contains("an")){a.note=el.value;save();return}
-if(cl.contains("nt")){var nd=el.getAttribute("data-d"),note=el.value;if(note.trim())a.notes[nd]=note;else delete a.notes[nd];var ce=c.querySelector('.cal [data-d="'+nd+'"]');if(ce)ce.classList.toggle("hn",!!note.trim());save();return}
+if(cl.contains("an")){a.note=el.value;save();refreshActivityInfo(c,a);return}
+if(cl.contains("nt")){var nd=el.getAttribute("data-d"),note=el.value;if(note.trim())a.notes[nd]=note;else delete a.notes[nd];var ce=c.querySelector('.cal [data-d="'+nd+'"]');if(ce)ce.classList.toggle("hn",!!note.trim());save();refreshActivityInfo(c,a);return}
 if(cl.contains("es")||cl.contains("ee")){
  var si=c.querySelector(".es"),ei=c.querySelector(".ee"),dateError=validateActivityDates(si.value,ei.value);
  if(dateError){badF(!validISODate(si.value)?si:ei,dateError);return}
@@ -850,7 +869,7 @@ else if(cl.contains("eb")){var b=v?Number(v):0;if(v&&(!Number.isInteger(b)||b<0)
 else if(cl.contains("ec"))a.cat=v;
 else if(cl.contains("efrequency")){a.frequency=v==="custom"?"custom":"daily";var daysWrap=c.querySelector(".e-frequency-days");if(daysWrap)daysWrap.hidden=a.frequency!=="custom";if(a.frequency==="custom"&&!c.querySelector(".efday:checked"))groupError(c.querySelector(".freq-box"),"Vyber aspoň jeden deň v týždni.");else groupError(c.querySelector(".freq-box"),"");c.querySelectorAll(".e-frequency-toggle button").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-frequency")===a.frequency)})}
 else if(cl.contains("efday")){var days=[].slice.call(c.querySelectorAll(".efday:checked")).map(function(x){return Number(x.value)});if(!days.length){el.checked=true;groupError(c.querySelector(".freq-box"),"Vyber aspoň jeden deň v týždni.");return}a.frequency="custom";a.frequencyDays=days;var fs=c.querySelector(".efrequency");if(fs)fs.value="custom";groupError(c.querySelector(".freq-box"),"");c.querySelectorAll(".e-frequency-toggle button").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-frequency")==="custom")})}
-dirty[id]=(cl.contains("ec")||dirty[id]==="cat")?"cat":true;save()}
+dirty[id]=(cl.contains("ec")||dirty[id]==="cat")?"cat":true;save();refreshActivityInfo(c,a)}
 function syncEditDateInput(el){
 if(!el||!el.matches||!el.matches(".es,.ee"))return false;
 var c=el.closest("[data-id]"),id=c&&c.getAttribute("data-id"),a=items.find(function(x){return x.id===id});if(!a)return false;
@@ -861,7 +880,7 @@ if(current===next)return false;
 if(el.classList.contains("ee")&&value&&a.start&&pd(value)<=pd(a.start)){badF(el,"Dátum konca musí byť po dátume začiatku.");return false;}
 if(el.classList.contains("es")&&value&&a.end&&pd(a.end)<=pd(value)){badF(el,"Začiatok musí byť pred koncom.");return false;}
 if(el.classList.contains("ee"))a.end=next;else a.start=next;
-okF(el);dirty[id]=true;save();toast("Uložené");return true;
+okF(el);dirty[id]=true;save();refreshActivityInfo(c,a);toast("Uložené");return true;
 }
 list.addEventListener("input",function(ev){if(ev.target.closest&&ev.target.closest(".edit-activity-form")&&!ev.target.matches(".es,.ee"))okF(ev.target);if(!syncEditDateInput(ev.target))editField(ev)});
 list.addEventListener("change",function(ev){if(ev.target.closest&&ev.target.closest(".edit-activity-form")&&!ev.target.matches(".es,.ee"))okF(ev.target);if(!syncEditDateInput(ev.target))editField(ev)});
@@ -953,7 +972,7 @@ if(freqSelect&&act){
 return;
 }
 var cd=ev.target.closest(".sw .card");
-if(cd&&!ev.target.closest("button,input,label,details,select,textarea,[data-a],.cal,.dp")){
+if(cd&&!cd.closest(".sw.open")&&!ev.target.closest("button,input,label,details,select,textarea,[data-a],.cal,.dp")){
 if(Date.now()-supClick<350)return;
 var dd=cd.querySelector("details.d");
 if(dd){var cid=cd.closest("[data-id]").getAttribute("data-id");
@@ -970,6 +989,7 @@ return}
 var t=ev.target.closest("[data-a]");if(!t)return;
 var c=t.closest("[data-id]"),id=c&&c.getAttribute("data-id"),a=items.filter(function(x){return x.id===id})[0];if(!a)return;
 var act=t.getAttribute("data-a"),now=todayStr(),full=false,pp=pend;
+if(act==="sel"){detailTabs[id]="overview";var detailWrap=c.querySelector("details.d");if(detailWrap){detailWrap.querySelectorAll("[data-detail-tab]").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-detail-tab")==="overview")});detailWrap.querySelectorAll("[data-detail-panel]").forEach(function(p){p.hidden=p.getAttribute("data-detail-panel")!=="overview"})}}
 if(act==="go"){a.done[now]="";flash=id;save()}
 else if(act==="sel")sel[id]=t.getAttribute("data-d");
 else if(act==="dyes"||act==="dno"){var k=t.getAttribute("data-d");sel[id]=k;
@@ -1017,7 +1037,7 @@ if(d.classList&&d.classList.contains("d")){
 var W=76,sw=null;
 function closeSw(except){list.querySelectorAll(".sw.open,.sw.pd").forEach(function(w){if(w===except)return;if(w.classList.contains("pd")){pend=null;w.querySelector(".del").innerHTML=TRASH}w.classList.remove("open","pd");w.style.removeProperty("--p");w.querySelector(".card").style.transform=""})}
 list.addEventListener("pointerdown",function(ev){if(ev.pointerType==="touch")return;var w=ev.target.closest(".sw");closeSw(w);
-if(!w||w.classList.contains("pd")||(w.querySelector("details.d")&&w.querySelector("details.d").open)||ev.target.closest("input,button,summary,label,details"))return;
+if(!w||w.classList.contains("pd")||w.classList.contains("open")||(w.querySelector("details.d")&&w.querySelector("details.d").open)||ev.target.closest("input,button,summary,label,details"))return;
 sw={w:w,c:w.querySelector(".card"),x:ev.clientX,y:ev.clientY,sx:0,drag:false,was:w.classList.contains("open"),tx:0,lx:ev.clientX,lt:performance.now(),v:0,id:ev.pointerId}});
 list.addEventListener("pointermove",function(ev){if(ev.pointerType==="touch"||!sw)return;
 var dx=ev.clientX-sw.x,dy=ev.clientY-sw.y;
@@ -1131,7 +1151,7 @@ function beginOrderDrag(data){data.active=true;orderDrag=data;document.body.clas
 // switches that same gesture into reorder mode without requiring a second touch.
 document.addEventListener("touchstart",function(ev){if(ev.touches.length!==1)return;var found=dragTypeCard(ev.target);if(!found)return;
  if(scrollInertiaFrame){cancelAnimationFrame(scrollInertiaFrame);scrollInertiaFrame=0;}cancelOrderPress();if(orderDrag)finishOrderDrag();var t=ev.touches[0],wishDone=found.type==="wishlist"?getWishDone(found.id):false,activityDetailOpen=found.type==="activity"&&!!(found.card.querySelector("details.d")&&found.card.querySelector("details.d").open),blocked=activityDetailOpen||!!ev.target.closest("button,input,textarea,select,summary,details,label,a,.cal,.dp,[data-detail-tab]");
- var data={type:found.type,card:found.card,id:found.id,doneState:wishDone,blocked:blocked,dragAllowed:!blocked&&!wishDone,pointerId:"touch",x:t.clientX,y:t.clientY,lastY:t.clientY,lastX:t.clientX,lastTime:performance.now(),velocity:0,moved:false,scrollMode:false,swipeMode:false,swipeTx:0,swipeVelocity:0,active:false,target:null,after:false,scrollStart:window.scrollY,wasOpen:!!(found.type==="wishlist"?found.card.closest(".w-sw").classList.contains("open"):found.card.classList.contains("open")),swipeCard:found.type==="wishlist"?found.card:found.card.querySelector(":scope>.card")};orderPressData=data;
+ var data={type:found.type,card:found.card,id:found.id,doneState:wishDone,blocked:blocked,dragAllowed:!blocked&&!wishDone&&!(found.type==="activity"&&found.card.classList.contains("open")),pointerId:"touch",x:t.clientX,y:t.clientY,lastY:t.clientY,lastX:t.clientX,lastTime:performance.now(),velocity:0,moved:false,scrollMode:false,swipeMode:false,swipeTx:0,swipeVelocity:0,active:false,target:null,after:false,scrollStart:window.scrollY,wasOpen:!!(found.type==="wishlist"?found.card.closest(".w-sw").classList.contains("open"):found.card.classList.contains("open")),swipeCard:found.type==="wishlist"?found.card:found.card.querySelector(":scope>.card")};orderPressData=data;
  if(data.dragAllowed)orderPress=setTimeout(function(){orderPress=null;if(orderPressData===data&&!data.moved){beginOrderDrag(data);}},360);
 },{passive:true});
 document.addEventListener("touchmove",function(ev){if(ev.touches.length!==1)return;var t=ev.touches[0],now=performance.now();
