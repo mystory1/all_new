@@ -550,12 +550,44 @@ button { max-width: 100%; }
 .detail-tabs button{position:relative;z-index:4;pointer-events:auto;touch-action:manipulation;cursor:pointer}
 .detail-panel[hidden]{display:none!important}
 
+
+/* Lists: same dark card language as Habits; isolated from activity styles. */
+.lists-filter{margin-bottom:12px}
+.lists-back{margin:0 0 10px}
+.lists-title-card{margin-bottom:10px}
+.lists-title-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.lists-type{font-size:.7rem;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;font-weight:700}
+.lists-title{font-size:1.12rem;font-weight:700;overflow-wrap:anywhere}
+.list-swipe,.item-swipe{position:relative;margin-bottom:9px;overflow:hidden;border-radius:16px;--p:1}
+.list-swipe-actions,.item-swipe-actions{position:absolute;right:0;top:0;bottom:0;width:76px;background:linear-gradient(90deg,#b91c1c,#ef4444);display:flex;align-items:center;justify-content:center;border-radius:0 16px 16px 0}
+.list-swipe-actions button,.item-swipe-actions button{width:76px;height:100%;display:grid;place-items:center;background:transparent;color:#fff;border-radius:0}
+.list-swipe-actions svg,.item-swipe-actions svg{width:26px;height:26px}
+.list-card,.list-item-card{position:relative;z-index:1;width:100%;text-align:left;display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--card);color:var(--txt);transition:transform .28s cubic-bezier(.22,1,.36,1);touch-action:pan-y}
+.list-card{padding:14px}
+.list-card-copy{display:grid;gap:3px;min-width:0}
+.list-card-copy strong{font-size:1rem;overflow-wrap:anywhere}
+.list-card-copy small,.list-item-copy small{font-size:.75rem;color:var(--mut)}
+.list-chevron{font-size:1.5rem;color:var(--mut)}
+.list-item-card{display:block;padding:12px 14px}
+.list-item-main{display:flex;align-items:center;gap:10px;min-width:0}
+.list-item-copy{display:grid;gap:3px;flex:1;min-width:0}
+.list-item-copy strong{font-size:.94rem;overflow-wrap:anywhere}
+.list-item-copy strong.is-complete{text-decoration:line-through;color:var(--mut)}
+.list-edit-toggle{flex:none}
+.list-item-editor{display:grid;gap:12px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.list-item-editor-actions{display:flex;justify-content:flex-end}
+.note-fld{height:auto;min-height:88px;overflow:visible}
+.note-fld textarea{display:block;width:100%;min-height:88px;resize:vertical;background:transparent;border:0;color:var(--txt);padding:10px 12px;font:inherit;font-size:16px;outline:none}
+#listCreateType{width:100%;height:100%;background:transparent;border:0;color:var(--txt);padding:0 12px;font:inherit;font-size:16px}
+#listItemFields{display:grid;gap:12px}
+@media(max-width:480px){.lists-title-row{align-items:flex-start;flex-direction:column}.list-edit-toggle{padding:7px 9px}}
+
 </style>
 </head>
 <body>
 <main>
 <div class="hd"><h1>Habits</h1><div class="r"><span id="accountName" class="meta"></span><button class="ghost" id="logoutBtn" type="button">Späť</button><button class="add" id="addb" aria-label="Nová aktivita">＋</button></div></div>
-<div class="tabs"><button data-t="ov" class="on">Prehľad</button><button data-t="act">Aktivity</button><button data-t="wl">Wishlist</button></div>
+<div class="tabs"><button data-t="ov" class="on">Prehľad</button><button data-t="act">Aktivity</button><button data-t="wl">Lists</button></div>
 <div id="v-ov"></div>
 <div id="v-act" hidden>
 <div class="card" id="add" hidden style="margin-bottom:12px">
@@ -592,14 +624,20 @@ button { max-width: 100%; }
 <div id="list"></div>
 </div>
 <div id="v-wl" hidden>
-<div class="card" id="wadd" hidden style="margin-bottom:12px">
-<form id="wf" novalidate>
-<label>Čo si prajem<span class="fld"><input type="text" id="wt" maxlength="80" placeholder="napr. Nové slúchadlá"></span></label>
-<label>Do kedy (nepovinné)<span class="fld"><input type="date" id="wdt"></span></label>
-<button class="primary" type="submit">Pridať do wishlistu</button>
+<div class="card" id="listCreateCard" hidden style="margin-bottom:12px">
+<form id="listCreateForm" novalidate>
+<label>Typ zoznamu<span class="fld"><select id="listCreateType"><option value="wishlist">Wishlist</option><option value="todo">To do list</option><option value="notes">Notes</option></select></span></label>
+<label>Názov zoznamu<span class="fld"><input id="listCreateTitle" maxlength="80" placeholder="napr. Veci na kúpu"></span></label>
+<button class="primary" type="submit">Vytvoriť zoznam</button>
 </form>
 </div>
-<div id="wlist"></div>
+<div class="card" id="listItemCreateCard" hidden style="margin-bottom:12px">
+<form id="listItemCreateForm" novalidate>
+<div id="listItemFields"></div>
+<button class="primary" type="submit" id="listItemSubmit">Pridať položku</button>
+</form>
+</div>
+<div id="listsView"></div>
 </div>
 </main>
 <div id="toast"></div>
@@ -724,7 +762,7 @@ function renderOne(id){var old=list.querySelector('.sw[data-id="'+id+'"]'),a=ite
 if(!old||!a){render();return}
 old.querySelectorAll("details[data-k]").forEach(function(d){openIds[d.getAttribute("data-k")]=d.open});
 var tmp=document.createElement("div");tmp.innerHTML=card(a,todayStr());old.replaceWith(tmp.firstChild);flash=null}
-function closeAll(){[].forEach.call(document.querySelectorAll("#v-wl details[data-wk]"),function(o){o.open=false});wPend=null;[].forEach.call(list.querySelectorAll("details[data-k]:not([data-k=ended])"),function(o){o.open=false});origY={};prevY={};pend=null;forced=[]}
+function closeAll(){[].forEach.call(document.querySelectorAll("#v-wl details[data-wk]"),function(o){o.open=false});if(typeof closeListsForms==="function")closeListsForms();wPend=null;[].forEach.call(list.querySelectorAll("details[data-k]:not([data-k=ended])"),function(o){o.open=false});origY={};prevY={};pend=null;forced=[]}
 function keepY(fn){var y=window.scrollY;fn();window.scrollTo(0,y)}
 function chipClick(ev){if(ev.target.closest("[data-menu]")){closeAll();keepY(function(){catOpen=!catOpen;render()});return}var b=ev.target.closest("[data-cat]");if(!b)return;var v=b.getAttribute("data-cat");closeAll();keepY(function(){S.cat=(v&&v===S.cat)?"":v;catOpen=false;render()})}
 document.getElementById("chips").addEventListener("click",chipClick);document.getElementById("catp").addEventListener("click",chipClick);
@@ -783,10 +821,10 @@ function renderOv(){var now=todayStr(),box=document.getElementById("v-ov");
 var seg='<div class="seg">'+[["day","Deň"],["week","Týždeň"],["month","Mesiac"],["year","Rok"]].map(function(m){return '<button data-m="'+m[0]+'" class="'+(OV.m===m[0]?"on":"")+'">'+m[1]+'</button>'}).join("")+'</div>';
 if(!items.length){box.innerHTML=seg+'<div class="empty">Zatiaľ žiadne aktivity.<br>Pridaj ich v záložke Aktivity.</div>';return}
 box.innerHTML=seg+(OV.m==="day"?ovDay(now):OV.m==="week"?ovWeek(now):OV.m==="month"?ovMonth(now):ovYear(now))}
-function setTab(x){closeAll();S.cat="";catOpen=false;var cpReset=document.getElementById("catp");if(cpReset)cpReset.hidden=true;T=x;document.querySelector(".hd h1").textContent=x==="wl"?"Wishlist":"Habits";["ov","act","wl"].forEach(function(k){document.getElementById("v-"+k).hidden=x!==k});
+function setTab(x){closeAll();S.cat="";catOpen=false;var cpReset=document.getElementById("catp");if(cpReset)cpReset.hidden=true;T=x;document.querySelector(".hd h1").textContent=x==="wl"?"Lists":"Habits";["ov","act","wl"].forEach(function(k){document.getElementById("v-"+k).hidden=x!==k});
 document.querySelectorAll(".tabs button").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-t")===x)});
 document.getElementById("addb").style.visibility="visible";
-addEl.hidden=true;wEl.hidden=true;addBtn();
+addEl.hidden=true;wEl.hidden=true;if(listItemCreateCard)listItemCreateCard.hidden=true;addBtn();
 if(x==="ov"){OV={m:"day",o:0,day:null};renderOv()}else if(x==="act")render();else renderWl()}
 document.querySelector(".tabs").addEventListener("click",function(ev){var b=ev.target.closest("[data-t]");if(b)setTab(b.getAttribute("data-t"))});
 document.getElementById("v-ov").addEventListener("click",function(ev){
@@ -796,7 +834,8 @@ var day=ev.target.closest("[data-day]");if(day&&!day.disabled){var picked=day.ge
 });
 function toast(m){var t=document.getElementById("toast");t.textContent=m;t.className="show";clearTimeout(toast.t);toast.t=setTimeout(function(){t.className=""},2200)}
 var addEl=document.getElementById("add");
-function addBtn(){var f=T==="wl"?wEl:addEl;document.getElementById("addb").textContent=f.hidden?"＋":"✕"}
+var wEl=document.getElementById("listCreateCard");
+function addBtn(){var f=T==="wl"?(activeListId?listItemCreateCard:listCreateCard):addEl;document.getElementById("addb").textContent=(!f||f.hidden)?"＋":"✕"}
 function closeAddForm(el){
   if(!el||el.hidden)return;
   var h=el.getBoundingClientRect().height;
@@ -812,10 +851,10 @@ function openAddForm(el,focusId){
 }
 document.getElementById("addb").addEventListener("click",function(){
   if(T==="ov"){setTab("act");openAddForm(addEl,"n");return;}
+  if(T==="wl"){toggleListsAddForm();return;}
   origY={};prevY={};
   document.querySelectorAll("#list details[data-k]:not([data-k=ended])").forEach(function(o){o.open=false});
-  var f=T==="wl"?wEl:addEl;
-  if(f.hidden)openAddForm(f,T==="wl"?"wt":"n");else closeAddForm(f);
+  if(addEl.hidden)openAddForm(addEl,"n");else closeAddForm(addEl);
 });
 document.getElementById("pick").innerHTML=dots(pickC,"data-pc");
 document.getElementById("s").value=todayStr();
@@ -1097,64 +1136,161 @@ s.w.classList.toggle("open",o);s.c.style.transform=o?"translateX("+(-W)+"px)":""
 else if(s.was){supClick=Date.now();s.w.classList.remove("open");s.c.style.transform="";s.w.style.removeProperty("--p")}}
 list.addEventListener("pointerup",endSw);list.addEventListener("pointercancel",endSw);
 document.addEventListener("visibilitychange",function(){if(!document.hidden){render();if(T==="ov")renderOv();if(T==="wl")renderWl()}});
-var WLK="aktivity_wish_v1",WL=[],WF="all",wPend=null,wDirty={},wEl=document.getElementById("wadd"),wlEl=document.getElementById("v-wl"),wOpen={};
-function wLoad(){try{var r=localStorage.getItem(WLK);WL=r?JSON.parse(r):[]}catch(x){WL=[]}if(!Array.isArray(WL))WL=[];WL=WL.filter(function(w){return w&&w.id&&w.text}).map(function(w){if(typeof w.note!=="string")w.note="";return w});sortWishlistByStatus()}
-function wSave(){try{localStorage.setItem(WLK,JSON.stringify(WL))}catch(x){}scheduleRemoteSave()}
-function sortWishlistByStatus(){var active=WL.filter(function(w){return !w.done}),done=WL.filter(function(w){return !!w.done});WL=active.concat(done);WL.forEach(function(w,i){w.sort_order=i});persistSavedOrder(WL,WLK+"_order")}
-function wCard(w,now){var left=w.due?diff(now,w.due):null,id=w.id,col,meta,big="",bar="";
-if(w.done){col="#22c55e";meta="Splnené "+fmt(w.done);}
-else if(w.due){col=left<=3?"#ef4444":left<=14?"#f59e0b":"#22c55e";var ab=Math.abs(left);
-meta="do "+fmt(w.due)+" · "+(left>0?"zostáva "+left+" "+dni(left):left===0?"dnes je termín":"po termíne o "+ab+" "+dni(ab));
-big='<div class="big">'+(left<0?"−":"")+ab+'<small>'+dni(ab)+'</small></div>';
-var tot=Math.max(1,diff(w.created,w.due)),p=Math.max(0,Math.min(100,Math.round(diff(w.created,now)/tot*100)));bar='<div class="progress-block aligned"><div class="bar"><i style="width:'+p+'%"></i></div></div>'}
-else{col="#3b82f6";meta=""}
-var ck=w.done?'<span class="ck on" role="img" aria-label="Splnené">'+CHK+'</span>':'<button class="ck" data-w-a="done" aria-label="Označiť ako splnené">'+CHK+'</button>';
-var del=wPend===id?'<button type="button" data-w-a="yes">Áno</button><button type="button" data-w-a="no">Nie</button>':'<button type="button" data-w-a="del" aria-label="Odstrániť prianie"><svg viewBox="0 0 24 24" width="27" height="27" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V5h6v2m-8 0 1 13h8l1-13M10 11v5m4-5v5"/></svg></button>';
-var dragHandle=!w.done?'<button type="button" class="drag-handle" data-drag="wishlist" aria-label="Zmeniť poradie priania">⠿</button>':'';
-var detail='';
-if(!w.done){detail='<details class="d" data-wk="'+id+'"'+(wOpen[id]?" open":"")+'><summary>⚙</summary><div class="dc"><div class="col"><label>Prianie<span class="fld"><input type="text" class="wt" maxlength="80" value="'+esc(w.text)+'"></span></label><label>Do kedy (nepovinné)<span class="fld"><input type="date" class="wdd" value="'+(w.due||"")+'"></span></label>'+(w.due?'':'<div class="meta">Bez termínu</div>')+'<label>Poznámka (nepovinné)<span class="fld note-fld"><textarea class="wnote" maxlength="1000" placeholder="Doplň poznámku...">'+esc(w.note||"")+'</textarea></span></label><div class="meta">Pridané '+fmt(w.created)+'</div><button class="ghost danger" data-w-a="del">Odstrániť</button></div></div></details>'}
-else{detail='<details class="d" data-wk="'+id+'"'+(wOpen[id]?" open":"")+'><summary>⚙ Detail priania</summary><div class="dc"><div class="col"><div class="meta">Splnené '+fmt(w.done)+'</div>'+(!w.due?'<div class="meta">Bez termínu</div>':'<div class="meta">Termín: '+fmt(w.due)+'</div>')+(w.note?'<div class="sm">'+esc(w.note)+'</div>':'')+'<div class="w-done-actions"><button class="ghost" data-w-a="undone">Vrátiť medzi nesplnené</button><button class="ghost danger" data-w-a="del">Odstrániť</button></div></div></div></details>'}
-return '<div class="w-sw'+(wPend===id?' open pd':'')+(w.done?' is-done':'')+'" data-wsw="'+id+'"><div class="w-del">'+del+'</div><div class="card wc" data-w="'+id+'" style="--c:'+col+'"><div class="top">'+dragHandle+'<div style="flex:1;min-width:0"><div class="name">'+esc(w.text)+'</div><div class="meta">'+meta+'</div></div><div class="r day-count">'+big+ck+'</div></div>'+bar+detail+'</div></div>'}
 
-function renderWl(){var now=todayStr(),box=document.getElementById("wlist");
-box.querySelectorAll("details[data-wk]").forEach(function(d){wOpen[d.getAttribute("data-wk")]=d.open});
-sortWishlistByStatus();
-var dn=WL.filter(function(w){return !!w.done});var l=WF==="done"?dn:WL;
-box.innerHTML='<div class="seg"><button data-wf="all" class="'+(WF==="all"?"on":"")+'">Všetky ('+WL.length+')</button><button data-wf="done" class="'+(WF==="done"?"on":"")+'">Done ('+dn.length+')</button></div>'
-+(l.length?l.map(function(w){return wCard(w,now)}).join(""):'<div class="empty">'+(WF==="all"?"Zatiaľ žiadne priania.<br>Pridaj prvé tlačidlom ＋.":"Zatiaľ nič v Done.")+'</div>')}
+var WLK="aktivity_lists_v1",LISTS=[],LIST_ITEMS=[],LIST_FILTER="all",activeListId=null,WL=[],wPend=null;
+var wlEl=document.getElementById("v-wl"),listCreateCard=document.getElementById("listCreateCard");
+var listItemCreateCard=document.getElementById("listItemCreateCard"),listCreateForm=document.getElementById("listCreateForm");
+var listItemCreateForm=document.getElementById("listItemCreateForm"),listItemFields=document.getElementById("listItemFields");
+var listCreateType=document.getElementById("listCreateType"),listCreateTitle=document.getElementById("listCreateTitle");
+var listSwipeState=null,listDeletePending=null,itemDeletePending=null;
+function listLoad(){
+ try{var raw=localStorage.getItem(WLK);var data=raw?JSON.parse(raw):null;
+  if(data&&Array.isArray(data.lists)&&Array.isArray(data.items)){LISTS=data.lists;LIST_ITEMS=data.items;}
+  else if(Array.isArray(data)){LISTS=[];LIST_ITEMS=[];if(data.length){var lid="legacy-wishlist";LISTS.push({id:lid,type:"wishlist",title:"Wishlist",created:todayStr(),sort_order:0});data.forEach(function(w,i){LIST_ITEMS.push({id:String(w.id||("legacy-"+i)),list_id:lid,title:w.text||"Položka",note:w.note||"",amount:null,done:!!w.done,created:w.created||todayStr(),due:w.due||null,sort_order:i})})}}
+ }catch(e){LISTS=[];LIST_ITEMS=[]}
+ LISTS=LISTS.filter(function(x){return x&&x.id&&["wishlist","todo","notes"].includes(x.type)&&x.title});
+ LIST_ITEMS=LIST_ITEMS.filter(function(x){return x&&x.id&&x.list_id&&x.title&&LISTS.some(function(l){return l.id===x.list_id})});
+}
+function listSaveLocalOnly(){try{localStorage.setItem(WLK,JSON.stringify({lists:LISTS,items:LIST_ITEMS}))}catch(e){}}
+function listSave(){
+ listSaveLocalOnly();
+ scheduleRemoteSave();
+}
+function listTypeName(type){return type==="wishlist"?"Wishlist":type==="todo"?"To do list":"Notes"}
+function currentList(){return LISTS.find(function(l){return l.id===activeListId})||null}
+function listItemsFor(id){return LIST_ITEMS.filter(function(x){return x.list_id===id}).sort(function(a,b){return (a.sort_order||0)-(b.sort_order||0)})}
+function listCount(id){return listItemsFor(id).length}
+function listEscapeId(id){return String(id).replace(/[^a-zA-Z0-9_-]/g,"")}
+function toggleListsAddForm(){
+ var form=activeListId?listItemCreateCard:listCreateCard;
+ var other=activeListId?listCreateCard:listItemCreateCard;
+ if(!other.hidden)closeAddForm(other);
+ if(form.hidden){
+  if(activeListId)prepareListItemForm(currentList());
+  else{listCreateType.value="wishlist";listCreateTitle.value="";}
+  openAddForm(form,activeListId?"listItemTitle":"listCreateTitle");
+ }else closeAddForm(form);
+}
+function closeListsForms(){
+ if(!listCreateCard.hidden)closeAddForm(listCreateCard);
+ if(!listItemCreateCard.hidden)closeAddForm(listItemCreateCard);
+}
+function prepareListItemForm(list){
+ if(!list)return;
+ var fields='<label>Názov položky<span class="fld"><input id="listItemTitle" maxlength="100" placeholder="Zadaj názov"></span></label>';
+ if(list.type==="wishlist"){
+  fields+='<label>Poznámka (nepovinná)<span class="fld note-fld"><textarea id="listItemNote" maxlength="2000" placeholder="Doplň poznámku..."></textarea></span></label>';
+  fields+='<label>Suma (nepovinná)<span class="fld"><input id="listItemAmount" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0,00"></span></label>';
+ }else if(list.type==="notes"){
+  fields+='<label>Poznámka<span class="fld note-fld"><textarea id="listItemNote" maxlength="5000" placeholder="Napíš poznámku..."></textarea></span></label>';
+ }
+ listItemFields.innerHTML=fields;
+ document.getElementById("listItemSubmit").textContent=list.type==="notes"?"Pridať poznámku":"Pridať položku";
+}
+function renderLists(){
+ var box=document.getElementById("listsView"),list=currentList();
+ if(list){
+  var its=listItemsFor(list.id),body=its.map(function(it){return renderListItem(it,list)}).join("");
+  box.innerHTML='<div class="lists-back"><button class="ghost" type="button" data-list-action="back">‹ Všetky zoznamy</button></div>'+
+   '<div class="lists-title-card card"><div class="lists-title-row"><div><div class="lists-type">'+listTypeName(list.type)+'</div><div class="lists-title">'+esc(list.title)+'</div><div class="meta">'+its.length+(list.type==="notes"?" poznámok":list.type==="todo"?" úloh":" položiek")+'</div></div><button class="ghost" type="button" data-list-action="rename">Upraviť názov</button></div></div>'+
+   (body||'<div class="empty">'+(list.type==="notes"?"Zatiaľ žiadne poznámky.":list.type==="todo"?"Zatiaľ žiadne úlohy.":"Zoznam je zatiaľ prázdny.")+'<br>Pridaj prvú položku tlačidlom ＋.</div>');
+  return;
+ }
+ var filtered=LIST_FILTER==="all"?LISTS:LISTS.filter(function(l){return l.type===LIST_FILTER});
+ var filters=[["all","Všetky"],["wishlist","Wishlist"],["todo","To do"],["notes","Notes"]];
+ box.innerHTML='<div class="seg lists-filter">'+filters.map(function(f){return '<button type="button" data-list-filter="'+f[0]+'" class="'+(LIST_FILTER===f[0]?"on":"")+'">'+f[1]+'</button>'}).join("")+'</div>'+
+  (filtered.length?filtered.sort(function(a,b){return (a.sort_order||0)-(b.sort_order||0)}).map(function(l){
+   var n=listCount(l.id),done=listItemsFor(l.id).filter(function(x){return x.done}).length;
+   return '<div class="list-swipe" data-list-swipe="'+esc(l.id)+'"><div class="list-swipe-actions"><button type="button" data-list-action="delete-list" data-id="'+esc(l.id)+'" aria-label="Odstrániť zoznam">'+TRASH.replace(/^<button[^>]*>/,"").replace(/<\/button>$/,"")+'</button></div><div class="card list-card" data-list-open="'+esc(l.id)+'" role="button" tabindex="0"><span class="list-card-copy"><span class="lists-type">'+listTypeName(l.type)+'</span><strong>'+esc(l.title)+'</strong><small>'+(l.type==="todo"?done+" / "+n+" dokončených":n+(l.type==="notes"?" poznámok":" položiek"))+'</small></span><span class="list-chevron">›</span></div></div>';
+  }).join(""):'<div class="empty">Zatiaľ nemáš žiadne zoznamy.<br>Vytvor Wishlist, To do list alebo Notes tlačidlom ＋.</div>');
+}
+function renderListItem(it,list){
+ var edit=list.type==="wishlist"
+  ?'<label>Poznámka (nepovinná)<span class="fld note-fld"><textarea class="list-edit-note" data-id="'+esc(it.id)+'" maxlength="2000">'+esc(it.note||"")+'</textarea></span></label><label>Suma (nepovinná)<span class="fld"><input class="list-edit-amount" data-id="'+esc(it.id)+'" type="number" min="0" step="0.01" value="'+(it.amount==null?"":esc(String(it.amount)))+'" placeholder="0,00"></span></label>'
+  :list.type==="notes"?'<label>Poznámka<span class="fld note-fld"><textarea class="list-edit-note" data-id="'+esc(it.id)+'" maxlength="5000">'+esc(it.note||"")+'</textarea></span></label>':'';
+ var titleEdit='<label>Názov položky<span class="fld"><input class="list-edit-title" data-id="'+esc(it.id)+'" maxlength="100" value="'+esc(it.title)+'"></span></label>';
+ var done=list.type==="todo"?'<button type="button" class="ck'+(it.done?" on":"")+'" data-list-action="toggle-done" data-id="'+esc(it.id)+'" aria-label="'+(it.done?"Označiť ako nesplnené":"Označiť ako splnené")+'">'+CHK+'</button>':'';
+ var summary='<div class="list-item-main">'+done+'<div class="list-item-copy"><strong class="'+(it.done?"is-complete":"")+'">'+esc(it.title)+'</strong>'+(list.type==="wishlist"&&it.amount!=null&&it.amount!==""?'<small>'+esc(String(it.amount))+'</small>':list.type==="notes"&&it.note?'<small>'+esc(it.note.slice(0,100))+'</small>':'')+'</div><button type="button" class="ghost list-edit-toggle" data-list-action="edit-item" data-id="'+esc(it.id)+'">Upraviť</button></div>';
+ return '<div class="item-swipe" data-item-swipe="'+esc(it.id)+'"><div class="item-swipe-actions"><button type="button" data-list-action="delete-item" data-id="'+esc(it.id)+'" aria-label="Odstrániť položku">'+TRASH.replace(/^<button[^>]*>/,"").replace(/<\/button>$/,"")+'</button></div><div class="card list-item-card" data-item-card="'+esc(it.id)+'">'+summary+'<div class="list-item-editor" data-editor="'+esc(it.id)+'" hidden>'+titleEdit+edit+'<div class="list-item-editor-actions"><button type="button" class="ghost" data-list-action="close-editor" data-id="'+esc(it.id)+'">Hotovo</button></div></div></div></div>';
+}
+function listToastSaved(){toast("Uložené")}
+function deleteList(id){
+ LIST_ITEMS=LIST_ITEMS.filter(function(x){return x.list_id!==id});LISTS=LISTS.filter(function(x){return x.id!==id});
+ if(activeListId===id)activeListId=null;listDeletePending=null;listSave();renderLists();toast("Zoznam odstránený");addBtn();
+}
+function deleteListItem(id){
+ LIST_ITEMS=LIST_ITEMS.filter(function(x){return x.id!==id});itemDeletePending=null;listSave();renderLists();toast("Položka odstránená");
+}
+listCreateForm.addEventListener("submit",function(ev){
+ ev.preventDefault();var title=listCreateTitle.value.trim();
+ if(!title){badF(listCreateTitle,"Zadaj názov zoznamu.");return}
+ okF(listCreateTitle);
+ var id="l"+Date.now()+Math.floor(Math.random()*1000);
+ LISTS.push({id:id,type:listCreateType.value,title:title,created:todayStr(),sort_order:LISTS.length});
+ listSave();listCreateForm.reset();listCreateCard.hidden=true;LIST_FILTER=listCreateType.value;activeListId=id;renderLists();addBtn();toast("Zoznam vytvorený");
+});
+listItemCreateForm.addEventListener("submit",function(ev){
+ ev.preventDefault();var list=currentList();if(!list)return;
+ var title=document.getElementById("listItemTitle"),value=title.value.trim();
+ if(!value){badF(title,list.type==="notes"?"Zadaj názov poznámky.":"Zadaj názov položky.");return}
+ okF(title);
+ var noteEl=document.getElementById("listItemNote"),amountEl=document.getElementById("listItemAmount"),amount=null;
+ if(amountEl&&amountEl.value.trim()!==""){
+  amount=Number(amountEl.value.replace(",","."));
+  if(!Number.isFinite(amount)||amount<0){badF(amountEl,"Zadaj platnú nezápornú sumu.");return}
+ }
+ LIST_ITEMS.push({id:"i"+Date.now()+Math.floor(Math.random()*1000),list_id:list.id,title:value,note:noteEl?noteEl.value.trim():"",amount:amount,done:false,created:todayStr(),sort_order:listItemsFor(list.id).length});
+ listSave();listItemCreateForm.reset();listItemCreateCard.hidden=true;renderLists();addBtn();toast(list.type==="notes"?"Poznámka pridaná":"Položka pridaná");
+});
+wlEl.addEventListener("keydown",function(ev){if((ev.key==="Enter"||ev.key===" ")&&ev.target.closest("[data-list-open]")){ev.preventDefault();ev.target.closest("[data-list-open]").click()}});
 wlEl.addEventListener("click",function(ev){
-if(Date.now()-supClick<550&&ev.target.closest(".wc")){ev.preventDefault();ev.stopPropagation();return}
-var sg=ev.target.closest("[data-wf]");if(sg){WF=sg.getAttribute("data-wf");renderWl();return}
-var cd=ev.target.closest(".wc"),wrap=ev.target.closest(".w-sw");if(!cd&&wrap)cd=wrap.querySelector(".wc");if(!cd)return;var id=cd.getAttribute("data-w"),w=WL.filter(function(x){return x.id===id})[0];if(!w)return;
-var t=ev.target.closest("[data-w-a]");
-if(!t){if(!ev.target.closest("button,input,label,details,summary")){var dd=cd.querySelector("details.d");
-if(dd&&!dd.open){var y0=window.scrollY;closeAddForm(wEl);[].forEach.call(wlEl.querySelectorAll("details.d[open]"),function(o){if(o!==dd)o.open=false});origY={};origY[id]=y0;anim(dd,true);sTo(topOf(cd)-stickyTopOffset()-8)}
-else if(dd&&dd.open){anim(dd,false);if(origY[id]!==undefined){sTo(origY[id]);delete origY[id]}}}return}
-var a=t.getAttribute("data-w-a"),now=todayStr();
-if(a==="done"){w.done=now;sortWishlistByStatus();WF="all";wSave();toast("🎉 Presunuté na koniec zoznamu")}
-else if(a==="undone"){w.done=null;sortWishlistByStatus();WF="all";wSave()}
-else if(a==="del"){wPend=id;renderWl();return}
-else if(a==="no")wPend=null;
-else if(a==="yes"&&wPend===id){var oldY=window.scrollY;WL=WL.filter(function(x){return x!==w});wPend=null;wSave();renderWl();requestAnimationFrame(function(){var max=Math.max(0,document.documentElement.scrollHeight-window.innerHeight);window.scrollTo(0,Math.min(oldY,max))});return}
-renderWl()});
-wlEl.addEventListener("input",function(ev){var el=ev.target;if(!el.matches||!el.matches(".wt,.wdd,.wnote"))return;
-var cd=el.closest(".wc"),w=WL.filter(function(x){return x.id===cd.getAttribute("data-w")})[0];if(!w||w.done)return;okF(el);
-if(el.classList.contains("wt")){var v=el.value.trim();if(!v){badF(el,"Napíš, čo si praješ.");return}w.text=v;cd.querySelector(".name").textContent=v}
-else if(el.classList.contains("wdd"))w.due=el.value||null;else w.note=el.value;
-wDirty[w.id]=true;wSave()});
-wlEl.addEventListener("focusout",function(ev){var cd=ev.target.closest&&ev.target.closest(".wc");if(!cd)return;var id=cd.getAttribute("data-w"),ww=WL.filter(function(x){return String(x.id)===String(id)})[0];if(!ww||ww.done||!wDirty[id])return;
-setTimeout(function(){var c=wlEl.querySelector('[data-w="'+id+'"]');if(!c||!wDirty[id]||c.contains(document.activeElement))return;delete wDirty[id];renderWl();toast("Uložené")},150)});
-var wf=document.getElementById("wf");
-wf.addEventListener("input",function(ev){okF(ev.target)});wf.addEventListener("change",function(ev){okF(ev.target)});
-wf.addEventListener("submit",function(ev){ev.preventDefault();
-var ti=document.getElementById("wt"),di=document.getElementById("wdt"),first=null,now=todayStr();
-var bad=function(el,m){badF(el,m);if(!first)first=el};[ti,di].forEach(okF);
-var v=ti.value.trim(),dv=di.value;
-if(!v)bad(ti,"Napíš, čo si praješ.");
-if(dv&&dv<now)bad(di,"Termín nemôže byť v minulosti.");
-if(first){try{first.closest(".fld").scrollIntoView({block:"center",behavior:"smooth"})}catch(x){}return}
-WL.unshift({sort_order:0,id:"w"+Date.now()+Math.floor(Math.random()*1e3),text:v,due:dv||null,note:"",created:now,done:null});wSave();this.reset();wEl.hidden=true;addBtn();WF="all";sortWishlistByStatus();renderWl();toast("Pridané do wishlistu")});
-
+ if(Date.now()-supClick<550&&ev.target.closest(".list-card,.list-item-card")){ev.preventDefault();ev.stopPropagation();return}
+ var filter=ev.target.closest("[data-list-filter]");if(filter){LIST_FILTER=filter.getAttribute("data-list-filter");renderLists();return}
+ var open=ev.target.closest("[data-list-open]");if(open){activeListId=open.getAttribute("data-list-open");closeListsForms();renderLists();addBtn();return}
+ var action=ev.target.closest("[data-list-action]");if(!action)return;
+ var a=action.getAttribute("data-list-action"),id=action.getAttribute("data-id");
+ if(a==="back"){activeListId=null;closeListsForms();renderLists();addBtn();return}
+ if(a==="rename"){
+  var list=currentList();if(!list)return;var v=window.prompt("Nový názov zoznamu",list.title);if(v===null)return;v=v.trim();if(!v){toast("Názov nemôže byť prázdny.");return}list.title=v;listSave();renderLists();toast("Uložené");return;
+ }
+ if(a==="delete-list"){if(listDeletePending===id){deleteList(id);return}listDeletePending=id;action.textContent="Naozaj odstrániť?";return}
+ if(a==="delete-item"){if(itemDeletePending===id){deleteListItem(id);return}itemDeletePending=id;action.textContent="Naozaj odstrániť?";return}
+ if(a==="toggle-done"){var it=LIST_ITEMS.find(function(x){return x.id===id});if(it){it.done=!it.done;listSave();renderLists()}return}
+ if(a==="edit-item"){var editor=wlEl.querySelector('[data-editor="'+CSS.escape(id)+'"]');if(editor)editor.hidden=!editor.hidden;return}
+ if(a==="close-editor"){var ed=wlEl.querySelector('[data-editor="'+CSS.escape(id)+'"]');if(ed)ed.hidden=true;listSave();toast("Uložené");return}
+});
+wlEl.addEventListener("input",function(ev){
+ var el=ev.target;if(!el.matches)return;var id=el.getAttribute("data-id"),it=LIST_ITEMS.find(function(x){return x.id===id});if(!it)return;
+ if(el.classList.contains("list-edit-title")){var v=el.value.trim();if(!v){badF(el,"Názov je povinný.");return}okF(el);it.title=v;var card=el.closest(".list-item-card");if(card)card.querySelector(".list-item-copy strong").textContent=v}
+ else if(el.classList.contains("list-edit-note"))it.note=el.value;
+ else if(el.classList.contains("list-edit-amount")){if(el.value.trim()==="")it.amount=null;else{var n=Number(el.value.replace(",", "."));if(Number.isFinite(n)&&n>=0)it.amount=n;else{badF(el,"Zadaj platnú sumu.");return}}}
+ listSave();
+});
+wlEl.addEventListener("focusout",function(ev){
+ var el=ev.target;if(!el.matches||!el.matches(".list-edit-title,.list-edit-note,.list-edit-amount"))return;
+ setTimeout(function(){if(wlEl.contains(document.activeElement))return;renderLists();toast("Uložené")},120);
+});
+function initListSwipe(){
+ wlEl.addEventListener("pointerdown",function(ev){
+  var wrap=ev.target.closest(".list-swipe,.item-swipe");if(!wrap||ev.target.closest("button,input,textarea,select,label"))return;
+  var content=wrap.querySelector(".list-card,.list-item-card");if(!content)return;
+  listSwipeState={wrap:wrap,content:content,x:ev.clientX,y:ev.clientY,dx:0,drag:false,id:ev.pointerId};
+ });
+ wlEl.addEventListener("pointermove",function(ev){
+  if(!listSwipeState||ev.pointerId!==listSwipeState.id)return;var s=listSwipeState,dx=ev.clientX-s.x,dy=ev.clientY-s.y;
+  if(!s.drag){if(Math.abs(dx)>8&&Math.abs(dx)>Math.abs(dy)*1.2){s.drag=true;s.content.style.transition="none";try{s.content.setPointerCapture(ev.pointerId)}catch(e){}}else return}
+  s.dx=Math.min(0,Math.max(-76,dx));s.content.style.transform="translateX("+s.dx+"px)";ev.preventDefault();
+ },{passive:false});
+ function finish(ev){
+  if(!listSwipeState||ev&&ev.pointerId!==listSwipeState.id)return;var s=listSwipeState;listSwipeState=null;s.content.style.transition="";
+  if(!s.drag)return;supClick=Date.now();var opened=s.dx<-32;s.wrap.classList.toggle("swipe-open",opened);s.content.style.transform=opened?"translateX(-76px)":"";
+ }
+ wlEl.addEventListener("pointerup",finish);wlEl.addEventListener("pointercancel",finish);
+}
+initListSwipe();
+function wLoad(){listLoad()}
+function wSave(){listSave()}
+function renderWl(){renderLists()}
 
 // Touch-first reordering. Cards use touch-action:none and ordinary vertical
 // scrolling is emulated until a long-press is confirmed. This avoids the
@@ -1162,7 +1298,7 @@ WL.unshift({sort_order:0,id:"w"+Date.now()+Math.floor(Math.random()*1e3),text:v,
 var orderDrag=null,orderPress=null,orderPressData=null,scrollInertiaFrame=0;
 function clearDropMarks(){document.querySelectorAll(".drop-before,.drop-after").forEach(function(el){el.classList.remove("drop-before","drop-after")})}
 function clearDragState(){document.querySelectorAll(".dragging-order").forEach(function(el){el.classList.remove("dragging-order")});document.querySelectorAll(".drag-ghost").forEach(function(el){el.remove()});document.body.classList.remove("order-drag-active")}
-function dragTypeCard(el){var a=el&&el.closest&&el.closest(".sw[data-id]"),w=el&&el.closest&&el.closest(".wc[data-w]");return a?{type:"activity",card:a,id:a.getAttribute("data-id")}:w?{type:"wishlist",card:w,id:w.getAttribute("data-w")}:null}
+function dragTypeCard(el){var a=el&&el.closest&&el.closest(".sw[data-id]");return a?{type:"activity",card:a,id:a.getAttribute("data-id")}:null}
 function getWishDone(id){var w=WL.find(function(x){return String(x.id)===String(id)});return !!(w&&w.done)}
 function orderNodes(type,doneState){var selector=type==="activity"?"#list .sw[data-id]":"#wlist .wc[data-w]";
  return Array.prototype.slice.call(document.querySelectorAll(selector)).filter(function(el){if(el.getBoundingClientRect().height<=0)return false;if(type==="wishlist"&&getWishDone(el.getAttribute("data-w"))!==doneState)return false;return true;});}
@@ -1255,7 +1391,8 @@ function scheduleRemoteSave(){
       activities:items.map(function(a,i){return{id:String(a.id),sort_order:i,name:a.name,category:a.cat||"",note:a.note||"",color:a.color||COLORS[0],start_date:a.start,end_date:a.end||null,goal_days:a.goal||0,auto_count:a.auto!==false,base_count:a.base||0,ended:!!a.ended,frequency_type:a.frequency||"daily",frequency_days:a.frequencyDays||[1,2,3,4,5,6,7]}}),
       activity_days:[],
       activity_history:[],
-      wishlist_items:WL.map(function(w,i){return{id:String(w.id),sort_order:i,text:w.text,due_date:w.due||null,created_date:w.created,completed_date:w.done||null,note:w.note||""}})
+      lists:LISTS.map(function(l,i){return{id:String(l.id),sort_order:i,list_type:l.type,title:l.title,created_date:l.created||todayStr()}}),
+      list_items:LIST_ITEMS.map(function(it,i){return{id:String(it.id),list_id:String(it.list_id),sort_order:it.sort_order==null?i:it.sort_order,title:it.title,note:it.note||"",amount:it.amount==null?null:it.amount,is_done:!!it.done,created_date:it.created||todayStr(),due_date:it.due||null}})
     };
     items.forEach(function(a){
       var keys={};Object.keys(a.done||{}).forEach(function(k){keys[k]=1});Object.keys(a.notes||{}).forEach(function(k){keys[k]=1});
@@ -1272,7 +1409,8 @@ function scheduleRemoteSave(){
         p_activities:snapshot.activities,
         p_activity_days:snapshot.activity_days,
         p_activity_history:snapshot.activity_history,
-        p_wishlist_items:snapshot.wishlist_items
+        p_lists:snapshot.lists,
+        p_list_items:snapshot.list_items
       });
       if(result.error)throw result.error;
     }).catch(dbError);
@@ -1297,7 +1435,8 @@ async function loadRemoteWorkspace(){
   var result=await DB.rpc("habits_legacy_load_workspace",{p_token:CURRENT_USER.habits_token});
   if(result.error)throw result.error;
   var payload=result.data||{};
-  var aRows=payload.activities||[],dRows=payload.activity_days||[],hRows=payload.activity_history||[],wRows=payload.wishlist_items||[];
+  var aRows=payload.activities||[],dRows=payload.activity_days||[],hRows=payload.activity_history||[];
+  var listRows=payload.lists||[],listItemRows=payload.list_items||[];
   var byId={};
   items=aRows.map(function(r){
     var a=norm({id:r.id,sort_order:r.sort_order,name:r.name,cat:r.category||"",note:r.note||"",color:r.color||COLORS[0],start:r.start_date,end:r.end_date||null,goal:r.goal_days||0,auto:r.auto_count,base:r.base_count||0,ended:!!r.ended,frequency:r.frequency_type||"daily",frequencyDays:r.frequency_days||[1,2,3,4,5,6,7],done:{},notes:{},history:[]});
@@ -1306,9 +1445,10 @@ async function loadRemoteWorkspace(){
   items=applySavedOrder(items,KEY+"_order");
   dRows.forEach(function(r){var a=byId[r.activity_id];if(!a)return;if(r.is_done!==null)a.done[r.day_date]=r.is_done?"":false;if(r.note)a.notes[r.day_date]=r.note});
   hRows.forEach(function(r){var a=byId[r.activity_id];if(a)a.history.push({start:r.start_date,end:r.end_date,days:r.days_count,pct:r.completion_pct,type:r.event_type})});
-  WL=wRows.map(function(r){return{id:r.id,sort_order:r.sort_order,text:r.text,due:r.due_date||null,created:r.created_date,done:r.completed_date||null,note:r.note||""}}).sort(function(a,b){return (a.sort_order==null?0:a.sort_order)-(b.sort_order==null?0:b.sort_order)});
-  WL=applySavedOrder(WL,WLK+"_order");sortWishlistByStatus();
-  return {hasRemoteData:aRows.length>0||wRows.length>0||dRows.length>0||hRows.length>0};
+  LISTS=listRows.map(function(r){return{id:r.id,type:r.list_type,title:r.title,created:r.created_date,sort_order:r.sort_order}}).sort(function(a,b){return (a.sort_order||0)-(b.sort_order||0)});
+  LIST_ITEMS=listItemRows.map(function(r){return{id:r.id,list_id:r.list_id,title:r.title,note:r.note||"",amount:r.amount==null?null:Number(r.amount),done:!!r.is_done,created:r.created_date,due:r.due_date||null,sort_order:r.sort_order}});
+  listSaveLocalOnly();
+  return {hasRemoteData:aRows.length>0||listRows.length>0||listItemRows.length>0||dRows.length>0||hRows.length>0,hasRemoteLists:listRows.length>0||listItemRows.length>0};
 }
 async function boot(){
   try{
@@ -1342,20 +1482,35 @@ async function boot(){
     var accountStorageSuffix=String(session.id||'').replace(/[^a-zA-Z0-9_-]/g,'');
     if(!accountStorageSuffix) throw new Error('Nepodarilo sa identifikovať používateľský účet.');
     KEY='aktivity_v1_'+accountStorageSuffix;
-    WLK='aktivity_wish_v1_'+accountStorageSuffix;
+    WLK='aktivity_lists_v1_'+accountStorageSuffix;
+    var oldWishlistKey='aktivity_wish_v1_'+accountStorageSuffix;
+    if(!localStorage.getItem(WLK)&&localStorage.getItem(oldWishlistKey)){
+      try{
+        var legacyWishlist=JSON.parse(localStorage.getItem(oldWishlistKey)||"[]");
+        if(Array.isArray(legacyWishlist)&&legacyWishlist.length){
+          var legacyListId="legacy-wishlist";
+          LISTS=[{id:legacyListId,type:"wishlist",title:"Wishlist",created:todayStr(),sort_order:0}];
+          LIST_ITEMS=legacyWishlist.map(function(w,i){return{id:String(w.id||("legacy-"+i)),list_id:legacyListId,title:w.text||"Položka",note:w.note||"",amount:null,done:!!w.done,created:w.created||todayStr(),due:w.due||null,sort_order:i}});
+          listSaveLocalOnly();
+        }
+      }catch(migrationError){console.warn("Lokálna migrácia Wishlist:",migrationError)}
+    }
     CURRENT_USER=session;
-    wLoad();
+    listLoad();
     load();
     var localItems=items.slice();
-    var localWishlist=WL.slice();
+    var localLists=LISTS.slice(),localListItems=LIST_ITEMS.slice();
     var remote=await loadRemoteWorkspace();
     if(!remote.hasRemoteData){
       // Preserve this browser's existing workspace and import it once.
       items=localItems;
-      WL=localWishlist;
+      LISTS=localLists;LIST_ITEMS=localListItems;
+    }else if(!remote.hasRemoteLists && (localLists.length||localListItems.length)){
+      // Existing remote Habits data must not cause local Lists data to be discarded.
+      LISTS=localLists;LIST_ITEMS=localListItems;
     }
     DB_READY=true;
-    if(!remote.hasRemoteData && (items.length||WL.length)) scheduleRemoteSave();
+    if((!remote.hasRemoteData||(!remote.hasRemoteLists&&(LISTS.length||LIST_ITEMS.length))) && (items.length||LISTS.length||LIST_ITEMS.length)) scheduleRemoteSave();
     window.scrollTo(0,0);
     render();
     setTab("ov");
