@@ -237,7 +237,7 @@ body{overflow-anchor:none}
 .sw .card,.wc{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-user-drag:none}
 .sw .card{touch-action:none}
 .wc{touch-action:none}
-.day-count{flex:none;align-items:center;gap:7px}.day-count .big{font-size:1.5rem}.day-count .big{position:relative;top:3px}.day-count .big small{font-size:.72rem;margin-left:4px}.day-count .ck{width:26px;height:26px;border-radius:8px}.day-count .ck svg{width:14px;height:14px}
+.day-count{flex:none;align-items:center;gap:7px}.day-count .big{font-size:1.5rem}.day-count .big{position:relative;top:5px}.day-count .big small{font-size:.72rem;margin-left:4px}.day-count .ck{width:26px;height:26px;border-radius:8px}.day-count .ck svg{width:14px;height:14px}
 .big{font-size:1.65rem}
 .big.muted{color:#777!important}
 .ck{width:30px;height:30px;border-radius:9px}
@@ -434,8 +434,8 @@ body{overscroll-behavior-y:auto}
 
 
 /* Illustrated streak flame */
-#v-act .streak-badge{display:inline-flex;align-items:center;gap:2px;white-space:nowrap}
-#v-act .streak-flame{display:inline-block;width:13px;height:16px;vertical-align:-3px;overflow:visible;filter:drop-shadow(0 1px 1px rgba(0,0,0,.45))}
+#v-act .streak-badge{display:inline-flex;align-items:center;justify-content:center;gap:2px;white-space:nowrap;vertical-align:middle;line-height:1;height:1.25em}
+#v-act .streak-flame{display:block;flex:none;width:12px;height:14px;vertical-align:middle;overflow:visible;transform:translateY(-.5px);filter:drop-shadow(0 1px 1px rgba(0,0,0,.45))}
 #v-act .streak-flame .flame-outer{fill:#ff8a24;stroke:#ffb34d;stroke-width:1.1;stroke-linejoin:round}
 #v-act .streak-flame .flame-inner{fill:#ffe28a;stroke:#fff0bd;stroke-width:.65;stroke-linejoin:round}
 #v-act .streak-count{font-weight:600;color:var(--muted);font-size:inherit}
@@ -629,6 +629,11 @@ button { max-width: 100%; }
 /* Lists are now maintained in the independent 8.html page. */
 .tabs button[data-t="wl"], #v-wl{display:none!important}
 
+
+/* Weekly activity squares reveal one by one */
+#v-ov .sq i.week-square-in{animation:weekSquareIn .34s cubic-bezier(.2,.75,.25,1) both}
+@keyframes weekSquareIn{0%{opacity:.15;transform:scale(.35)}70%{opacity:1;transform:scale(1.08)}100%{opacity:1;transform:scale(1)}}
+@media(prefers-reduced-motion:reduce){#v-ov .sq i.week-square-in{animation:none!important}}
 /* Small staggered entrance for overview fold rows */
 #v-ov .ov-row-in{animation:ovRowIn .38s cubic-bezier(.2,.7,.25,1) both}
 @keyframes ovRowIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
@@ -962,6 +967,16 @@ row.style.animationDelay=Math.min(i*35,350)+"ms";
 void row.offsetWidth;
 row.classList.add("ov-row-in");
 });
+/* The weekly "Podľa aktivít" view is a grid of seven day squares per activity. */
+if(fold.querySelector(".sq i")){
+var squares=body.querySelectorAll(".sq i");
+squares.forEach(function(square,i){
+square.classList.remove("week-square-in");
+square.style.animationDelay=Math.min(i*24,650)+"ms";
+void square.offsetWidth;
+square.classList.add("week-square-in");
+});
+}
 });});
 });
 function toast(m){var t=document.getElementById("toast");t.textContent=m;t.className="show";clearTimeout(toast.t);toast.t=setTimeout(function(){t.className=""},2200)}
