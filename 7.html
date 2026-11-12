@@ -146,9 +146,16 @@ button,.cal span,.hm span{touch-action:manipulation}
 .bt{height:78px;width:100%;display:flex;align-items:flex-end;justify-content:center}
 .bb{width:70%;max-width:26px;min-height:3px;border-radius:6px 6px 3px 3px;background:#22c55e}
 
-/* LevelUp intro + overview chart entrance animations */
-.hd h1.levelup-intro{animation:levelupIntro .85s cubic-bezier(.2,.8,.2,1) both}
-@keyframes levelupIntro{0%{opacity:0;transform:translateY(9px) scale(.96);filter:blur(3px);letter-spacing:.08em}65%{opacity:1;transform:translateY(-2px) scale(1.025);filter:blur(0);letter-spacing:normal}100%{opacity:1;transform:translateY(0) scale(1);filter:blur(0);letter-spacing:normal}}
+/* Subtle one-pass light sweep on the LevelUp title */
+.hd h1.levelup-shine{
+background:linear-gradient(110deg,#f2f2f2 0%,#f2f2f2 38%,#fff 47%,#a3a3a3 51%,#f2f2f2 62%,#f2f2f2 100%);
+background-size:230% 100%;background-position:100% 50%;
+-webkit-background-clip:text;background-clip:text;color:transparent;
+animation:levelupShine 1.15s ease-out both
+}
+@keyframes levelupShine{from{background-position:100% 50%}to{background-position:0% 50%}}
+/* Add breathing room before +; the + button itself stays in place */
+#addb{margin-left:6px}
 #v-ov .bb{transform:scaleY(0);transform-origin:bottom;transition:transform .72s cubic-bezier(.2,.75,.25,1)}
 #v-ov .bb.chart-in{transform:scaleY(1)}
 #v-ov .bar i{transition:width .8s cubic-bezier(.2,.75,.25,1)}
@@ -163,7 +170,7 @@ button,.cal span,.hm span{touch-action:manipulation}
 @keyframes overviewCellIn{from{opacity:.25;transform:scale(.72)}to{opacity:1;transform:scale(1)}}
 @keyframes overviewRowIn{from{opacity:.35;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
 @media(prefers-reduced-motion:reduce){
- .hd h1.levelup-intro,#v-ov .hm-day,#v-ov .am{animation:none!important}
+ .hd h1.levelup-shine,#v-ov .hm-day,#v-ov .am{animation:none!important}
  #v-ov .bb,#v-ov .bar i,#v-ov .rg circle.rg-progress{transition:none!important}
  #v-ov .bb{transform:none!important}
 }
@@ -873,7 +880,7 @@ if(!items.length){box.innerHTML=seg+'<div class="empty">Zatiaľ žiadne aktivity
 box.innerHTML=seg+(OV.m==="day"?ovDay(now):OV.m==="week"?ovWeek(now):OV.m==="month"?ovMonth(now):ovYear(now));animateOverviewCharts()}
 function animateLevelUpHeading(){
 var h=document.querySelector(".hd h1");if(!h)return;
-h.classList.remove("levelup-intro");void h.offsetWidth;h.classList.add("levelup-intro");
+h.classList.remove("levelup-shine");void h.offsetWidth;h.classList.add("levelup-shine");
 }
 function setTab(x){closeAll();S.cat="";catOpen=false;var cpReset=document.getElementById("catp");if(cpReset)cpReset.hidden=true;T=x;document.querySelector(".hd h1").textContent=x==="wl"?"Lists":"LevelUp";if(x!=="wl")animateLevelUpHeading();["ov","act","wl"].forEach(function(k){document.getElementById("v-"+k).hidden=x!==k});
 document.querySelectorAll(".tabs button").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-t")===x)});
