@@ -1507,11 +1507,14 @@ async function boot(){
     }
     document.getElementById("accountName").textContent=session.username||"";
     var navBtn=document.getElementById("logoutBtn");
-    var assignedPages=Array.isArray(session.allowed_pages)?Array.from(new Set(session.allowed_pages)):[];
+    // Count only the same application pages that 0.html displays.
+    // System permissions such as admin.html must not change this count.
+    var appPages=["1.html","2.html","3.html","4.html","5.html","6.html","7.html","8.html"];
+    var allowedPages=Array.isArray(session.allowed_pages)?session.allowed_pages:[];
+    var assignedAppPages=appPages.filter(function(page){return allowedPages.includes(page);});
 
-    // A user with exactly one assigned HTML page has no menu to return to.
-    // Show a real logout action instead of the misleading "Späť" button.
-    if(!session.is_admin && assignedPages.length===1){
+    // A normal user with exactly one application page has no menu to return to.
+    if(!session.is_admin && assignedAppPages.length===1){
       navBtn.textContent="Odhlásiť sa";
       navBtn.addEventListener("click",async function(){
         navBtn.disabled=true;
