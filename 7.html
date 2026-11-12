@@ -1057,6 +1057,7 @@ else{anim(dd,false);if(origY[cid]!==undefined){sTo(origY[cid]);delete origY[cid]
 return}
 var sm=ev.target.closest("summary");
 if(sm){var dt=sm.parentElement;
+if(dt.classList.contains("d")&&!dt.open){var mainWrap=dt.closest("[data-id]");if(mainWrap){var mainId=mainWrap.getAttribute("data-id");detailTabs[mainId]="overview";}}
 if(dt.classList.contains("n")&&dt.getAttribute("data-k")!=="ended"){ev.preventDefault();var cid2=dt.closest("[data-id]").getAttribute("data-id"),sib=dt.parentElement.querySelectorAll("details.n"),any=[].some.call(sib,function(o){return o!==dt&&o.open});
 if(!dt.open){if(!any)prevY[cid2]=window.scrollY;[].forEach.call(sib,function(o){if(o!==dt)o.open=false});anim(dt,true);setTimeout(function(){sTo(topOf(dt)-stickyTopOffset()-8)},30)}
 else{anim(dt,false);if(!any&&prevY[cid2]!==undefined){var py=prevY[cid2];delete prevY[cid2];sTo(py)}}}
@@ -1072,7 +1073,7 @@ var calendarPanel=c.querySelector('[data-detail-panel="calendar"]');
 if(calendarPanel)calendarPanel.innerHTML=cal(a,now);
 return;
 }
-else if(act==="dyes"||act==="dno"){var k=t.getAttribute("data-d");sel[id]=k;
+else if(act==="dyes"||act==="dno"){var k=t.getAttribute("data-d");sel[id]=k;detailTabs[id]="calendar";
 if(act==="dno")a.done[k]=false;
 else{if(k<a.start){if(a.auto!==false){for(var q=addDays(k,1);q<a.start;q=addDays(q,1))a.done[q]=false}a.start=k}a.done[k]="";if(k===now)flash=id}
 save()}
@@ -1094,7 +1095,7 @@ else if(pend.act==="end"){full=true;a.history.push({start:a.start,end:now,days:c
 else{a.history.push({start:a.start,end:now,days:cnt(a,now),pct:pct(a,now),type:"reset"});a.done={};a.base=0;a.start=now;if(a.end&&pd(a.end)<=pd(now))a.end=null}
 pend=null;save()}
 var needsFull=full||forced.length||(S.cat.indexOf("__")===0&&(act==="go"||act==="dyes"||act==="dno"))||!list.querySelector('.sw[data-id="'+id+'"]');
-if(needsFull){var oldScroll=window.scrollY;render();if(full)requestAnimationFrame(function(){var max=Math.max(0,document.documentElement.scrollHeight-window.innerHeight);window.scrollTo(0,Math.min(oldScroll,max))})}
+if(needsFull){if(act==="dyes"||act==="dno")detailTabs[id]="calendar";var oldScroll=window.scrollY;render();if(full)requestAnimationFrame(function(){var max=Math.max(0,document.documentElement.scrollHeight-window.innerHeight);window.scrollTo(0,Math.min(oldScroll,max))})}
 else if(act==="dyes"||act==="dno"){
 var calendarPanel=c.querySelector('[data-detail-panel="calendar"]');
 if(calendarPanel)calendarPanel.innerHTML=cal(a,now);
