@@ -939,6 +939,16 @@ if(body)animateOverviewSection(body);
 }
 },true);
 document.getElementById("v-ov").addEventListener("click",function(ev){
+var summary=ev.target.closest("details.ovfold > summary");
+if(summary){
+var fold=summary.parentElement;
+requestAnimationFrame(function(){
+if(fold&&fold.open){
+var body=fold.querySelector(".ovfold-body");
+if(body)animateOverviewSection(body);
+}
+});
+}
 var m=ev.target.closest("[data-m]");if(m){OV.m=m.getAttribute("data-m");OV.o=0;OV.day=null;renderOv();return}
 var n=ev.target.closest("[data-n]");if(n&&!n.disabled){OV.o=Math.min(0,OV.o+ +n.getAttribute("data-n"));OV.day=null;renderOv();return}
 var day=ev.target.closest("[data-day]");if(day&&!day.disabled){var picked=day.getAttribute("data-day");OV.day=OV.day===picked?null:picked;renderOv();return}
