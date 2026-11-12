@@ -1104,9 +1104,12 @@ pend=null;save()}
 var needsFull=full||forced.length||(S.cat.indexOf("__")===0&&(act==="go"||act==="dyes"||act==="dno"))||!list.querySelector('.sw[data-id="'+id+'"]');
 if(needsFull){if(act==="dyes"||act==="dno")detailTabs[id]="calendar";var oldScroll=window.scrollY;render();if(act==="dyes"||act==="dno"){var refreshed=list.querySelector('.sw[data-id="'+id+'"]');activateDetailTab(refreshed,id,"calendar")}if(full)requestAnimationFrame(function(){var max=Math.max(0,document.documentElement.scrollHeight-window.innerHeight);window.scrollTo(0,Math.min(oldScroll,max))})}
 else if(act==="dyes"||act==="dno"){
-var calendarPanel=c.querySelector('[data-detail-panel="calendar"]');
-if(calendarPanel)calendarPanel.innerHTML=cal(a,now);
-activateDetailTab(c,id,"calendar");
+// Rebuild the complete activity card so the overview/counts update immediately.
+// renderOne preserves the open detail state; detailTabs keeps the Calendar tab selected.
+detailTabs[id]="calendar";
+renderOne(id);
+var refreshed=list.querySelector('.sw[data-id="'+id+'"]');
+if(refreshed)activateDetailTab(refreshed,id,"calendar");
 return;
 }else if(act==="sel"){renderOne(id)}
 else{renderOne(id);if(pp&&pp.id!==id&&pend!==pp)renderOne(pp.id)}});
@@ -1117,7 +1120,12 @@ openIds[k]=d.open;
 // Do not reset detailTabs here. The toggle event can fire asynchronously
 // after an in-place card refresh and would overwrite the user's current tab.
 // A card opened for the first time already defaults to Info in card().
-if(d.classList&&d.classList.contains("d")&&d.open&&!detailTabs[k])detailTabs[k]="overview";
+if(d.classList&&d.classList.contains("d")){
+// Closing the activity detail always resets its next opening to Info.
+// Do not reset on open/re-render: that would interrupt editing or calendar actions.
+if(!d.open)detailTabs[k]="overview";
+else if(!detailTabs[k])detailTabs[k]="overview";
+}
 },true);
 var W=76,sw=null;
 function closeSw(except){list.querySelectorAll(".sw.open,.sw.pd").forEach(function(w){if(w===except)return;if(w.classList.contains("pd")){pend=null;w.querySelector(".del").innerHTML=TRASH}w.classList.remove("open","pd");w.style.removeProperty("--p");w.querySelector(".card").style.transform=""})}
