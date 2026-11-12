@@ -145,6 +145,29 @@ button,.cal span,.hm span{touch-action:manipulation}
 .bc{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:.7rem;color:var(--mut)}
 .bt{height:78px;width:100%;display:flex;align-items:flex-end;justify-content:center}
 .bb{width:70%;max-width:26px;min-height:3px;border-radius:6px 6px 3px 3px;background:#22c55e}
+
+/* LevelUp intro + overview chart entrance animations */
+.hd h1.levelup-intro{animation:levelupIntro .85s cubic-bezier(.2,.8,.2,1) both}
+@keyframes levelupIntro{0%{opacity:0;transform:translateY(9px) scale(.96);filter:blur(3px);letter-spacing:.08em}65%{opacity:1;transform:translateY(-2px) scale(1.025);filter:blur(0);letter-spacing:normal}100%{opacity:1;transform:translateY(0) scale(1);filter:blur(0);letter-spacing:normal}}
+#v-ov .bb{transform:scaleY(0);transform-origin:bottom;transition:transform .72s cubic-bezier(.2,.75,.25,1)}
+#v-ov .bb.chart-in{transform:scaleY(1)}
+#v-ov .bar i{transition:width .8s cubic-bezier(.2,.75,.25,1)}
+#v-ov .rg circle.rg-progress{transition:stroke-dasharray .9s cubic-bezier(.2,.75,.25,1)}
+#v-ov .hm-day{animation:overviewCellIn .38s ease both}
+#v-ov .hm-day:nth-of-type(7n){animation-delay:.04s}
+#v-ov .hm-day:nth-of-type(7n+1){animation-delay:.08s}
+#v-ov .am{animation:overviewRowIn .42s ease both}
+#v-ov .am:nth-child(2){animation-delay:.04s}
+#v-ov .am:nth-child(3){animation-delay:.08s}
+#v-ov .am:nth-child(4){animation-delay:.12s}
+@keyframes overviewCellIn{from{opacity:.25;transform:scale(.72)}to{opacity:1;transform:scale(1)}}
+@keyframes overviewRowIn{from{opacity:.35;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){
+ .hd h1.levelup-intro,#v-ov .hm-day,#v-ov .am{animation:none!important}
+ #v-ov .bb,#v-ov .bar i,#v-ov .rg circle.rg-progress{transition:none!important}
+ #v-ov .bb{transform:none!important}
+}
+
 .bb.z{background:#1c1c1c}
 .arow{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #161616;font-size:.9rem}
 .arow .nm{flex:1;min-width:0;word-break:break-word}
@@ -777,6 +800,7 @@ function keepY(fn){var y=window.scrollY;fn();window.scrollTo(0,y)}
 function chipClick(ev){if(ev.target.closest("[data-menu]")){closeAll();keepY(function(){catOpen=!catOpen;render()});return}var b=ev.target.closest("[data-cat]");if(!b)return;var v=b.getAttribute("data-cat");closeAll();keepY(function(){S.cat=(v&&v===S.cat)?"":v;catOpen=false;render()})}
 document.getElementById("chips").addEventListener("click",chipClick);document.getElementById("catp").addEventListener("click",chipClick);
 var T="ov",OV={m:"day",o:0},DN=["Po","Ut","St","Št","Pi","So","Ne"];
+requestAnimationFrame(animateLevelUpHeading);
 function wd(d){return (new Date(pd(d)).getUTCDay()+6)%7}
 function endOf(a){if(!a.ended)return"9999-12-31";for(var i=a.history.length-1;i>=0;i--)if(a.history[i].type==="end")return a.history[i].end;return"9999-12-31"}
 function inP(a,f,t){return a.start<=t&&(!a.ended||endOf(a)>=f)}
@@ -827,11 +851,31 @@ var bars=MS.map(function(l,i){var p=me[i]?Math.round(mn[i]/me[i]*100):0;return '
 var rows=items.filter(function(a){return inP(a,a1,a2)}).map(function(a){var st=astat(a,a1,a2,now);if(!st.e)return"";var p=Math.round(st.n/st.e*100);
 return '<div class="am" style="--c:'+a.color+'"><div class="t2"><span>'+esc(a.name)+'</span><b>'+st.n+'/'+st.e+' dní</b></div><div class="bar"><i style="width:'+p+'%"></i></div></div>'}).join("");
 return nav(String(yy),OV.o<0)+sumCard(R,"Splnené "+R.n+" z "+R.e,R.e?"splnení v roku":"V roku zatiaľ nič",cmp(R,range((yy-1)+"-01-01",(yy-1)+"-12-31",now),"minulému roku"))+'<div class="card"><div class="sh">Po mesiacoch</div><div class="bars y">'+bars+'</div></div>'+catCard(a1,a2,now)+(rows?'<div class="card"><div class="sh">Podľa aktivít</div>'+rows+'</div>':'')}
+function animateOverviewCharts(){
+var root=document.getElementById("v-ov");
+if(!root||root.hidden||window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+var bars=root.querySelectorAll(".bb");
+bars.forEach(function(el){el.classList.remove("chart-in")});
+root.querySelectorAll(".bar i").forEach(function(el){var target=el.style.width;el.setAttribute("data-chart-width",target);el.style.width="0%"});
+root.querySelectorAll(".rg circle:nth-child(2)").forEach(function(el){
+var a=(el.getAttribute("stroke-dasharray")||"0 0").split(/[, ]+/),circ=Number(a[1])||0;
+el.classList.add("rg-progress");el.setAttribute("data-chart-dash",el.getAttribute("stroke-dasharray")||"0 "+circ);el.setAttribute("stroke-dasharray","0 "+circ);
+});
+requestAnimationFrame(function(){requestAnimationFrame(function(){
+bars.forEach(function(el){el.classList.add("chart-in")});
+root.querySelectorAll(".bar i").forEach(function(el){el.style.width=el.getAttribute("data-chart-width")||"0%"});
+root.querySelectorAll(".rg circle.rg-progress").forEach(function(el){el.setAttribute("stroke-dasharray",el.getAttribute("data-chart-dash")||"0 0")});
+})});
+}
 function renderOv(){var now=todayStr(),box=document.getElementById("v-ov");
 var seg='<div class="seg">'+[["day","Deň"],["week","Týždeň"],["month","Mesiac"],["year","Rok"]].map(function(m){return '<button data-m="'+m[0]+'" class="'+(OV.m===m[0]?"on":"")+'">'+m[1]+'</button>'}).join("")+'</div>';
 if(!items.length){box.innerHTML=seg+'<div class="empty">Zatiaľ žiadne aktivity.<br>Pridaj ich v záložke Aktivity.</div>';return}
-box.innerHTML=seg+(OV.m==="day"?ovDay(now):OV.m==="week"?ovWeek(now):OV.m==="month"?ovMonth(now):ovYear(now))}
-function setTab(x){closeAll();S.cat="";catOpen=false;var cpReset=document.getElementById("catp");if(cpReset)cpReset.hidden=true;T=x;document.querySelector(".hd h1").textContent=x==="wl"?"Lists":"LevelUp";["ov","act","wl"].forEach(function(k){document.getElementById("v-"+k).hidden=x!==k});
+box.innerHTML=seg+(OV.m==="day"?ovDay(now):OV.m==="week"?ovWeek(now):OV.m==="month"?ovMonth(now):ovYear(now));animateOverviewCharts()}
+function animateLevelUpHeading(){
+var h=document.querySelector(".hd h1");if(!h)return;
+h.classList.remove("levelup-intro");void h.offsetWidth;h.classList.add("levelup-intro");
+}
+function setTab(x){closeAll();S.cat="";catOpen=false;var cpReset=document.getElementById("catp");if(cpReset)cpReset.hidden=true;T=x;document.querySelector(".hd h1").textContent=x==="wl"?"Lists":"LevelUp";if(x!=="wl")animateLevelUpHeading();["ov","act","wl"].forEach(function(k){document.getElementById("v-"+k).hidden=x!==k});
 document.querySelectorAll(".tabs button").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-t")===x)});
 document.getElementById("addb").style.visibility="visible";
 addEl.hidden=true;wEl.hidden=true;if(listItemCreateCard)listItemCreateCard.hidden=true;addBtn();
