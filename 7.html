@@ -1067,12 +1067,12 @@ if(cd&&!cd.closest(".sw.open,.sw.pd")&&!ev.target.closest("button,input,label,de
 if(Date.now()-supClick<350)return;
 var dd=cd.querySelector("details.d");
 if(dd){var cid=cd.closest("[data-id]").getAttribute("data-id");
-if(!dd.open){var y0=window.scrollY;detailTabs[cid]="overview";closeAddForm(addEl);[].forEach.call(list.querySelectorAll("details[data-k]:not([data-k=ended])"),function(o){if(o!==dd&&!dd.contains(o))o.open=false});origY={};prevY={};origY[cid]=y0;anim(dd,true);sTo(topOf(cd)-stickyTopOffset()-8)}
-else{detailTabs[cid]="overview";anim(dd,false);if(origY[cid]!==undefined){sTo(origY[cid]);delete origY[cid]}delete prevY[cid]}}
+if(!dd.open){var y0=window.scrollY;detailTabs[cid]="overview";activateDetailTab(cd.closest(".sw"),cid,"overview");closeAddForm(addEl);[].forEach.call(list.querySelectorAll("details[data-k]:not([data-k=ended])"),function(o){if(o!==dd&&!dd.contains(o))o.open=false});origY={};prevY={};origY[cid]=y0;anim(dd,true);sTo(topOf(cd)-stickyTopOffset()-8)}
+else{detailTabs[cid]="overview";activateDetailTab(cd.closest(".sw"),cid,"overview");anim(dd,false);if(origY[cid]!==undefined){sTo(origY[cid]);delete origY[cid]}delete prevY[cid]}}
 return}
 var sm=ev.target.closest("summary");
 if(sm){var dt=sm.parentElement;
-if(dt.classList.contains("d")){var mainWrap=dt.closest("[data-id]");if(mainWrap){var mainId=mainWrap.getAttribute("data-id");detailTabs[mainId]="overview";}}
+if(dt.classList.contains("d")){var mainWrap=dt.closest("[data-id]");if(mainWrap){var mainId=mainWrap.getAttribute("data-id");detailTabs[mainId]="overview";activateDetailTab(mainWrap,mainId,"overview");}}
 if(dt.classList.contains("n")&&dt.getAttribute("data-k")!=="ended"){ev.preventDefault();var cid2=dt.closest("[data-id]").getAttribute("data-id"),sib=dt.parentElement.querySelectorAll("details.n"),any=[].some.call(sib,function(o){return o!==dt&&o.open});
 if(!dt.open){if(!any)prevY[cid2]=window.scrollY;[].forEach.call(sib,function(o){if(o!==dt)o.open=false});anim(dt,true);setTimeout(function(){sTo(topOf(dt)-stickyTopOffset()-8)},30)}
 else{anim(dt,false);if(!any&&prevY[cid2]!==undefined){var py=prevY[cid2];delete prevY[cid2];sTo(py)}}}
