@@ -147,6 +147,13 @@ button,.cal span,.hm span{touch-action:manipulation}
 .bb{width:70%;max-width:26px;min-height:3px;border-radius:6px 6px 3px 3px;background:#22c55e}
 
 /* Subtle one-pass light sweep on the LevelUp title */
+
+/* Overview detail sections: completed activities, categories and activity breakdown */
+#v-ov .ov-row-in{animation:ovRowIn .38s cubic-bezier(.2,.7,.25,1) both}
+#v-ov .ov-dot-in{animation:ovDotIn .32s ease both}
+@keyframes ovRowIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+@keyframes ovDotIn{from{opacity:.25;transform:scale(.65)}to{opacity:1;transform:scale(1)}}
+
 .hd h1.levelup-shine{
 background:linear-gradient(110deg,#f2f2f2 0%,#f2f2f2 38%,#fff 47%,#a3a3a3 51%,#f2f2f2 62%,#f2f2f2 100%);
 background-size:230% 100%;background-position:100% 50%;
@@ -874,10 +881,39 @@ root.querySelectorAll(".bar i").forEach(function(el){el.style.width=el.getAttrib
 root.querySelectorAll(".rg circle.rg-progress").forEach(function(el){el.setAttribute("stroke-dasharray",el.getAttribute("data-chart-dash")||"0 0")});
 })});
 }
+function animateOverviewSection(section){
+if(!section)return;
+var reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+if(reduce)return;
+var rows=section.querySelectorAll(".orow,.arow,.am");
+rows.forEach(function(el,i){
+el.classList.remove("ov-row-in");
+el.style.animationDelay=Math.min(i*28,280)+"ms";
+void el.offsetWidth;
+el.classList.add("ov-row-in");
+});
+var dots=section.querySelectorAll(".sq i,.hm-day");
+dots.forEach(function(el,i){
+el.classList.remove("ov-dot-in");
+el.style.animationDelay=Math.min(i*5,180)+"ms";
+void el.offsetWidth;
+el.classList.add("ov-dot-in");
+});
+section.querySelectorAll(".bar i").forEach(function(el){
+var target=el.style.width;
+el.style.transition="none";el.style.width="0%";
+void el.offsetWidth;
+requestAnimationFrame(function(){el.style.transition="width .72s cubic-bezier(.2,.75,.25,1)";el.style.width=target});
+});
+}
+function animateOverviewContent(){
+var root=document.getElementById("v-ov");if(!root)return;
+root.querySelectorAll(":scope > .card:not(.ovfold),:scope > .ovfold[open]").forEach(animateOverviewSection);
+}
 function renderOv(){var now=todayStr(),box=document.getElementById("v-ov");
 var seg='<div class="seg">'+[["day","Deň"],["week","Týždeň"],["month","Mesiac"],["year","Rok"]].map(function(m){return '<button data-m="'+m[0]+'" class="'+(OV.m===m[0]?"on":"")+'">'+m[1]+'</button>'}).join("")+'</div>';
 if(!items.length){box.innerHTML=seg+'<div class="empty">Zatiaľ žiadne aktivity.<br>Pridaj ich v záložke Aktivity.</div>';return}
-box.innerHTML=seg+(OV.m==="day"?ovDay(now):OV.m==="week"?ovWeek(now):OV.m==="month"?ovMonth(now):ovYear(now));animateOverviewCharts()}
+box.innerHTML=seg+(OV.m==="day"?ovDay(now):OV.m==="week"?ovWeek(now):OV.m==="month"?ovMonth(now):ovYear(now));animateOverviewCharts();animateOverviewContent()}
 function animateLevelUpHeading(){
 var h=document.querySelector(".hd h1");if(!h)return;
 h.classList.remove("levelup-shine");void h.offsetWidth;h.classList.add("levelup-shine");
@@ -888,6 +924,13 @@ document.getElementById("addb").style.visibility="visible";
 addEl.hidden=true;wEl.hidden=true;if(listItemCreateCard)listItemCreateCard.hidden=true;addBtn();
 if(x==="ov"){OV={m:"day",o:0,day:null};renderOv()}else if(x==="act")render();else renderWl()}
 document.querySelector(".tabs").addEventListener("click",function(ev){var b=ev.target.closest("[data-t]");if(b)setTab(b.getAttribute("data-t"))});
+document.getElementById("v-ov").addEventListener("toggle",function(ev){
+var section=ev.target;
+if(section&&section.matches&&section.matches("details.ovfold")&&section.open){
+var body=section.querySelector(".ovfold-body");
+if(body)animateOverviewSection(body);
+}
+},true);
 document.getElementById("v-ov").addEventListener("click",function(ev){
 var m=ev.target.closest("[data-m]");if(m){OV.m=m.getAttribute("data-m");OV.o=0;OV.day=null;renderOv();return}
 var n=ev.target.closest("[data-n]");if(n&&!n.disabled){OV.o=Math.min(0,OV.o+ +n.getAttribute("data-n"));OV.day=null;renderOv();return}
