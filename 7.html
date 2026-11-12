@@ -740,7 +740,12 @@ return '<div class="sw'+(pd?' pd':'')+'" data-id="'+id+'"><div class="del">'+(pd
 +'<details class="d" data-k="'+id+'"'+op(id)+'><summary>Detail aktivity</summary><div class="dc">'+detail+'</div></details></div></div>'}
 function render(){
 var now=todayStr(),box=document.getElementById("list");
-box.querySelectorAll("details[data-k]").forEach(function(d){openIds[d.getAttribute("data-k")]=d.open});
+box.querySelectorAll("details[data-k]").forEach(function(d){
+var key=d.getAttribute("data-k");
+openIds[key]=d.open;
+// A closed main activity detail must always reopen on Info.
+if(d.classList&&d.classList.contains("d")&&!d.open)detailTabs[key]="overview";
+});
 if(forced.length)Object.keys(openIds).forEach(function(k){if(k!=="ended")openIds[k]=false});forced.forEach(function(k){openIds[k]=true});forced=[];
 var cats=[];items.forEach(function(a){if(a.cat&&cats.indexOf(a.cat)<0)cats.push(a.cat)});
 var SP={"__done":"✓ Splnené"};
@@ -762,6 +767,9 @@ return '<div class="er" data-id="'+a.id+'" style="--c:'+a.color+'"><div><div cla
 box.innerHTML=h;flash=null}
 function renderOne(id){var old=list.querySelector('.sw[data-id="'+id+'"]'),a=items.filter(function(x){return x.id===id})[0];
 if(!old||!a){render();return}
+var mainDetail=old.querySelector("details.d");
+// Do not carry the Edit tab across a closed detail into its next opening.
+if(!mainDetail||!mainDetail.open)detailTabs[id]="overview";
 old.querySelectorAll("details[data-k]").forEach(function(d){openIds[d.getAttribute("data-k")]=d.open});
 var tmp=document.createElement("div");tmp.innerHTML=card(a,todayStr());old.replaceWith(tmp.firstChild);flash=null}
 function closeAll(){[].forEach.call(document.querySelectorAll("#v-wl details[data-wk]"),function(o){o.open=false});if(typeof closeListsForms==="function")closeListsForms();wPend=null;[].forEach.call(list.querySelectorAll("details[data-k]:not([data-k=ended])"),function(o){o.open=false});origY={};prevY={};pend=null;forced=[]}
