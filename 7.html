@@ -237,7 +237,7 @@ body{overflow-anchor:none}
 .sw .card,.wc{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-user-drag:none}
 .sw .card{touch-action:none}
 .wc{touch-action:none}
-.day-count{flex:none;align-items:center;gap:7px}.day-count .big{font-size:1.5rem}.day-count .big{position:relative;top:8px}.day-count .big small{font-size:.72rem;margin-left:4px}.day-count .ck,.day-count .done-spacer{width:26px;height:26px;position:relative;top:8px;flex:none}.day-count .ck{border-radius:8px}.day-count .ck svg{width:14px;height:14px}
+.day-count{flex:none;align-items:center;gap:7px}.day-count .big{font-size:1.5rem}.day-count .big{position:relative;top:-3px}.day-count .big small{font-size:.72rem;margin-left:4px}.day-count .ck,.day-count .done-spacer{width:26px;height:26px;position:relative;top:5px;flex:none}.day-count .ck{border-radius:8px}.day-count .ck svg{width:14px;height:14px}
 .big{font-size:1.65rem}
 .big.muted{color:#777!important}
 .ck{width:30px;height:30px;border-radius:9px}
@@ -729,10 +729,10 @@ function dni(n){return n===1?"deň":(n>=2&&n<=4?"dni":"dní")}
 function weekday(d){return (new Date(pd(d)).getUTCDay()+6)%7+1}
 function isScheduled(a,d){return a.frequency==="custom"?a.frequencyDays.indexOf(weekday(d))>=0:true}
 function isReportScheduled(a,d){return a.frequency!=="manual"&&isScheduled(a,d)}
-function isDone(a,d,now){if(!isScheduled(a,d))return false;var v=a.done[d];if(v===false)return false;if(v!==undefined)return true;return a.frequency!=="manual"&&a.auto!==false&&d>=a.start&&d<now}
+function isDone(a,d,now){if(!isScheduled(a,d))return false;if(a.frequency!=="manual"&&a.auto!==false&&d>=a.start&&d<now)return true;var v=a.done[d];if(v===false)return false;if(v!==undefined)return true;return false}
 function scheduledCount(a,from,to){var n=0;for(var d=from;d<=to;d=addDays(d,1))if(isScheduled(a,d))n++;return n}
 function conf(a,now){var au=a.auto!==false,n=au?scheduledCount(a,a.start,addDays(now,-1)):0;
-for(var k in a.done){if(k<a.start||k>now||!isScheduled(a,k))continue;var f=a.done[k]===false;if(au){if(k<now){if(f)n--}else if(!f)n++}else if(!f)n++}return Math.max(0,n)}
+for(var k in a.done){if(k<a.start||k>now||!isScheduled(a,k))continue;if(au){if(k===now&&a.done[k]!==false)n++}else if(a.done[k]!==false)n++}return Math.max(0,n)}
 function cnt(a,now){return conf(a,now)+a.base}
 function total(a){return a.goal>0?a.goal:(a.end?scheduledCount(a,a.start,addDays(a.end,-1)):null)}
 function pct(a,now){var t=total(a);if(t===null)return null;if(t<=0)return 100;return Math.max(0,Math.min(100,Math.round(cnt(a,now)/t*100)))}
