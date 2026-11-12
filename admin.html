@@ -168,7 +168,7 @@ input:disabled{opacity:.75}
     $('saveBtn').disabled=busy||state.saving||!state.draft;
     $('approveBtn').disabled=busy||state.saving||!state.draft||!!(state.draft&&state.draft.approved);
     $('resetBtn').disabled=busy||state.saving||!state.draft;
-    $('deleteBtn').disabled=busy||state.saving||!state.draft;
+    $('deleteBtn').disabled=busy||state.saving||!state.draft||isProtectedAdmin(state.draft);
   };
   const clone=obj=>JSON.parse(JSON.stringify(obj));
   const normalizeUser=u=>({...u,role:u.role||'user',approved:!!u.approved,allowed_pages:Array.isArray(u.allowed_pages)?u.allowed_pages.filter(p=>PAGES.includes(p)):[]});
@@ -176,12 +176,14 @@ input:disabled{opacity:.75}
     if(!state.draft||!state.original)return false;
     return JSON.stringify({role:state.draft.role,approved:state.draft.approved,allowed_pages:[...state.draft.allowed_pages].sort()})!==JSON.stringify({role:state.original.role,approved:state.original.approved,allowed_pages:[...state.original.allowed_pages].sort()});
   };
+  const isProtectedAdmin=user=>!!user&&(String(user.role||'').toLowerCase()==='admin');
   const updateDirty=()=>{
     $('dirtyLabel').classList.toggle('show',isDirty());
     $('saveBtn').disabled=state.loading||state.saving||!state.draft||!isDirty();
     $('approveBtn').disabled=state.loading||state.saving||!state.draft||state.draft.approved;
     $('resetBtn').disabled=state.loading||state.saving||!state.draft||!isDirty();
-    $('deleteBtn').disabled=state.loading||state.saving||!state.draft;
+    $('deleteBtn').disabled=state.loading||state.saving||!state.draft||isProtectedAdmin(state.draft);
+    $('deleteBtn').title=isProtectedAdmin(state.draft)?'Administrátorské účty nie je možné odstrániť.':'Odstrániť vybraný účet';
   };
   const updateCounts=visible=>{
     const pending=state.users.filter(u=>!u.approved).length;
@@ -281,6 +283,10 @@ input:disabled{opacity:.75}
   const deleteUser=async()=>{
     if(!state.draft||state.saving||state.loading)return;
     const user=state.draft;
+    if(isProtectedAdmin(user)){
+      setNotice('Administrátorský účet nie je možné odstrániť.','error');
+      return;
+    }
     if(String(user.id)===String(state.session.id)){
       setNotice('Svoj vlastný účet nemôžeš odstrániť.','error');
       return;
