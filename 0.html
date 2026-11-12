@@ -67,6 +67,14 @@ main{width:100%;max-width:720px;margin:0 auto}
   const allowed=new Set(Array.isArray(session.allowed_pages)?session.allowed_pages:[]);
   const visible=all.filter(p=>allowed.has(p));
   const menu=document.getElementById("menu");
+
+  // Bežný používateľ s jedinou pridelenou stránkou ide priamo na ňu.
+  // Administrátor zostáva v menu, aby mal dostupný odkaz na Admin portal.
+  if(!session.is_admin&&visible.length===1){
+   location.replace("./"+visible[0]);
+   return;
+  }
+
   if(visible.length){
    const grid=document.createElement("div");grid.className="buttons";
    visible.forEach(page=>{const a=document.createElement("a");a.className="nav-btn";a.href=page;a.textContent=page.replace(".html","");grid.appendChild(a)});
