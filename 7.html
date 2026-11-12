@@ -1506,9 +1506,26 @@ async function boot(){
       document.body.innerHTML='<main><div class="card"><h2>Nemáš prístup</h2><p>Administrátor ti zatiaľ nepovolil túto stránku.</p><p><a href="./0.html" style="color:#fff">Späť do menu</a></p></div></main>';return;
     }
     document.getElementById("accountName").textContent=session.username||"";
-    document.getElementById("logoutBtn").addEventListener("click",function(){
-      location.replace("./0.html");
-    });
+    var navBtn=document.getElementById("logoutBtn");
+    var assignedPages=Array.isArray(session.allowed_pages)?Array.from(new Set(session.allowed_pages)):[];
+
+    // A user with exactly one assigned HTML page has no menu to return to.
+    // Show a real logout action instead of the misleading "Späť" button.
+    if(!session.is_admin && assignedPages.length===1){
+      navBtn.textContent="Odhlásiť sa";
+      navBtn.addEventListener("click",async function(){
+        navBtn.disabled=true;
+        try{await DB.rpc("habits_legacy_logout",{p_token:session.habits_token});}
+        catch(e){console.warn("Serverové odhlásenie sa nepodarilo:",e);}
+        localStorage.removeItem("session_user");
+        location.replace("./index.html");
+      });
+    }else{
+      navBtn.textContent="Späť";
+      navBtn.addEventListener("click",function(){
+        location.replace("./0.html");
+      });
+    }
     // Browser-local workspace must be isolated per account.
     // Never reuse the old shared keys across different signed-in users.
     var accountStorageSuffix=String(session.id||'').replace(/[^a-zA-Z0-9_-]/g,'');
