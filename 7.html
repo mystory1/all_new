@@ -631,7 +631,7 @@ button { max-width: 100%; }
 
 
 /* Weekly activity squares reveal one by one */
-#v-ov .sq i.week-square-in{animation:weekSquareIn .34s cubic-bezier(.2,.75,.25,1) both}
+#v-ov .sq i.week-square-in{animation:weekSquareIn .28s cubic-bezier(.2,.75,.25,1) both}
 @keyframes weekSquareIn{0%{opacity:0;transform:scale(.35)}70%{opacity:1;transform:scale(1.08)}100%{opacity:1;transform:scale(1)}}
 @media(prefers-reduced-motion:reduce){#v-ov .sq i.week-square-in{animation:none!important}}
 /* Small staggered entrance for overview fold rows */
@@ -880,7 +880,7 @@ var MS=["Jan","Feb","Mar","Apr","Máj","Jún","Júl","Aug","Sep","Okt","Nov","De
 var bars=MS.map(function(l,i){var p=me[i]?Math.round(mn[i]/me[i]*100):0;return '<div class="bc"><div class="bt"><div class="bb'+(me[i]&&mn[i]?'':' z')+'" style="height:'+Math.max(4,p)+'%'+(me[i]&&mn[i]?';background:'+pc(p):'')+'"></div></div><span>'+l+'</span><span>'+(me[i]?p+"%":"–")+'</span></div>'}).join("");
 var rows=items.filter(function(a){return inP(a,a1,a2)}).map(function(a){var st=astat(a,a1,a2,now);if(!st.e)return"";var p=Math.round(st.n/st.e*100);
 return '<div class="am" style="--c:'+a.color+'"><div class="t2"><span>'+esc(a.name)+'</span><b>'+st.n+'/'+st.e+' dní</b></div><div class="bar"><i style="width:'+p+'%"></i></div></div>'}).join("");
-return nav(String(yy),OV.o<0)+sumCard(R,"Splnené "+R.n+" z "+R.e,R.e?"splnení v roku":"V roku zatiaľ nič",cmp(R,range((yy-1)+"-01-01",(yy-1)+"-12-31",now),"minulému roku"))+'<div class="card"><div class="sh">Po mesiacoch</div><div class="bars y">'+bars+'</div></div>'+catCard(a1,a2,now)+(rows?'<div class="card"><div class="sh">Podľa aktivít</div>'+rows+'</div>':'')}
+return nav(String(yy),OV.o<0)+sumCard(R,"Splnené "+R.n+" z "+R.e,R.e?"splnení v roku":"V roku zatiaľ nič",cmp(R,range((yy-1)+"-01-01",(yy-1)+"-12-31",now),"minulému roku"))+'<div class="card"><div class="sh">Po mesiacoch</div><div class="bars y">'+bars+'</div></div>'+catCard(a1,a2,now)+(rows?'<details class="card ovfold"><summary>Podľa aktivít</summary><div class="ovfold-body">'+rows+'</div></details>':'')}
 function animateOverviewCharts(){
 var root=document.getElementById("v-ov");
 if(!root||root.hidden||window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches)return;
@@ -973,7 +973,7 @@ activityRows.forEach(function(row,rowIndex){
 var squares=row.querySelectorAll(".sq i");
 squares.forEach(function(square,squareIndex){
 square.classList.remove("week-square-in");
-square.style.animationDelay=(rowIndex*7*55+squareIndex*55)+"ms";
+square.style.animationDelay=(rowIndex*7*30+squareIndex*30)+"ms";
 void square.offsetWidth;
 square.classList.add("week-square-in");
 });
