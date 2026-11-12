@@ -237,7 +237,7 @@ body{overflow-anchor:none}
 .sw .card,.wc{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-user-drag:none}
 .sw .card{touch-action:none}
 .wc{touch-action:none}
-.day-count{flex:none;align-items:center;gap:7px}.day-count .big{font-size:1.5rem}.day-count .big{position:relative;top:8px}.day-count .big small{font-size:.72rem;margin-left:4px}.day-count .ck{width:26px;height:26px;border-radius:8px}.day-count .ck svg{width:14px;height:14px}
+.day-count{flex:none;align-items:center;gap:7px}.day-count .big{font-size:1.5rem}.day-count .big{position:relative;top:8px}.day-count .big small{font-size:.72rem;margin-left:4px}.day-count .ck,.day-count .done-spacer{width:26px;height:26px;position:relative;top:8px;flex:none}.day-count .ck{border-radius:8px}.day-count .ck svg{width:14px;height:14px}
 .big{font-size:1.65rem}
 .big.muted{color:#777!important}
 .ck{width:30px;height:30px;border-radius:9px}
@@ -755,7 +755,7 @@ return '<div class="cn"><button data-a="pm">‹</button><span>'+MN[mm]+" "+yy+'<
 var IC=function(p){return '<svg class="ic" viewBox="0 0 24 24">'+p+'</svg>'};
 var ICN={u:IC('<path d="M4 20h4L19 9a2.1 2.1 0 0 0-3-3L5 17v3z"/><path d="M13.5 7.5l3 3"/>'),c:IC('<rect x="3.5" y="5" width="17" height="15.5" rx="3.5"/><path d="M8 3v4M16 3v4M3.5 10.5h17M9 15.3l2.1 2.1 3.9-4"/>'),z:IC('<path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2.2"/><circle cx="9" cy="17" r="2.2"/>')};
 function CK(a,now){var sv='<svg viewBox="0 0 24 24"><path d="M5.5 12.5l4.2 4.2L18.5 7.5"/></svg>';
-if(a.frequency==="manual"||!isScheduled(a,now)||now<a.start||(a.end&&now>a.end)||isDone(a,now,now))return "";
+if(a.frequency==="manual"||!isScheduled(a,now)||now<a.start||(a.end&&now>a.end)||isDone(a,now,now))return '<span class="done-spacer" aria-hidden="true"></span>';
 return '<button class="ck" data-a="go" aria-label="Označiť ako splnené dnes">'+sv+'</button>'}
 
 function activityProgressDetail(a,now){
