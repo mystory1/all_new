@@ -761,10 +761,10 @@ var cd=COLORS.map(function(c){return '<button type="button" class="dot'+(c===a.c
 var op=function(k){return openIds[k]?" open":""};
 var G=function(k,title,body){return '<details class="n" data-k="'+id+k+'"'+op(id+k)+'><summary>'+title+'</summary><div class="in">'+body+'</div></details>'};
 var freqLabel=a.frequency==="custom"?a.frequencyDays.map(function(v){return ["","Po","Ut","St","Št","Pi","So","Ne"][v]}).join(", "):(a.frequency==="manual"?"Vlastná":"Denne");
-var editPanel='<form class="col edit-activity-form" data-edit-form novalidate><label>Názov<span class="fld"><input type="text" class="en" maxlength="60" value="'+esc(a.name)+'"></span></label><div class="row"><label>Začiatok<span class="fld"><input type="date" class="es" value="'+a.start+'"></span></label><label>Koniec<span class="fld"><input type="date" class="ee" value="'+(a.end||"")+'" aria-label="Dátum konca"></span><span class="date-hint">Dátum konca musí byť po dátume začiatku.</span></label></div><div class="freq-box"><div class="freq-label">Opakovanie</div><div class="freq-toggle e-frequency-toggle"><button type="button" data-frequency="daily" class="'+(a.frequency==="daily"?"on":"")+'">Denne</button><button type="button" data-frequency="custom" class="'+(a.frequency==="custom"?"on":"")+'">Vybrané dni</button><button type="button" data-frequency="manual" class="'+(a.frequency==="manual"?"on":"")+'">Vlastná</button></div><select class="efrequency" hidden><option value="daily"'+(a.frequency==="daily"?" selected":"")+'>Denne</option><option value="custom"'+(a.frequency==="custom"?" selected":"")+'>Vybrané dni</option><option value="manual"'+(a.frequency==="manual"?" selected":"")+'>Vlastná</option></select><div class="freq-days e-frequency-days"'+(a.frequency==="custom"?"":" hidden")+'>'+["Po","Ut","St","Št","Pi","So","Ne"].map(function(day,i){var v=i+1;return '<label><input type="checkbox" class="efday" value="'+v+'"'+(a.frequencyDays.indexOf(v)>=0?" checked":"")+'><span>'+day+'</span></label>'}).join("")+'</div></div><label>Kategória<span class="fld"><input type="text" class="ec" maxlength="24" list="cats" value="'+esc(a.cat||"")+'"></span></label><label>Poznámka<span class="fld"><input type="text" class="an" maxlength="140" placeholder="Poznámka k aktivite" value="'+esc(a.note||"")+'"></span></label><label>Cieľ (počet dní)<span class="fld"><input type="number" class="eg" min="1" inputmode="numeric" value="'+(a.goal||"")+'"></span></label><label class="tg"><input type="checkbox" class="eauto"'+(a.auto!==false&&a.frequency!=="manual"?" checked":"")+(a.frequency==="manual"?" disabled":"")+'> Automaticky započítavať plánované dni (bez odkliknutia)</label><div><div class="cl">Farba</div><div class="dots">'+cd+'</div></div></form>';
-var overviewPanel=activityProgressDetail(a,now)+'<div class="detail-summary"><div class="detail-stat"><b>'+freqLabel+'</b><span>Frekvencia</span></div><div class="detail-stat"><b>'+fmt(a.start)+'</b><span>Začiatok</span></div></div>'+(a.note?'<div class="detail-note"><div class="meta">Poznámka k aktivite</div><div class="sm">'+esc(a.note)+'</div></div>':'');
 var detailTab=detailTabs[id]||"overview";
-var detail='<div class="detail-tabs"><button type="button" data-detail-tab="overview" class="'+(detailTab==="overview"?"on":"")+'">Info</button><button type="button" data-detail-tab="calendar" class="'+(detailTab==="calendar"?"on":"")+'">Kalendár</button><button type="button" data-detail-tab="edit" class="'+(detailTab==="edit"?"on":"")+'">Upraviť</button></div><div class="detail-panel" data-detail-panel="overview"'+(detailTab==="overview"?"":" hidden")+'>'+overviewPanel+'</div><div class="detail-panel" data-detail-panel="calendar"'+(detailTab==="calendar"?"":" hidden")+'>'+cal(a,now)+'</div><div class="detail-panel" data-detail-panel="edit"'+(detailTab==="edit"?"":" hidden")+'>'+editPanel+'<div class="sec">'+acts+'</div></div>';
+var editPanel="";if(detailTab==="edit")editPanel='<form class="col edit-activity-form" data-edit-form novalidate><label>Názov<span class="fld"><input type="text" class="en" maxlength="60" value="'+esc(a.name)+'"></span></label><div class="row"><label>Začiatok<span class="fld"><input type="date" class="es" value="'+a.start+'"></span></label><label>Koniec<span class="fld"><input type="date" class="ee" value="'+(a.end||"")+'" aria-label="Dátum konca"></span><span class="date-hint">Dátum konca musí byť po dátume začiatku.</span></label></div><div class="freq-box"><div class="freq-label">Opakovanie</div><div class="freq-toggle e-frequency-toggle"><button type="button" data-frequency="daily" class="'+(a.frequency==="daily"?"on":"")+'">Denne</button><button type="button" data-frequency="custom" class="'+(a.frequency==="custom"?"on":"")+'">Vybrané dni</button><button type="button" data-frequency="manual" class="'+(a.frequency==="manual"?"on":"")+'">Vlastná</button></div><select class="efrequency" hidden><option value="daily"'+(a.frequency==="daily"?" selected":"")+'>Denne</option><option value="custom"'+(a.frequency==="custom"?" selected":"")+'>Vybrané dni</option><option value="manual"'+(a.frequency==="manual"?" selected":"")+'>Vlastná</option></select><div class="freq-days e-frequency-days"'+(a.frequency==="custom"?"":" hidden")+'>'+["Po","Ut","St","Št","Pi","So","Ne"].map(function(day,i){var v=i+1;return '<label><input type="checkbox" class="efday" value="'+v+'"'+(a.frequencyDays.indexOf(v)>=0?" checked":"")+'><span>'+day+'</span></label>'}).join("")+'</div></div><label>Kategória<span class="fld"><input type="text" class="ec" maxlength="24" list="cats" value="'+esc(a.cat||"")+'"></span></label><label>Poznámka<span class="fld"><input type="text" class="an" maxlength="140" placeholder="Poznámka k aktivite" value="'+esc(a.note||"")+'"></span></label><label>Cieľ (počet dní)<span class="fld"><input type="number" class="eg" min="1" inputmode="numeric" value="'+(a.goal||"")+'"></span></label><label class="tg"><input type="checkbox" class="eauto"'+(a.auto!==false&&a.frequency!=="manual"?" checked":"")+(a.frequency==="manual"?" disabled":"")+'> Automaticky započítavať plánované dni (bez odkliknutia)</label><div><div class="cl">Farba</div><div class="dots">'+cd+'</div></div></form>';
+var overviewPanel=activityProgressDetail(a,now)+'<div class="detail-summary"><div class="detail-stat"><b>'+freqLabel+'</b><span>Frekvencia</span></div><div class="detail-stat"><b>'+fmt(a.start)+'</b><span>Začiatok</span></div></div>'+(a.note?'<div class="detail-note"><div class="meta">Poznámka k aktivite</div><div class="sm">'+esc(a.note)+'</div></div>':'');
+var detail='<div class="detail-tabs"><button type="button" data-detail-tab="overview" class="'+(detailTab==="overview"?"on":"")+'">Info</button><button type="button" data-detail-tab="calendar" class="'+(detailTab==="calendar"?"on":"")+'">Kalendár</button><button type="button" data-detail-tab="edit" class="'+(detailTab==="edit"?"on":"")+'">Upraviť</button></div><div class="detail-panel" data-detail-panel="overview"'+(detailTab==="overview"?"":" hidden")+'>'+overviewPanel+'</div><div class="detail-panel" data-detail-panel="calendar"'+(detailTab==="calendar"?"":" hidden")+'>'+(detailTab==="calendar"?cal(a,now):"")+'</div><div class="detail-panel" data-detail-panel="edit"'+(detailTab==="edit"?"":" hidden")+'>'+(detailTab==="edit"?editPanel+'<div class="sec">'+acts+'</div>':"")+'</div>';
 
 return '<div class="sw'+(pd?' pd':'')+'" data-id="'+id+'"><div class="del">'+(pd?'<button data-a="yes">Áno</button><button data-a="no">Nie</button>':TRASH)+'</div><div class="card'+(flash===id?' flash':'')+'" style="--c:'+a.color+'"><div class="top"><button type="button" class="drag-handle" data-drag="activity" aria-label="Zmeniť poradie aktivity">⠿</button><div style="flex:1;min-width:0"><div class="name">'+esc(a.name)+'</div><div class="meta activity-meta"><span class="activity-category">'+[a.cat?esc(a.cat):"",now<a.start?"ešte nezačala":"",st?"🔥 "+st:""].filter(Boolean).join(" · ")+'</span></div></div><div class="r day-count"><div class="big'+(isDone(a,now,now)?'':' muted')+'">'+d+'<small>'+dni(d)+'</small></div>'+CK(a,now)+'</div></div>'+today
 +'<details class="d" data-k="'+id+'"'+op(id)+'><summary>Detail aktivity</summary><div class="dc">'+detail+'</div></details></div></div>'}
@@ -914,7 +914,7 @@ document.getElementById("addb").addEventListener("click",function(){
   if(T==="ov"){setTab("act");openAddForm(addEl,"n");return;}
   if(T==="wl"){toggleListsAddForm();return;}
   origY={};prevY={};
-  document.querySelectorAll("#list details[data-k]:not([data-k=ended])").forEach(function(o){o.open=false});
+  list.querySelectorAll("details[data-k]:not([data-k=ended])").forEach(function(o){o.open=false});
   if(addEl.hidden)openAddForm(addEl,"n");else closeAddForm(addEl);
 });
 document.getElementById("pick").innerHTML=dots(pickC,"data-pc");
@@ -963,12 +963,19 @@ var ty=0;
 document.addEventListener("touchstart",function(e){ty=e.touches[0].clientY},{passive:true});
 document.addEventListener("touchmove",function(e){var a=document.activeElement;if(a&&a.matches&&a.matches('input[type="date"]'))return;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)&&a!==e.target&&Math.abs(e.touches[0].clientY-ty)>12)a.blur()},{passive:true});
 var origY={},prevY={};
-function anim(d,open){var c=d.querySelector(":scope>.dc")||d.querySelector(":scope>.in");
+function anim(d,open){
+var c=d.querySelector(":scope>.dc")||d.querySelector(":scope>.in");
 if(!c||!c.animate||RM()){d.open=open;return}
-if(c._a)c._a.cancel();
-var kf=function(a,b){return [{height:a,opacity:a==="0px"?0:1,overflow:"hidden"},{height:b,opacity:b==="0px"?0:1,overflow:"hidden"}]};
-if(open){d.open=true;var h=c.offsetHeight;c._a=c.animate(kf("0px",h+"px"),{duration:260,easing:"cubic-bezier(.22,1,.36,1)"});c._a.onfinish=function(){c._a=null}}
-else{var h2=c.offsetHeight;c._a=c.animate(kf(h2+"px","0px"),{duration:230,easing:"cubic-bezier(.4,0,.2,1)"});c._a.onfinish=function(){c._a=null;d.open=false}}}
+if(c._a){c._a.cancel();c._a=null}
+if(open){
+ d.open=true;
+ c._a=c.animate([{opacity:0,transform:"translateY(-4px)"},{opacity:1,transform:"translateY(0)"}],{duration:150,easing:"ease-out"});
+ c._a.onfinish=function(){c._a=null;c.style.opacity="";c.style.transform=""};
+}else{
+ c._a=c.animate([{opacity:1,transform:"translateY(0)"},{opacity:0,transform:"translateY(-3px)"}],{duration:110,easing:"ease-in"});
+ c._a.onfinish=function(){c._a=null;c.style.opacity="";c.style.transform="";d.open=false};
+}
+}
 function RM(){return !!(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)}
 function sTo(y){y=Math.max(0,y);try{window.scrollTo({top:y,behavior:RM()?"auto":"smooth"})}catch(e){window.scrollTo(0,y)}}
 function topOf(el){return el.getBoundingClientRect().top+window.scrollY}
@@ -1003,6 +1010,19 @@ else if(cl.contains("eauto"))a.auto=el.checked;
 else if(cl.contains("efrequency")){a.frequency=v==="custom"?"custom":(v==="manual"?"manual":"daily");if(a.frequency==="manual")a.auto=false;var daysWrap=c.querySelector(".e-frequency-days"),autoBox=c.querySelector(".eauto");if(daysWrap)daysWrap.hidden=a.frequency!=="custom";if(autoBox){autoBox.disabled=a.frequency==="manual";autoBox.checked=a.frequency!=="manual"&&a.auto!==false;}if(a.frequency==="custom"&&!c.querySelector(".efday:checked"))groupError(c.querySelector(".freq-box"),"Vyber aspoň jeden deň v týždni.");else groupError(c.querySelector(".freq-box"),"");if(a.frequency==="custom"&&!c.querySelector(".efday:checked")){return;}c.querySelectorAll(".e-frequency-toggle button").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-frequency")===a.frequency)})}
 else if(cl.contains("efday")){var days=[].slice.call(c.querySelectorAll(".efday:checked")).map(function(x){return Number(x.value)});if(!days.length){el.checked=true;groupError(c.querySelector(".freq-box"),"Vyber aspoň jeden deň v týždni.");return}a.frequency="custom";a.frequencyDays=days;var fs=c.querySelector(".efrequency");if(fs)fs.value="custom";groupError(c.querySelector(".freq-box"),"");c.querySelectorAll(".e-frequency-toggle button").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-frequency")==="custom")})}
 dirty[id]=(cl.contains("ec")||dirty[id]==="cat")?"cat":true;save();if(cl.contains("efday")){detailTabs[id]="edit";toast("Uložené");renderOne(id);return}refreshActivityInfo(c,a)}
+function ensureDetailPanel(cardEl,id,which){
+if(!cardEl)return;
+var panel=cardEl.querySelector('[data-detail-panel="'+which+'"]');
+if(!panel||panel.childElementCount)return;
+var activity=items.find(function(x){return String(x.id)===String(id)});
+if(!activity)return;
+detailTabs[id]=which;
+var holder=document.createElement("div");
+holder.innerHTML=card(activity,todayStr());
+var source=holder.querySelector('[data-detail-panel="'+which+'"]');
+if(source)panel.innerHTML=source.innerHTML;
+detailTabs[id]=which;
+}
 function activateDetailTab(cardEl,id,which){
 if(!cardEl)return;
 detailTabs[id]=which;
@@ -1080,6 +1100,7 @@ var tab=ev.target.closest("[data-detail-tab]");
 if(tab){
   var wrap=tab.closest(".sw"),aid=wrap&&wrap.getAttribute("data-id"),which=tab.getAttribute("data-detail-tab");
   if(aid){
+    ensureDetailPanel(wrap,aid,which);
     detailTabs[aid]=which;
     wrap.querySelectorAll("[data-detail-tab]").forEach(function(b){
       b.classList.toggle("on",b.getAttribute("data-detail-tab")===which);
