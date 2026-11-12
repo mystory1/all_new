@@ -136,6 +136,7 @@ input:disabled{opacity:.75}
           <div class="actions">
             <button class="btn primary" id="saveBtn" type="button">Uložiť zmeny</button>
             <button class="btn secondary" id="approveBtn" type="button">Schváliť účet</button>
+            <button class="btn danger" id="deleteBtn" type="button">Odstrániť účet</button>
             <button class="btn secondary" id="resetBtn" type="button">Zrušiť zmeny</button>
           </div>
         </div>
@@ -163,10 +164,11 @@ input:disabled{opacity:.75}
   };
   const setBusy=busy=>{
     state.loading=busy;
-    ['refreshBtn','loadDbBtn','showPendingBtn','showAllBtn'].forEach(id=>$(id).disabled=busy);
+    ['refreshBtn','loadDbBtn','showPendingBtn','showAllBtn','deleteBtn'].forEach(id=>$(id).disabled=busy||state.saving);
     $('saveBtn').disabled=busy||state.saving||!state.draft;
     $('approveBtn').disabled=busy||state.saving||!state.draft||!!(state.draft&&state.draft.approved);
     $('resetBtn').disabled=busy||state.saving||!state.draft;
+    $('deleteBtn').disabled=busy||state.saving||!state.draft;
   };
   const clone=obj=>JSON.parse(JSON.stringify(obj));
   const normalizeUser=u=>({...u,role:u.role||'user',approved:!!u.approved,allowed_pages:Array.isArray(u.allowed_pages)?u.allowed_pages.filter(p=>PAGES.includes(p)):[]});
@@ -179,6 +181,7 @@ input:disabled{opacity:.75}
     $('saveBtn').disabled=state.loading||state.saving||!state.draft||!isDirty();
     $('approveBtn').disabled=state.loading||state.saving||!state.draft||state.draft.approved;
     $('resetBtn').disabled=state.loading||state.saving||!state.draft||!isDirty();
+    $('deleteBtn').disabled=state.loading||state.saving||!state.draft;
   };
   const updateCounts=visible=>{
     const pending=state.users.filter(u=>!u.approved).length;
@@ -275,6 +278,30 @@ input:disabled{opacity:.75}
       console.error(err);setNotice('Uloženie zlyhalo: '+(err.message||String(err)),'error');
     }finally{state.saving=false;setBusy(false);updateDirty();}
   };
+  const deleteUser=async()=>{
+    if(!state.draft||state.saving||state.loading)return;
+    const user=state.draft;
+    if(String(user.id)===String(state.session.id)){
+      setNotice('Svoj vlastný účet nemôžeš odstrániť.','error');
+      return;
+    }
+    if(isDirty()&&!confirm('Vybraný používateľ má neuložené zmeny. Odstránením sa zahodia. Pokračovať?'))return;
+    const username=user.username||'(bez username)';
+    const prompt=user.approved
+      ? `Naozaj chceš natrvalo odstrániť schválený účet „${username}“? Používateľ stratí prístup.`
+      : `Naozaj chceš natrvalo odstrániť čakajúcu registráciu „${username}“?`;
+    if(!confirm(prompt))return;
+    state.saving=true;setBusy(true);setNotice('Odstraňujem používateľa…');
+    try{
+      const data=await rpc('habits_legacy_admin_delete_user',{p_token:token(),p_user_id:user.id});
+      if(!data||data.ok!==true)throw new Error(data&&data.message?data.message:'Databáza nepotvrdila odstránenie.');
+      state.users=state.users.filter(u=>String(u.id)!==String(user.id));
+      clearSelection();
+      setNotice(`Používateľ „${username}“ bol odstránený.`,'success');
+    }catch(err){
+      console.error(err);setNotice('Odstránenie zlyhalo: '+(err.message||String(err)),'error');
+    }finally{state.saving=false;setBusy(false);updateDirty();}
+  };
   const logout=async()=>{
     $('logoutBtn').disabled=true;
     try{if(token())await rpc('habits_legacy_logout',{p_token:token()});}
@@ -292,6 +319,7 @@ input:disabled{opacity:.75}
       if(!state.session||!token()){location.replace('index.html');return;}
       const valid=await rpc('habits_legacy_validate_session',{p_token:token()});
       if(!valid||valid.ok!==true||!valid.is_admin){location.replace('0.html');return;}
+      state.session.id=valid.id||state.session.id;
       $('meBadge').textContent=`${valid.username||'Admin'} · ${valid.role||'admin'}`;
       if(!state.session.habits_token&&state.session.token){state.session.habits_token=state.session.token;localStorage.setItem('session_user',JSON.stringify(state.session));}
       await loadDb();
@@ -316,6 +344,7 @@ input:disabled{opacity:.75}
     updateDirty();
   });
   $('saveBtn').addEventListener('click',saveToDb);
+  $('deleteBtn').addEventListener('click',deleteUser);
   $('approveBtn').addEventListener('click',()=>{
     if(!state.draft||state.draft.approved)return;
     state.draft.approved=true;renderStatus();updateDirty();
