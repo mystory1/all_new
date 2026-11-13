@@ -637,6 +637,9 @@ button { max-width: 100%; }
 /* Small staggered entrance for overview fold rows */
 #v-ov .ov-row-in{animation:ovRowIn .38s cubic-bezier(.2,.7,.25,1) both}
 @keyframes ovRowIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+
+/* V51: after the checkmark disappears, reclaim its horizontal space */
+.day-count .done-spacer{width:0!important;min-width:0!important;margin-left:-7px;flex:0 0 0!important}
 </style>
 </head>
 <body>
