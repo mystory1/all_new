@@ -1322,7 +1322,47 @@ if(s.confirm&&!o){pend=null;renderOne(s.w.getAttribute("data-id"));return}
 s.w.classList.toggle("open",o);s.c.style.transform=o?"translateX("+(-s.width)+"px)":"";s.w.style.setProperty("--p",o?1:0)}
 else if(s.was){supClick=Date.now();if(s.confirm){pend=null;renderOne(s.w.getAttribute("data-id"));return}s.w.classList.remove("open");s.c.style.transform="";s.w.style.removeProperty("--p")}}
 list.addEventListener("pointerup",endSw);list.addEventListener("pointercancel",endSw);
-document.addEventListener("visibilitychange",function(){if(!document.hidden){render();if(T==="ov")renderOv();if(T==="wl")renderWl()}});
+// Mobile browsers may suspend this page while it is in the background.
+// When the user returns, revalidate the custom session and refresh remote data.
+var resumeRefreshTimer=null,resumeRefreshBusy=false,lastResumeAt=0;
+async function refreshAfterResume(){
+  if(resumeRefreshBusy||!DB_READY||!DB||!CURRENT_USER)return;
+  var now=Date.now();
+  if(now-lastResumeAt<2500)return;
+  lastResumeAt=now;resumeRefreshBusy=true;
+  try{
+    // Give any debounced save that was paused by the browser time to run.
+    await new Promise(function(resolve){setTimeout(resolve,700)});
+    if(REMOTE_TIMER){await new Promise(function(resolve){setTimeout(resolve,500)})}
+    await REMOTE_CHAIN;
+    var check=await DB.rpc("habits_legacy_validate_session",{p_token:CURRENT_USER.habits_token});
+    if(check.error)throw check.error;
+    if(!check.data||check.data.ok!==true){
+      toast("Relácia vypršala. Prihlás sa znova.");
+      return;
+    }
+    CURRENT_USER=Object.assign({},CURRENT_USER,check.data);
+    localStorage.setItem("session_user",JSON.stringify(Object.assign({},CURRENT_USER,{token:CURRENT_USER.habits_token,habits_token:CURRENT_USER.habits_token})));
+    await loadRemoteWorkspace();
+    render();
+    if(T==="ov")renderOv();
+    if(T==="wl")renderWl();
+  }catch(e){
+    console.warn("Obnovenie aplikácie po nečinnosti:",e);
+    // Keep the locally cached workspace usable if the network is unavailable.
+    render();
+    if(T==="ov")renderOv();
+    if(T==="wl")renderWl();
+    toast("Pripojenie sa obnovuje. Skontroluj internetové pripojenie.");
+  }finally{resumeRefreshBusy=false}
+}
+function scheduleResumeRefresh(){
+  clearTimeout(resumeRefreshTimer);
+  resumeRefreshTimer=setTimeout(refreshAfterResume,300);
+}
+document.addEventListener("visibilitychange",function(){if(!document.hidden)scheduleResumeRefresh()});
+window.addEventListener("pageshow",scheduleResumeRefresh);
+window.addEventListener("focus",scheduleResumeRefresh);
 
 var EDIT_ICON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg>';
 var WLK="aktivity_lists_v1",LISTS=[],LIST_ITEMS=[],LIST_FILTER="todo",activeListId=null,WL=[],wPend=null;
