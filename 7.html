@@ -672,7 +672,7 @@ button { max-width: 100%; }
 <label>Kategória (nepovinné)<span class="fld"><input type="text" id="cat" maxlength="24" list="cats" placeholder="napr. Zdravie"></span></label>
 <datalist id="cats"></datalist>
 <label>Počet dní trvania (nepovinné, bez ohľadu na dátum)<span class="fld"><input type="number" id="g" min="1" max="3650" inputmode="numeric" placeholder="napr. 30"></span></label>
-<label class="tg"><input type="checkbox" id="au"> Automaticky započítavať plánované dni (bez odkliknutia)</label>
+<label class="tg"><input type="checkbox" id="au"> Automaticky označiť plánované dni ako splnené po skončení dňa</label>
 <div class="dots" id="pick"></div>
 <button class="primary" type="submit">Pridať aktivitu</button>
 </form>
@@ -731,13 +731,14 @@ function esc(t){return String(t).replace(/[&<>"']/g,function(c){return{"&":"&amp
 function dni(n){return n===1?"deň":(n>=2&&n<=4?"dni":"dní")}
 function weekday(d){return (new Date(pd(d)).getUTCDay()+6)%7+1}
 function isScheduled(a,d){return a.frequency==="custom"?a.frequencyDays.indexOf(weekday(d))>=0:true}
-function isReportScheduled(a,d){return a.frequency!=="manual"&&isScheduled(a,d)}
-function isDone(a,d,now){if(!isScheduled(a,d))return false;if(a.frequency!=="manual"&&a.auto!==false&&d>=a.start&&d<now)return true;var v=a.done[d];if(v===false)return false;if(v!==undefined)return true;return false}
-function scheduledCount(a,from,to){var n=0;for(var d=from;d<=to;d=addDays(d,1))if(isScheduled(a,d))n++;return n}
-function conf(a,now){var au=a.auto!==false,n=au?scheduledCount(a,a.start,addDays(now,-1)):0;
-for(var k in a.done){if(k<a.start||k>now||!isScheduled(a,k))continue;if(au){if(k===now&&a.done[k]!==false)n++}else if(a.done[k]!==false)n++}return Math.max(0,n)}
+function isWithinActivity(a,d){return d>=a.start&&(!a.end||d<=a.end)}
+function isReportScheduled(a,d){return a.frequency!=="manual"&&isWithinActivity(a,d)&&isScheduled(a,d)}
+function isDone(a,d,now){if(!isWithinActivity(a,d)||!isScheduled(a,d))return false;if(a.frequency!=="manual"&&a.auto!==false&&d<=now)return true;var v=a.done[d];if(v===false)return false;if(v!==undefined)return true;return false}
+function scheduledCount(a,from,to){var first=from<a.start?a.start:from,last=to;if(a.end&&last>a.end)last=a.end;if(last<first)return 0;var n=0;for(var d=first;d<=last;d=addDays(d,1))if(isScheduled(a,d))n++;return n}
+function conf(a,now){var au=a.auto!==false;if(au)return scheduledCount(a,a.start,now);var n=0;
+for(var k in a.done){if(!isWithinActivity(a,k)||k>now||!isScheduled(a,k))continue;if(a.done[k]!==false)n++}return Math.max(0,n)}
 function cnt(a,now){return conf(a,now)+a.base}
-function total(a){return a.goal>0?a.goal:(a.end?scheduledCount(a,a.start,addDays(a.end,-1)):null)}
+function total(a){return a.goal>0?a.goal:(a.end?scheduledCount(a,a.start,a.end):null)}
 function pct(a,now){var t=total(a);if(t===null)return null;if(t<=0)return 100;return Math.max(0,Math.min(100,Math.round(cnt(a,now)/t*100)))}
 function streak(a,now){var n=0,d=now;if(d>now)d=now;while(d>=a.start&&!isScheduled(a,d))d=addDays(d,-1);while(d>=a.start&&isScheduled(a,d)&&isDone(a,d,now)){n++;d=addDays(d,-1);while(d>=a.start&&!isScheduled(a,d))d=addDays(d,-1)}return n}
 function B(act,t,c){return '<button class="ghost '+(c||"")+'" data-a="'+act+'">'+t+'</button>'}
@@ -788,7 +789,7 @@ var op=function(k){return openIds[k]?" open":""};
 var G=function(k,title,body){return '<details class="n" data-k="'+id+k+'"'+op(id+k)+'><summary>'+title+'</summary><div class="in">'+body+'</div></details>'};
 var freqLabel=a.frequency==="custom"?a.frequencyDays.map(function(v){return ["","Po","Ut","St","Št","Pi","So","Ne"][v]}).join(", "):(a.frequency==="manual"?"Vlastná":"Denne");
 var detailTab=detailTabs[id]||"overview";
-var editPanel="";if(detailTab==="edit")editPanel='<form class="col edit-activity-form" data-edit-form novalidate><label>Názov<span class="fld"><input type="text" class="en" maxlength="60" value="'+esc(a.name)+'"></span></label><div class="row"><label>Začiatok<span class="fld"><input type="date" class="es" value="'+a.start+'"></span></label><label>Koniec<span class="fld"><input type="date" class="ee" value="'+(a.end||"")+'" aria-label="Dátum konca"></span><span class="date-hint">Dátum konca musí byť po dátume začiatku.</span></label></div><div class="freq-box"><div class="freq-label">Opakovanie</div><div class="freq-toggle e-frequency-toggle"><button type="button" data-frequency="daily" class="'+(a.frequency==="daily"?"on":"")+'">Denne</button><button type="button" data-frequency="custom" class="'+(a.frequency==="custom"?"on":"")+'">Vybrané dni</button><button type="button" data-frequency="manual" class="'+(a.frequency==="manual"?"on":"")+'">Vlastná</button></div><select class="efrequency" hidden><option value="daily"'+(a.frequency==="daily"?" selected":"")+'>Denne</option><option value="custom"'+(a.frequency==="custom"?" selected":"")+'>Vybrané dni</option><option value="manual"'+(a.frequency==="manual"?" selected":"")+'>Vlastná</option></select><div class="freq-days e-frequency-days"'+(a.frequency==="custom"?"":" hidden")+'>'+["Po","Ut","St","Št","Pi","So","Ne"].map(function(day,i){var v=i+1;return '<label><input type="checkbox" class="efday" value="'+v+'"'+(a.frequencyDays.indexOf(v)>=0?" checked":"")+'><span>'+day+'</span></label>'}).join("")+'</div></div><label>Kategória<span class="fld"><input type="text" class="ec" maxlength="24" list="cats" value="'+esc(a.cat||"")+'"></span></label><label>Poznámka<span class="fld"><input type="text" class="an" maxlength="140" placeholder="Poznámka k aktivite" value="'+esc(a.note||"")+'"></span></label><label>Cieľ (počet dní)<span class="fld"><input type="number" class="eg" min="1" inputmode="numeric" value="'+(a.goal||"")+'"></span></label><label class="tg"><input type="checkbox" class="eauto"'+(a.auto!==false&&a.frequency!=="manual"?" checked":"")+(a.frequency==="manual"?" disabled":"")+'> Automaticky započítavať plánované dni (bez odkliknutia)</label><div><div class="cl">Farba</div><div class="dots">'+cd+'</div></div></form>';
+var editPanel="";if(detailTab==="edit")editPanel='<form class="col edit-activity-form" data-edit-form novalidate><label>Názov<span class="fld"><input type="text" class="en" maxlength="60" value="'+esc(a.name)+'"></span></label><div class="row"><label>Začiatok<span class="fld"><input type="date" class="es" value="'+a.start+'"></span></label><label>Koniec<span class="fld"><input type="date" class="ee" value="'+(a.end||"")+'" aria-label="Dátum konca"></span><span class="date-hint">Dátum konca musí byť po dátume začiatku.</span></label></div><div class="freq-box"><div class="freq-label">Opakovanie</div><div class="freq-toggle e-frequency-toggle"><button type="button" data-frequency="daily" class="'+(a.frequency==="daily"?"on":"")+'">Denne</button><button type="button" data-frequency="custom" class="'+(a.frequency==="custom"?"on":"")+'">Vybrané dni</button><button type="button" data-frequency="manual" class="'+(a.frequency==="manual"?"on":"")+'">Vlastná</button></div><select class="efrequency" hidden><option value="daily"'+(a.frequency==="daily"?" selected":"")+'>Denne</option><option value="custom"'+(a.frequency==="custom"?" selected":"")+'>Vybrané dni</option><option value="manual"'+(a.frequency==="manual"?" selected":"")+'>Vlastná</option></select><div class="freq-days e-frequency-days"'+(a.frequency==="custom"?"":" hidden")+'>'+["Po","Ut","St","Št","Pi","So","Ne"].map(function(day,i){var v=i+1;return '<label><input type="checkbox" class="efday" value="'+v+'"'+(a.frequencyDays.indexOf(v)>=0?" checked":"")+'><span>'+day+'</span></label>'}).join("")+'</div></div><label>Kategória<span class="fld"><input type="text" class="ec" maxlength="24" list="cats" value="'+esc(a.cat||"")+'"></span></label><label>Poznámka<span class="fld"><input type="text" class="an" maxlength="140" placeholder="Poznámka k aktivite" value="'+esc(a.note||"")+'"></span></label><label>Cieľ (počet dní)<span class="fld"><input type="number" class="eg" min="1" inputmode="numeric" value="'+(a.goal||"")+'"></span></label><label class="tg"><input type="checkbox" class="eauto"'+(a.auto!==false&&a.frequency!=="manual"?" checked":"")+(a.frequency==="manual"?" disabled":"")+'> Automaticky označiť plánované dni ako splnené po skončení dňa</label><div><div class="cl">Farba</div><div class="dots">'+cd+'</div></div></form>';
 var overviewPanel=activityProgressDetail(a,now)+'<div class="detail-summary"><div class="detail-stat"><b>'+freqLabel+'</b><span>Frekvencia</span></div><div class="detail-stat"><b>'+fmt(a.start)+'</b><span>Začiatok</span></div></div>'+(a.note?'<div class="detail-note"><div class="meta">Poznámka k aktivite</div><div class="sm">'+esc(a.note)+'</div></div>':'');
 var detail='<div class="detail-tabs"><button type="button" data-detail-tab="overview" class="'+(detailTab==="overview"?"on":"")+'">Info</button><button type="button" data-detail-tab="calendar" class="'+(detailTab==="calendar"?"on":"")+'">Kalendár</button><button type="button" data-detail-tab="edit" class="'+(detailTab==="edit"?"on":"")+'">Upraviť</button></div><div class="detail-panel" data-detail-panel="overview"'+(detailTab==="overview"?"":" hidden")+'>'+overviewPanel+'</div><div class="detail-panel" data-detail-panel="calendar"'+(detailTab==="calendar"?"":" hidden")+'>'+(detailTab==="calendar"?cal(a,now):"")+'</div><div class="detail-panel" data-detail-panel="edit"'+(detailTab==="edit"?"":" hidden")+'>'+(detailTab==="edit"?editPanel+'<div class="sec">'+acts+'</div>':"")+'</div>';
 
@@ -1734,6 +1735,17 @@ async function boot(){
     document.body.innerHTML='<main><div class="card"><h2>Nepodarilo sa načítať aplikáciu</h2><p style="color:#aaa;line-height:1.6">'+esc(e&&e.message?e.message:"Neznáma chyba")+'</p><button class="primary" onclick="location.reload()">Skúsiť znova</button></div></main>';
   }
 }
+// Refresh automatic completions shortly after the local day changes (00:01).
+var autoCompletionDay=todayStr();
+setInterval(function(){
+  var d=new Date(),current=todayStr();
+  if(current!==autoCompletionDay&&d.getHours()===0&&d.getMinutes()>=1){
+    autoCompletionDay=current;
+    render();
+    if(T==="ov")renderOv();
+    if(T==="wl")renderWl();
+  }
+},10000);
 boot();
 </script>
 </body>
