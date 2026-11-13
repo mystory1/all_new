@@ -6,6 +6,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script>
+(function(){
+  var isIOSHomeScreen = ("standalone" in window.navigator && window.navigator.standalone === true) || window.matchMedia("(display-mode: standalone)").matches;
+  if (isIOSHomeScreen) document.documentElement.classList.add("ios-home-screen");
+})();
+</script>
 <title>LevelUp</title>
 <style>
 :root{color-scheme:dark;box-sizing:border-box;--card:#0e0e0e;--line:#222;--txt:#f2f2f2;--mut:#8a8a8a}
@@ -273,6 +279,7 @@ body{overflow-anchor:none}
 main{position:relative;isolation:auto;min-height:100vh;min-height:100dvh;padding-top:calc(env(safe-area-inset-top,0px) + 6px);padding-bottom:max(14px,env(safe-area-inset-bottom,0px))}
 /* Extra top spacing only when launched from the iPhone Home Screen. */
 @media (display-mode: standalone){main{padding-top:calc(env(safe-area-inset-top,0px) + 24px)}}
+html.ios-home-screen main{padding-top:calc(env(safe-area-inset-top,0px) + 44px)!important}
 .hd{position:relative;top:auto;z-index:auto;height:auto;min-height:40px;margin:6px 0 14px;padding:0;background:#000;isolation:auto;}
 .tabs{position:relative;top:auto;z-index:auto;background:#101010;box-shadow:none;isolation:auto;}
 #chips,#catp,#v-wl .seg{position:static;box-shadow:none}
