@@ -271,6 +271,8 @@ body{overflow-anchor:none}
 /* Mobile layout: keep all controls in normal document flow.
    No fixed overlay or sticky layer may cover category filters on any tab. */
 main{position:relative;isolation:auto;min-height:100vh;min-height:100dvh;padding-top:calc(env(safe-area-inset-top,0px) + 6px);padding-bottom:max(14px,env(safe-area-inset-bottom,0px))}
+/* Extra top spacing only when launched from the iPhone Home Screen. */
+@media (display-mode: standalone){main{padding-top:calc(env(safe-area-inset-top,0px) + 24px)}}
 .hd{position:relative;top:auto;z-index:auto;height:auto;min-height:40px;margin:6px 0 14px;padding:0;background:#000;isolation:auto;}
 .tabs{position:relative;top:auto;z-index:auto;background:#101010;box-shadow:none;isolation:auto;}
 #chips,#catp,#v-wl .seg{position:static;box-shadow:none}
